@@ -1,0 +1,41 @@
+const fs=require('node:fs'),vm=require('node:vm'),path=require('node:path'),assert=require('node:assert/strict');
+const ctx={window:{},Date,Intl,Set,Map};vm.createContext(ctx);
+const root=path.resolve(__dirname,'..');
+for(const file of ['components.js','screens.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),ctx);
+const C=ctx.window.LiseComponents;
+const bio={id:12,name:'Biologia',area:'Geral',definition:'Ciência da vida',favorite:true,radical_list:[
+ {text:'bio-',observed_form:'bio',meaning:'vida',type:'RADICAL'},
+ {text:'-logia',observed_form:'logia',meaning:'estudo',type:'SUFIXO'}]};
+const auto={id:20,name:'Autótrofo',area:'Botânica',definition:'Produz matéria orgânica',created_by_me:true,radical_list:[
+ {text:'auto',meaning:'por si mesmo',type:'PREFIXO'},{text:'trofo',meaning:'nutrição',type:'RADICAL'}]};
+const personal={id:37,name:'<script>alert(1)</script>',definition:'Termo pessoal',radical_list:[]};
+assert.match(C.anatomy(bio),/word-segment/);
+assert.match(C.anatomy(bio),/Sufixo/);
+assert.doesNotMatch(C.anatomy(auto),/class="word-segment"/,'Não deve perder o acento ao forçar uma concatenação');
+assert.match(C.anatomy(auto),/Prefixo/);
+assert.match(C.anatomy(personal),/ainda não disponível/);
+assert.doesNotMatch(C.termCard(personal),/<script>/);
+assert.match(C.termCard(bio),/Nº 012/);
+assert.doesNotMatch(C.termCard(bio,{study:true}),/Ciência da vida|anatomy-parts/);
+assert.match(C.termCard(bio,{study:true,revealed:true}),/Ciência da vida/);
+assert.match(C.anatomy({name:'ABC',radical_list:[{text:'abc',meaning:'Exemplo',type:'DESCONHECIDO'}]}),/data-tone="neutral"/);
+const dates=[new Date('2026-11-11T01:00:00Z'),new Date('2026-11-10T18:00:00Z')];
+assert.equal(C.dayTerm([bio,auto],dates[0]).id,C.dayTerm([auto,bio],dates[1]).id,'A mesma data em São Paulo e a ordem da lista não mudam a descoberta');
+assert.equal(C.dayTerm([bio,personal],dates[0]).id,bio.id,'Prefere anatomia validada');
+assert.equal(C.dayTerm([],dates[0]),null);
+const state={explore:{terms:[bio,auto,personal]},exploreSearch:'materia organica',exploreKind:'terms',sort:'asc'};
+assert.deepEqual(Array.from(C.filteredTerms(state),t=>t.id),[20]);
+state.exploreSearch='vida estudo';assert.deepEqual(Array.from(C.filteredTerms(state),t=>t.id),[12]);
+state.exploreSearch='';state.exploreType='PREFIXO';state.exploreArea='Botânica';state.exploreMine=true;
+assert.deepEqual(Array.from(C.filteredTerms(state),t=>t.id),[20]);
+state.exploreType='';state.exploreArea='';state.exploreMine=false;state.exploreKind='favorites';
+assert.deepEqual(Array.from(C.filteredTerms(state),t=>t.id),[12]);
+assert.match(C.statsStrip([['Alunos',undefined]]),/—/,'Informação ausente não é zero');
+assert.doesNotMatch(C.statsStrip([['Alunos',undefined]]),/<dd>0<\/dd>/);
+const viewState={user:{name:'Teste',role:'Aluno'},collection:{id:1,name:'Coleção',terms:[bio,auto],learning:{coverage:100,terms:[{id:12,attempts:1},{id:20,attempts:0}]}}};
+const screens=ctx.window.LiseScreens({state:viewState,AVATARS:[],GAMES:[],fmtDate:()=>'',avatarMarkup:()=>'',legalLinks:()=>'',learningPanel:()=>''});
+const collection=screens.collection();
+assert.equal((collection.match(/path-node practiced/g)||[]).length,1,'Percentual agregado não completa os nós sem histórico individual');
+assert.match(collection,/Sem prática individual registrada/);
+for(const game of ['bioquiz','familia_palavras','memoria','decifrador'])assert.match(C.gameArt(game),/<svg/);
+console.log('PASS: anatomia, escape, ausência de dados, estudo, pesquisa, filtros, dia em São Paulo e progresso parcial.');

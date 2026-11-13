@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 384" role="img" aria-labelledby="tardigrade-title">
+  <title id="tardigrade-title">Tardilo, o tardígrado persistente</title>
+  <defs>
+    <radialGradient id="tardi-bg" cx="28%" cy="18%" r="95%"><stop stop-color="#fff09a"/><stop offset=".52" stop-color="#ffc65c"/><stop offset="1" stop-color="#ee8f55"/></radialGradient>
+    <linearGradient id="tardi-body" x1=".18" y1=".05" x2=".86" y2=".96"><stop stop-color="#ffb9cc"/><stop offset=".5" stop-color="#f68aa9"/><stop offset="1" stop-color="#df5f88"/></linearGradient>
+    <linearGradient id="tardi-leg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f997b3"/><stop offset="1" stop-color="#dd5e87"/></linearGradient>
+    <radialGradient id="tardi-iris" cx="35%" cy="28%" r="70%"><stop stop-color="#ffcd57"/><stop offset=".52" stop-color="#b86635"/><stop offset="1" stop-color="#573042"/></radialGradient>
+    <linearGradient id="tardi-scarf" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#357be4"/><stop offset="1" stop-color="#173f9c"/></linearGradient>
+  </defs>
+  <circle cx="192" cy="192" r="192" fill="url(#tardi-bg)"/>
+  <g fill="#fff9dd"><path d="M71 72l7 16 18 2-14 12 4 18-15-9-16 9 4-18-14-12 18-2z" opacity=".88"/><circle cx="315" cy="91" r="11" opacity=".7"/><circle cx="331" cy="119" r="6" opacity=".45"/></g><ellipse cx="192" cy="338" rx="111" ry="20" fill="#a84e54" opacity=".16"/>
+  <g transform="translate(-8 4) rotate(-7 192 218)">
+  <g fill="url(#tardi-leg)" stroke="#a9476c" stroke-width="6"><path d="M112 126c-36-17-66-2-67 22-1 22 26 33 65 22z"/><path d="M105 184c-40-9-66 12-61 37 5 22 35 27 70 7z"/><path d="M108 245c-39 1-59 27-48 49 10 21 41 17 69-9z"/><path d="M131 295c-31 17-36 46-17 59 19 13 43-5 57-38z"/><path d="M272 126c36-17 66-2 67 22 1 22-26 33-65 22z"/><path d="M279 184c40-9 66 12 61 37-5 22-35 27-70 7z"/><path d="M276 245c39 1 59 27 48 49-10 21-41 17-69-9z"/><path d="M253 295c31 17 36 46 17 59-19 13-43-5-57-38z"/></g>
+  <g fill="none" stroke="#ffd1dc" stroke-width="7" stroke-linecap="round" opacity=".62"><path d="M61 143c13-8 27-8 41-2M57 208c14-8 29-9 44-4M73 276c13-9 26-13 40-14M323 143c-13-8-27-8-41-2M327 208c-14-8-29-9-44-4M311 276c-13-9-26-13-40-14"/></g>
+  <path d="M116 83c15-47 137-47 152 0 12 37 1 68 3 102 2 35 18 68 5 108-23 71-145 71-168 0-13-40 3-73 5-108 2-34-9-65 3-102z" fill="url(#tardi-body)" stroke="#a9476c" stroke-width="6"/>
+  <path d="M134 84c17-25 54-36 87-24-43 6-72 32-81 75-9 43-5 98 5 138 7 28 27 47 53 58-41 1-68-14-82-40-11-37 3-71 5-105 2-37-8-70 13-102z" fill="#ffd3df" opacity=".46"/><path d="M119 210c43 20 103 20 146 0M114 263c49 22 107 22 156 0" fill="none" stroke="#c9547c" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+  <ellipse cx="154" cy="139" rx="38" ry="45" fill="#fffaf7"/><ellipse cx="230" cy="139" rx="38" ry="45" fill="#fffaf7"/><ellipse cx="166" cy="137" rx="20" ry="26" fill="url(#tardi-iris)"/><ellipse cx="232" cy="136" rx="20" ry="26" fill="url(#tardi-iris)"/>
+  <ellipse cx="160" cy="126" rx="7" ry="9" fill="#fff"/><ellipse cx="226" cy="125" rx="7" ry="9" fill="#fff"/><circle cx="173" cy="146" r="4" fill="#ffe19a"/><circle cx="239" cy="145" r="4" fill="#ffe19a"/><path d="M122 92c20-17 43-20 63-8M262 92c-20-17-43-20-63-8" fill="none" stroke="#9c4166" stroke-width="7" stroke-linecap="round"/>
+  <path d="M178 181c9 6 19 6 28 0" fill="none" stroke="#c75478" stroke-width="5" stroke-linecap="round"/><path d="M151 201c22 39 60 39 82 0-2 51-80 54-82 0z" fill="#fffaf5" stroke="#9f4166" stroke-width="5" stroke-linejoin="round"/><path d="M171 231c14-11 28-11 42 0" fill="none" stroke="#e85e7d" stroke-width="8" stroke-linecap="round"/>
+  <ellipse cx="126" cy="189" rx="15" ry="9" fill="#d94f7d" opacity=".28"/><ellipse cx="258" cy="189" rx="15" ry="9" fill="#d94f7d" opacity=".28"/>
+  <path d="M121 278c27 22 114 22 142 0l-18 64H139z" fill="url(#tardi-scarf)" stroke="#173f83" stroke-width="5" stroke-linejoin="round"/><path d="M129 279l63 43 63-43-18 52-45-9-45 9z" fill="#4c93ec"/><circle cx="192" cy="318" r="18" fill="#ffd15c" stroke="#c77a2f" stroke-width="5"/><path d="M192 307l4 8 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#fff7d5"/>
+  <!-- A raised book and tilted body turn Tardilo's medal into a celebration. -->
+  <path d="M270 132c22-12 35-28 39-49" fill="none" stroke="#a9476c" stroke-width="24" stroke-linecap="round"/>
+  <path d="M270 132c20-11 31-26 35-47" fill="none" stroke="#f994b2" stroke-width="13" stroke-linecap="round"/>
+  <g transform="translate(287 45) rotate(14 30 30)">
+    <path d="M2 7c18-6 37-2 56 11v51c-19-12-38-15-56-9z" fill="#2F74D8" stroke="#173F83" stroke-width="5" stroke-linejoin="round"/>
+    <path d="M30 14v49M10 22c8-1 14 0 20 4M49 25c-6-2-12-2-19 1" fill="none" stroke="#9FC7FF" stroke-width="4" stroke-linecap="round"/>
+    <path d="M2 7c9-2 18 0 28 7 9-6 18-6 28 4" fill="none" stroke="#FFF7D8" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <path d="M81 262c-22 7-35 21-37 40" fill="none" stroke="#a9476c" stroke-width="20" stroke-linecap="round"/>
+  <path d="M80 262c-19 7-30 19-32 35" fill="none" stroke="#f994b2" stroke-width="10" stroke-linecap="round"/>
+  <path d="M53 301l-8 11M53 301l5 14" stroke="#a9476c" stroke-width="6" stroke-linecap="round"/>
+  </g>
+</svg>

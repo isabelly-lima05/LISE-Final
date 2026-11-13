@@ -1,0 +1,56 @@
+  {% if document == 'privacidade' %}
+    <h2>1. Quem responde pelos seus dados</h2>
+    <p>A equipe do projeto é formada por Lívia Domingues (Scrum Master), Isabelly Ferreira (Tech Lead), João Pedro Stadler (Desenvolvimento Backend) e John Cristopher (Desenvolvimento Frontend).</p>
+    {% if privacy_controller %}<p>O responsável pelo tratamento de dados na LISE é {{ privacy_controller }}.</p>{% else %}<p>A identificação do responsável pelo serviço está em atualização e será publicada na versão definitiva dos documentos.</p>{% endif %}
+    <p>{% if privacy_email %}Para assuntos de privacidade, escreva para <a href="mailto:{{ privacy_email }}">{{ privacy_email }}</a>.{% else %}O contato público de privacidade está em atualização. Se você já possui uma conta, pode registrar e acompanhar um pedido em <a href="/#conta">Minha conta</a>.{% endif %}</p>
+    <h2>2. Quais dados a LISE utiliza</h2>
+    <p>Nome, e-mail, perfil de aluno ou professor, data do cadastro, vínculo com turmas, trilhas, respostas e resultados de jogos, progresso, coleções, favoritos, avatar, avaliações, XP, conquistas e datas de atividade. Também registramos aceites dos documentos e pedidos sobre dados.</p>
+    <p>O acesso usa identificadores de sessão, informações de navegador fornecidas pelo dispositivo, datas de uso e registros temporários de proteção contra tentativas repetidas de autenticação. Também são mantidos registros técnicos de operações para evitar criações duplicadas. Se a remoção no serviço de autenticação precisar ser repetida, seu identificador nesse serviço e as datas das tentativas permanecem em uma fila até a conclusão; essa fila não guarda senha ou token de acesso. Na versão publicada, a senha é tratada pelo serviço de autenticação Supabase e não integra a cópia de dados fornecida pela LISE.</p>
+    <h2>3. Para que os dados são usados</h2>
+    <p>Para criar e autenticar a conta, organizar turmas, disponibilizar atividades, acompanhar aprendizagem, recuperar o acesso, proteger o serviço e atender solicitações. Cada finalidade deve ter base legal adequada. Aceitar os Termos de Uso não equivale a autorizar qualquer uso dos dados.</p>
+    <h2>4. Quem pode acessar</h2>
+    <p>O professor da turma pode consultar nome, e-mail, progresso, atividade e resultados de avaliações dos alunos matriculados. Colegas de turma podem visualizar o nome cadastrado e a pontuação nos rankings geral, diário e semanal da turma. Compartilhe o código de ingresso apenas com as pessoas que devem participar.</p>
+    <p>A LISE utiliza Supabase para autenticação e banco de dados e infraestrutura de hospedagem para entregar o site. O local de processamento e eventuais transferências internacionais devem ser informados conforme os contratos e as regiões escolhidos pelo responsável pelo serviço.</p>
+    <p>O acesso por Google não está disponível nesta interface. Não são carregadas ferramentas de autenticação desse provedor.</p>
+    <h2>5. Por quanto tempo</h2>
+    <p>As sessões de acesso expiram em até 12 horas, ou até 30 dias quando você escolhe lembrar o acesso. Os dados pessoais de aprendizagem permanecem associados à conta enquanto ela existir. A área Minha conta permite excluir diretamente a conta, com confirmação da senha e da palavra EXCLUIR.</p>
+    <p>A exclusão pode exigir a preservação de informações por obrigação legal ou para exercício de direitos. A equipe deve explicar o que foi removido, anonimizado ou mantido e por qual motivo. A política de retenção de cópias de segurança e registros da infraestrutura está em revisão.</p>
+    <h2>6. Seus direitos e suas escolhas</h2>
+    <p>Você pode solicitar acesso, correção, informação sobre compartilhamento, eliminação ou anonimização quando cabível e outros direitos previstos na LGPD. Em <a href="/#conta">Minha conta</a>, é possível corrigir seu nome, baixar os dados da aplicação, encerrar sessões, registrar pedidos de esclarecimento ou correção com protocolo e excluir diretamente a conta com confirmação de senha.</p>
+    <p>A exclusão direta encerra os acessos da LISE e remove os dados pessoais da conta. Estruturas e conteúdos educacionais já compartilhados podem ser arquivados sem sua autoria para preservar atividades e notas de outras pessoas. Se o serviço de autenticação estiver temporariamente indisponível, a remoção nesse provedor será repetida automaticamente; a interface informa quando essa etapa ainda estiver pendente. Cópias de segurança e registros de infraestrutura seguem as regras de retenção que o responsável pelo serviço deve revisar e informar.</p>
+    <h2>7. Crianças e adolescentes</h2>
+    <p>Esta versão não coleta data de nascimento, não verifica idade e não possui cadastro ou autorização de responsáveis. A seleção do perfil Aluno não confirma a idade da pessoa. O aceite dos Termos não deve ser apresentado como autorização de um responsável.</p>
+    <p>Se uma conta existente pertencer a um menor, o titular ou seu responsável pode solicitar atendimento pelo canal de privacidade. As medidas aplicáveis devem considerar o melhor interesse e a proteção dos dados desse público.</p>
+    <h2>8. Segurança e atualizações</h2>
+    <p>O serviço usa controle de acesso por conta e turma, autenticação por token e sessões com expiração. Mudanças relevantes nestes documentos terão nova versão. Informações de cookies e armazenamento estão na <a href="/#cookies">página de cookies</a>.</p>
+  {% elif document == 'termos-de-uso' %}
+    <h2>1. O serviço</h2>
+    <p>A LISE oferece estudo de termos biológicos, etimologia, jogos, coleções, trilhas e acompanhamento de turmas. O conteúdo serve de apoio ao aprendizado e pode ser revisado ou corrigido.</p>
+    <h2>2. Sua conta</h2>
+    <p>Informe dados corretos, mantenha suas credenciais protegidas e use apenas sua própria conta. O perfil Aluno permite estudar e ingressar em turmas. O perfil Professor permite criar turmas, trilhas e termos. A seleção desse perfil não certifica formação profissional ou vínculo institucional.</p>
+    <p>Esta versão não realiza verificação de idade nem possui fluxo de responsáveis. O aceite dos Termos não comprova idade ou autorização de terceiros. O responsável pelo serviço deve avaliar as condições de uso e a proteção dos públicos que pretende atender.</p>
+    <h2>3. Turmas e acompanhamento</h2>
+    <p>Ao ingressar por código, você passa a integrar a turma e permite o acompanhamento das atividades vinculadas a ela pelo professor. A <a href="/#privacidade">Política de Privacidade</a> explica quais dados ficam visíveis ao professor e aos colegas.</p>
+    <h2>4. Uso responsável</h2>
+    <p>Use o serviço de forma respeitosa. Não tente acessar dados de outras contas, manipular pontuação, explorar falhas, publicar conteúdo ilícito ou compartilhar códigos de turma fora do público autorizado.</p>
+    <p>Ao cadastrar conteúdo, assegure que pode compartilhá-lo e respeite os direitos de terceiros. O conteúdo será utilizado para as atividades educacionais e compartilhamentos que você escolher na plataforma.</p>
+    <h2>5. Disponibilidade e resultados</h2>
+    <p>O serviço pode ter interrupções para manutenção ou falhas de infraestrutura. XP, níveis e conquistas representam atividades na plataforma e não constituem avaliação oficial, certificado ou garantia de desempenho escolar.</p>
+    <h2>6. Encerramento e pedidos</h2>
+    <p>Você pode encerrar sessões na aba Segurança de Minha conta e excluir diretamente sua conta em <a href="/#conta/privacidade">Minha conta → Privacidade → Excluir minha conta</a>, confirmando a senha, digitando EXCLUIR e reconhecendo a preservação de histórico compartilhado. Não é necessário abrir um pedido para a equipe. Seus acessos e dados pessoais na LISE são removidos; turmas, trilhas, conteúdos compartilhados e resultados de outras pessoas podem permanecer arquivados sem sua autoria. A exclusão no provedor de autenticação é processada automaticamente e pode ter repetição em caso de falha temporária, informada pela interface.</p>
+    <p>Usos que comprometam a segurança ou violem estes termos podem exigir restrição de acesso, com informação e possibilidade de esclarecimento conforme o caso.</p>
+    <h2>7. Privacidade e aceite</h2>
+    <p>O aceite destes termos é registrado com a versão e a data. A Política de Privacidade informa como os dados são tratados; ela não é uma autorização genérica para tratamento. Caso seja necessário consentimento para uma finalidade opcional, ele deverá ser solicitado separadamente.</p>
+    <h2>8. Contato</h2>
+    <p>{% if privacy_email %}Fale com a equipe pelo e-mail <a href="mailto:{{ privacy_email }}">{{ privacy_email }}</a>.{% else %}Contas existentes podem usar o formulário de solicitações em Minha conta. O contato público está em atualização.{% endif %}</p>
+  {% else %}
+    <h2>O que é utilizado nesta versão</h2>
+    <p>A LISE utiliza armazenamento necessário para o acesso e uma preferência de navegação. Não há cookies opcionais de publicidade ou ferramentas de análise de comportamento integradas nesta versão. As fontes são servidas pelo próprio site.</p>
+    <div class="legal-table-wrap"><table><caption>Armazenamento utilizado pela LISE</caption><thead><tr><th scope="col">Nome</th><th scope="col">Finalidade</th><th scope="col">Duração</th></tr></thead><tbody>
+      <tr><th scope="row">lise_access_token</th><td>Token de acesso necessário, guardado no localStorage deste navegador e enviado à API no cabeçalho Authorization.</td><td>Até sair da conta ou remover o armazenamento; a sessão correspondente no servidor expira em até 12 horas ou 30 dias com “Manter conectado”.</td></tr>
+      <tr><th scope="row">lise_sidebar_collapsed</th><td>Preferência de recolhimento do menu lateral, guardada no localStorage.</td><td>Até remover o armazenamento do site.</td></tr>
+      <tr><th scope="row">Histórico de navegação</th><td>Cópias temporárias das telas em memória da página, sem gravar os dados das telas no armazenamento permanente do navegador.</td><td>Até recarregar, sair ou trocar de conta; limitado a 20 telas.</td></tr>
+    </tbody></table></div>
+    <h2>Como controlar</h2><p>Você pode sair da conta ou encerrar todas as sessões em <a href="/#conta">Minha conta</a>. É possível remover o armazenamento pelos controles do navegador. Bloquear o armazenamento necessário pode impedir que o acesso seja mantido. Esta interface não usa cookie de sessão para autenticar na API.</p>
+    <h2>Novas tecnologias</h2><p>Se forem adicionados recursos opcionais que dependam de consentimento, a escolha será apresentada antes da ativação, com opção de recusa e alteração posterior. Não há integração de acesso por Google nesta interface.</p>
+  {% endif %}

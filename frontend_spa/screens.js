@@ -1,0 +1,163 @@
+/* Apresentação das telas; gravações e permissões continuam na API existente. */
+(() => {
+  'use strict';
+  window.LiseScreens = ctx => {
+    const {state,avatarMarkup,AVATARS,GAMES,fmtDate,legalLinks}=ctx;
+    const C=window.LiseComponents;
+    const {esc,icon,button,empty,value,heading,breadcrumb,codeChip,anatomy,termCard,statsStrip,classCard,gameArt}=C;
+    const actions = {classes:'Turmas',collections:'Coleções',dashboard:state.user?.role==='Professor'?'Painel':'Início',explore:'Explorar',trail:'Trilha',collection:'Coleção'};
+    const count = (items,unit) => Array.isArray(items)?`${items.length} ${unit}`:'Quantidade não informada';
+
+    function trailList(trails) {
+      return trails.length?`<div class="trail-list">${trails.map(t=>`<article><div><span class="eyebrow">${esc(t.area)}</span><h3>${esc(t.name)}</h3><p>${count(t.terms,'termos')}</p></div><details class="trail-menu"><summary aria-label="Ações da trilha">${icon('ellipsis')}</summary><div>${button('Abrir trilha','open-trail','btn-text btn-small',`data-id="${t.id}"`)}${button('Adicionar termos','add-trail-terms','btn-text btn-small',`data-id="${t.id}" data-name="${esc(t.name)}"`)}${button(icon('trash-2')+' Excluir trilha','delete-trail','btn-text btn-small danger-text',`data-id="${t.id}" aria-label="Apagar trilha ${esc(t.name)}"`)}</div></details></article>`).join('')}</div>`:empty('O próximo caminho começa aqui','Crie uma trilha e selecione palavras para sua turma.');
+    }
+
+    function dashboard() {
+      const d=state.dashboard;
+      if(!d)return ctx.loadingCard();
+      if(d.role==='Professor')return teacherDashboard(d);
+      const term=state.discovery;
+      const hero=term?`<section class="discovery-sheet"><div class="discovery-label"><span class="eyebrow">Descoberta do dia</span><span class="catalog-id">Ficha Nº ${esc(String(term.id).padStart(3,'0'))}</span></div><div class="discovery-body"><div><span class="subject-label">${esc(term.area)}</span>${anatomy(term,{large:true})}<p class="discovery-definition">${esc(term.definition)}</p><div class="card-actions">${button('Investigar esta palavra '+icon('arrow-right'),'open-term','btn-primary',`data-id="${term.id}"`)}${button('Abrir o caderno','navigate','btn-text','data-view="explore"')}</div></div><div class="field-note" aria-hidden="true"><span class="notebook-sprig">${icon('sprout')}</span><span>Observar.<br>Conectar.<br>Descobrir.</span><small>Uma palavra,<br>novas conexões.</small></div></div></section>`:
+        `<section class="discovery-sheet">${empty(state.discoveryError?'A descoberta pode esperar um instante':'Seu caderno está aberto',state.discoveryError?'Não foi possível consultar as palavras agora. Seus outros dados continuam disponíveis.':'As palavras disponíveis aparecerão aqui quando o catálogo tiver conteúdo.')}${state.discoveryError?button('Tentar novamente','retry-discovery','btn-soft'):button('Explorar termos','navigate','btn-primary','data-view="explore"')}</section>`;
+      const stats=d.stats||{};
+      return `${heading('Seu caderno de Biologia',`Olá, ${state.user.name.split(' ')[0]}.`,'Uma descoberta de cada vez.',button('Praticar '+icon('arrow-up-right'),'navigate','btn-soft','data-view="games"'))}${hero}
+        <section class="growth-strip" aria-label="Seu progresso">${statsStrip([['XP conquistado',stats.xp,'sparkles'],['Nível',stats.nivel,'sprout'],['Dias seguidos',stats.streak,'sun']])}${Number.isFinite(stats.xp)?`<div class="level-progress"><span>Seu próximo nível</span><progress value="${stats.xp%100}" max="100" aria-label="Progresso no nível"></progress><small>${100-stats.xp%100} XP para o próximo nível</small></div>`:''}</section>
+        <div class="home-columns"><section><div class="split-heading"><h2>Minhas turmas</h2>${button('Entrar com código','join-class','btn-text btn-small')}</div>${d.classes?.length?`<div class="class-grid">${d.classes.map(c=>classCard(c,false)).join('')}</div>`:empty('Aprender também é compartilhar','Entre em uma turma com o código do professor para receber trilhas.')}</section>
+        <section><div class="split-heading"><h2>Minhas coleções</h2>${button('Ver todas','navigate','btn-text btn-small','data-view="collections"')}</div>${state.collections.length?`<div class="collection-notes">${state.collections.slice(0,3).map(c=>`<article><span class="eyebrow">Coleção pessoal</span><h3>${esc(c.name)}</h3><p>${count(c.terms,'termos')}</p><div class="card-actions">${button('Abrir','open-collection','btn-text btn-small',`data-id="${c.id}"`)}${button('Praticar','practice-collection','btn-soft btn-small',`data-id="${c.id}" data-name="${esc(c.name)}"`)}</div></article>`).join('')}</div>`:empty('Guarde suas próximas descobertas','Monte uma coleção com palavras que você quer conhecer melhor.').replace('</div>',button('Criar coleção','new-collection','btn-soft')+'</div>')}${state.collections.length?button('Criar coleção','new-collection','btn-text'):''}</section></div>`;
+    }
+
+    function teacherDashboard(d) {
+      const classes=d.classes||[],trails=d.trails||[];
+      const pupils=new Set(classes.flatMap(c=>c.alunos||[])),assigned=new Set(classes.flatMap(c=>c.trilhas||[]));
+      const noTrail=classes.filter(c=>!c.trilhas?.length),unassigned=trails.filter(t=>!assigned.has(t.id));
+      const checklist=[['Criar sua primeira turma',classes.length>0,'new-class'],['Preparar uma trilha',trails.length>0,'new-trail'],['Receber o primeiro aluno',pupils.size>0,'navigate']];
+      return `${heading('Bancada do professor',`Olá, ${state.user.name.split(' ')[0]}.`,'Organize os caminhos. Acompanhe as descobertas.',button(icon('plus')+' Criar turma','new-class')+button('Criar trilha','new-trail','btn-soft'))}
+        ${statsStrip([['Turmas',classes.length,'users'],['Alunos únicos',pupils.size,'graduation-cap'],['Trilhas criadas',trails.length,'route'],['Trilhas em uso',trails.filter(t=>assigned.has(t.id)).length,'book-open']])}
+        ${noTrail.length||unassigned.length?`<section class="attention-panel"><div>${icon('notebook-pen')}<h2>Precisa de atenção</h2></div><ul>${noTrail.map(c=>`<li><span>${esc(c.name)} está sem trilha.</span>${button('Abrir turma','open-class','btn-text btn-small',`data-id="${c.id}"`)}</li>`).join('')}${unassigned.map(t=>`<li><span>“${esc(t.name)}” ainda não foi atribuída.</span>${button('Ver turmas','navigate','btn-text btn-small','data-view="classes"')}</li>`).join('')}</ul></section>`:''}
+        <div class="teacher-columns"><section><div class="split-heading"><h2>Minhas turmas</h2><span class="small muted">${classes.length} ${classes.length===1?'turma':'turmas'}</span></div>${classes.length?`<div class="class-grid">${classes.map(c=>classCard(c,true)).join('')}</div>`:empty('Sua primeira turma','Crie uma turma e compartilhe o código com seus alunos.')}</section><section><div class="split-heading"><h2>Minhas trilhas</h2>${button('Nova','new-trail','btn-text btn-small')}</div>${trailList(trails)}</section></div>
+        ${checklist.some(item=>!item[1])?`<section class="onboarding"><h2>Primeiros passos</h2><ol>${checklist.map(([label,done,action],i)=>`<li class="${done?'done':''}">${icon(done?'circle-check':'circle')}<span>${esc(label)}</span>${!done?button(i===2?'Ver códigos':'Começar',action,'btn-text btn-small',i===2?'data-view="classes"':''):''}</li>`).join('')}</ol></section>`:''}`;
+    }
+
+    function exploreResults() {
+      const terms=C.filteredTerms(state),shown=terms.slice(0,state.exploreShown);
+      return `<p class="result-count" id="explore-count" role="status">${terms.length} ${terms.length===1?'palavra encontrada':'palavras encontradas'}${terms.length>shown.length?` · mostrando ${shown.length}`:''}</p>${shown.length?`<div class="specimen-grid">${shown.map(t=>termCard(t,{study:state.exploreMode==='study',revealed:state.studyRevealed.has(t.id)})).join('')}</div>`:empty('Nenhuma palavra por aqui','Experimente outra busca ou remova um dos filtros.')}${terms.length>shown.length?`<div class="load-more">${button('Mostrar mais 12 palavras','explore-more','btn-soft')}</div>`:''}`;
+    }
+
+    function explore() {
+      if(!state.explore)return ctx.loadingCard('Abrindo o caderno…');
+      const d=state.explore;
+      return `${heading('Coleção de descobertas','Explorar','Cada palavra guarda uma história. Investigue suas partes e os sentidos que elas conectam.')}
+        <div class="explore-heading"><div class="segmented" role="group" aria-label="Modo do Explorador">${[['browse','Consultar'],['study','Estudar']].map(([mode,label])=>button(label,'explore-mode',state.exploreMode===mode?'is-selected':'',`data-mode="${mode}" aria-pressed="${state.exploreMode===mode}"`)).join('')}</div><div class="anatomy-legend" aria-label="Cores dos elementos"><span data-tone="prefix">Prefixo</span><span data-tone="root">Raiz / radical</span><span data-tone="suffix">Sufixo</span></div></div>
+        <form class="explore-toolbar" data-form="explore-filter"><div class="search-field">${icon('search')}<label class="sr-only" for="explore-search">Buscar palavra, definição ou elemento</label><input id="explore-search" name="search" type="search" value="${esc(state.exploreSearch)}" placeholder="Que palavra vamos investigar?" autocomplete="off"><span class="search-hint" aria-hidden="true">palavras + significados</span></div><div class="explore-filters">
+        <label>Área<select name="area"><option value="">Todas as áreas</option>${(d.areas||[]).map(a=>`<option value="${esc(a)}" ${state.exploreArea===a?'selected':''}>${esc(a)}</option>`).join('')}</select></label>
+        <label>Elemento<select name="type"><option value="">Todos os tipos</option>${[['PREFIXO','Prefixo'],['RADICAL','Radical'],['RAIZ','Raiz'],['SUFIXO','Sufixo'],['ELEMENTO_COMPOSICAO','Elemento de composição']].map(([v,l])=>`<option value="${v}" ${state.exploreType===v?'selected':''}>${l}</option>`).join('')}</select></label>
+        <label>Ordem<select name="sort"><option value="asc" ${state.sort==='asc'?'selected':''}>A–Z</option><option value="desc" ${state.sort==='desc'?'selected':''}>Z–A</option></select></label>
+        <label class="check-row"><input name="mine" type="checkbox" ${state.exploreMine?'checked':''}> Criados por mim</label><label class="check-row"><input name="favorite" type="checkbox" ${state.exploreKind==='favorites'?'checked':''}> Favoritos</label>
+        <button class="btn btn-text btn-small" type="button" data-action="explore-clear">Limpar filtros</button><button class="sr-only" type="submit">Buscar</button></div></form>
+        ${state.exploreMode==='study'?'<p class="study-intro">Observe a palavra. Tente lembrar seu significado antes de revelar a ficha.</p>':''}<section id="explore-results" aria-labelledby="explore-count">${exploreResults()}</section>`;
+    }
+
+    function detail() {
+      if(!state.detail)return ctx.loadingCard();
+      if(state.detailType!=='term')return ctx.legacyRadicalDetail();
+      const {term,similar_terms:similar=[]}=state.detail;
+      return `${breadcrumb([{label:actions[state.detailBack]||'Explorar',action:'detail-back'},{label:term.name}])}${heading(term.area,term.name,'',button(term.favorite?'Salvo nos favoritos':'Favoritar','toggle-favorite',term.favorite?'btn-soft':'btn-primary',`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}"`))}
+        <article class="word-sheet"><div class="specimen-meta"><span>Ficha etimológica</span><span class="catalog-id">Nº ${esc(String(term.id).padStart(3,'0'))}</span></div>${anatomy(term,{large:true})}<div class="definition-section"><h2>Na Biologia</h2><p>${esc(term.definition)}</p>${ctx.sourceLink(term.source_url,'Fonte da definição')}</div>${(term.radical_list||[]).some(r=>r.reference_url)?`<details class="reference-list"><summary>Referências dos elementos</summary>${term.radical_list.filter(r=>r.reference_url).map(r=>`<p>${esc(r.text)} · ${ctx.sourceLink(r.reference_url,'Consultar referência')}</p>`).join('')}</details>`:''}</article>
+        ${state.user.role==='Aluno'?`<div class="card-actions">${state.collections.length?`<form data-form="add-to-collection" class="inline-form"><input type="hidden" name="term_id" value="${term.id}"><label class="sr-only" for="term-collection">Coleção</label><select id="term-collection" name="collection_id" required><option value="">Guardar em uma coleção…</option>${state.collections.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join('')}</select><button class="btn btn-soft" type="submit">Adicionar</button></form>`:button('Criar coleção','new-collection','btn-soft')}</div>`:''}
+        <div class="split-heading"><h2>Palavras que se conectam</h2><span class="small muted">Elementos validados em comum</span></div>${similar.length?`<div class="specimen-grid">${similar.map(t=>termCard(t)).join('')}</div>`:empty('Uma descoberta ainda singular','Não há outras palavras visíveis com elementos validados em comum.')}`;
+    }
+
+    function classes() {
+      if(!state.dashboard)return ctx.loadingCard();
+      const teacher=state.user.role==='Professor',rows=state.dashboard.classes||[];
+      return `${heading(teacher?'Bancada do professor':'Aprendizagem em conjunto','Turmas',teacher?'Abra uma turma para acompanhar os alunos e organizar as atividades.':'Encontre os caminhos preparados pelo seu professor.',button(teacher?'Criar turma':'Entrar com código',teacher?'new-class':'join-class'))}${rows.length?`<div class="class-grid">${rows.map(c=>classCard(c,teacher)).join('')}</div>`:empty('Nenhuma turma por enquanto',teacher?'Crie sua primeira turma para receber os alunos.':'Peça ao professor o código de entrada da sua turma.')}`;
+    }
+
+    function trails() {
+      if(!state.dashboard)return ctx.loadingCard();
+      return `${heading('Caminhos de aprendizagem','Trilhas','Selecione palavras, organize percursos e compartilhe com suas turmas.',button('Criar trilha','new-trail'))}${trailList(state.dashboard.trails||[])}`;
+    }
+
+    function classDetail() {
+      const d=state.classDetail;if(!d)return ctx.loadingCard();
+      const teacher=d.role==='Professor';
+      const tabs=teacher?[['overview','Visão geral'],['students','Alunos'],['trails','Trilhas'],['results','Avaliações']]:[['trails','Trilhas'],['rank','Ranking semanal']];
+      let body='';
+      if(state.classTab==='overview'){
+        const noAccess=(d.students||[]).filter(s=>!s.last_access).length,noDeadline=(d.trails||[]).filter(t=>!t.due_date&&!t.assessment?.closes_at).length;
+        body=`${statsStrip([['Alunos',d.students?.length,'users'],['Trilhas atribuídas',d.trails?.length,'route'],['Resultados disponíveis',d.assessment_results?.length,'clipboard-check']])}<section class="card overview-note"><h2>${noAccess||noDeadline?'Precisa de atenção':'Tudo em dia'}</h2>${noAccess?`<p>${noAccess} aluno(s) ainda não acessaram a LISE.</p>`:''}${noDeadline?`<p>${noDeadline} trilha(s) sem prazo definido.</p>`:''}${!noAccess&&!noDeadline?'<p>Não há pendências de acesso ou de prazo nos dados desta turma.</p>':''}<div class="card-actions">${button('Ver alunos','class-tab','btn-soft','data-tab="students"')}${button('Organizar trilhas','class-tab','btn-outline','data-tab="trails"')}</div></section>`;
+      }
+      if(state.classTab==='students')body=students(d.students||[]);
+      if(state.classTab==='trails')body=ctx.renderClassTrails(d,teacher);
+      if(state.classTab==='results')body=ctx.renderAssessmentResults(d.assessment_results||[]);
+      if(state.classTab==='rank')body=ctx.renderRank(d);
+      return `${breadcrumb([{label:'Turmas',action:'navigate',attrs:'data-view="classes"'},{label:d.name}])}${heading(teacher?'Caderno da turma':'Sua turma',d.name,teacher?'Organize a prática e acompanhe os caminhos de aprendizagem.':'Explore as trilhas e pratique com sua turma.',teacher?codeChip(d.code):'')}
+        <div class="tabs" role="tablist" aria-label="Seções da turma">${tabs.map(([id,label])=>`<button id="class-tab-${id}" class="tab ${state.classTab===id?'active':''}" role="tab" aria-selected="${state.classTab===id}" aria-controls="class-tabpanel" tabindex="${state.classTab===id?0:-1}" type="button" data-action="class-tab" data-tab="${id}">${label}</button>`).join('')}</div><section id="class-tabpanel" role="tabpanel" aria-labelledby="class-tab-${state.classTab}">${body}</section>`;
+    }
+
+    function students(rows) {
+      const sorted=[...rows].sort((a,b)=>{
+        const key=state.studentSort||'name',dir=state.studentSortDir==='desc'?-1:1;
+        if(key==='name')return dir*a.name.localeCompare(b.name,'pt-BR');
+        if(key==='trail_status')return dir*a.trail_status.localeCompare(b.trail_status,'pt-BR');
+        if(key==='last_access')return dir*((Date.parse(a[key])||0)-(Date.parse(b[key])||0));
+        return dir*((a[key]??-1)-(b[key]??-1));
+      });
+      const rank=new Map((state.classDetail?.weekly_leaderboard||[]).map(r=>[r.user_id,r.rank]));
+      const sortHeader=(label,key)=>`<th scope="col" class="${key==='weekly_xp'?'numeric':''}" aria-sort="${state.studentSort===key?(state.studentSortDir==='desc'?'descending':'ascending'):'none'}"><button type="button" data-action="sort-students" data-sort="${key}">${label}${state.studentSort===key?icon(state.studentSortDir==='desc'?'arrow-down':'arrow-up'):icon('chevrons-up-down')}</button></th>`;
+      return `<section class="card"><div class="split-heading"><div><h2>Alunos</h2><p class="small muted">XP da turma e último acesso à LISE.</p></div><div class="student-controls"><label class="switch-row"><input role="switch" type="checkbox" name="show-ranking" ${state.showRanking?'checked':''}> Mostrar posição semanal</label></div></div>${rows.length?`<div class="table-wrap"><table class="student-table"><thead><tr>${state.showRanking?'<th scope="col">Posição</th>':''}${sortHeader('Aluno','name')}${sortHeader('Trilhas','trail_status')}${sortHeader('XP na semana','weekly_xp')}${sortHeader('Último acesso','last_access')}<th scope="col"><span class="sr-only">Ações</span></th></tr></thead><tbody>${sorted.map(s=>`<tr tabindex="0" data-student-row="${esc(s.user_id)}" aria-label="Ver detalhes de ${esc(s.name)}">${state.showRanking?`<td data-label="Posição">${rank.get(s.user_id)??'—'}</td>`:''}<td data-label="Aluno"><strong>${esc(s.name)}</strong><br><small>${esc(s.email)}</small></td><td data-label="Trilhas"><span class="chip ${s.late_trails?'danger':''}">${esc(s.trail_status)}</span>${Number.isFinite(s.pending_trails)?`<small class="cell-note">${s.pending_trails} pendente(s)</small>`:''}</td><td class="numeric" data-label="XP na semana">${value(s.weekly_xp)}</td><td data-label="Último acesso">${fmtDate(s.last_access)}</td><td data-label="Ações">${button('Ver detalhes','open-student','btn-text btn-small',`data-id="${esc(s.user_id)}"`)}</td></tr>`).join('')}</tbody></table></div>`:empty('A turma está pronta para receber alunos','Compartilhe o código de entrada para começar.')}</section>`;
+    }
+
+    function collections() {
+      return `${heading('Seu herbário de palavras','Coleções','Agrupe suas descobertas para praticar no seu ritmo.',button('Criar coleção','new-collection'))}${state.collections.length?`<div class="collection-grid">${state.collections.map(c=>`<article class="collection-cover"><div class="card-top"><span class="eyebrow">Caderno pessoal</span>${icon('library')}</div><h2>${esc(c.name)}</h2><p>${count(c.terms,'palavras')}</p><div class="card-actions">${button('Abrir coleção','open-collection','btn-primary btn-small',`data-id="${c.id}"`)}${button('Praticar','practice-collection','btn-soft btn-small',`data-id="${c.id}" data-name="${esc(c.name)}"`)}${button('Apagar','delete-collection','btn-text btn-small danger-text',`data-id="${c.id}"`)}</div></article>`).join('')}</div>`:empty('Guarde suas descobertas','Crie uma coleção com termos do catálogo ou com palavras feitas por você.')}`;
+    }
+
+    function pathCards(terms, learning, collectionId) {
+      const records=new Map((learning?.terms||[]).map(r=>[r.id,r]));
+      return `<ol class="word-path">${terms.map((t,i)=>`<li><span class="path-node ${records.get(t.id)?.attempts>0?'practiced':''}" aria-label="Posição ${i+1}">${records.get(t.id)?.attempts>0?icon('check'):i+1}</span>${termCard(t,{numbered:true,status:records.get(t.id)?.attempts>0?'Praticado':'Sem prática individual registrada',extra:collectionId?button('Remover','remove-collection-term','btn-text btn-small danger-text',`data-collection="${collectionId}" data-term="${t.id}"`):''})}</li>`).join('')}</ol>`;
+    }
+
+    function collection() {
+      const c=state.collection;if(!c)return ctx.loadingCard();
+      return `${breadcrumb([{label:'Coleções',action:'navigate',attrs:'data-view="collections"'},{label:c.name}])}${heading('Caderno pessoal',c.name,count(c.terms,'palavras'),button('Praticar','practice-collection','btn-primary',`data-id="${c.id}" data-name="${esc(c.name)}"`)+button('Adicionar palavras','add-collection-terms','btn-soft',`data-id="${c.id}" data-name="${esc(c.name)}"`))}${ctx.learningPanel(c.learning)}${c.terms.length?pathCards(c.terms,c.learning,c.id):empty('O caderno ainda está vazio','Adicione palavras do Explorador ou crie seus próprios termos.')}`;
+    }
+
+    function trail() {
+      const t=state.collection;if(!t)return ctx.loadingCard();
+      const student=state.user.role==='Aluno';
+      return `${breadcrumb([{label:t.class_id?'Turma':'Trilhas',action:t.class_id?'back-to-class':'navigate',attrs:t.class_id?'':'data-view="trails"'},{label:t.name}])}${heading(t.area,t.name,t.description||count(t.term_items,'termos'),student?button('Praticar trilha','practice-trail','btn-primary',`data-assignment="${t.assignment_id}" data-trail="${t.id}" data-name="${esc(t.name)}" data-class="${t.class_id}"`):button('Adicionar termos','add-trail-terms','btn-primary',`data-id="${t.id}" data-name="${esc(t.name)}"`))}${ctx.learningPanel(t.learning)}${t.term_items.length?pathCards(t.term_items,t.learning):empty('Trilha sem palavras','Adicione termos do catálogo para preparar este caminho.')}`;
+    }
+
+    function games(choosing=false) {
+      const source=state.practiceSource;
+      return `${choosing?breadcrumb([{label:'Praticar',action:'navigate',attrs:'data-view="games"'},{label:source?.name||'Seus favoritos'}]):''}${heading('Laboratório de palavras',choosing?'Como vamos praticar?':'Praticar',choosing?`Conteúdo: ${source?.name||'Seus favoritos'}`:'Quatro formas de investigar palavras e conectar significados.')}<div class="games-grid">${GAMES.map((g,i)=>`<article class="activity-sheet" data-game="${g.id}"><span class="catalog-id">EXPERIMENTO ${String(i+1).padStart(2,'0')}</span>${gameArt(g.id)}<h2>${esc(g.title)}</h2><p>${esc(g.description)}</p>${button(choosing?'Preparar partida':'Escolher conteúdo',choosing?'configure-game':'select-game','btn-primary',`data-game="${g.id}"`)}</article>`).join('')}</div>`;
+    }
+
+    function account() {
+      const tab=state.accountTab||'perfil',d=state.account;
+      const tabs=[['perfil','Perfil','user-round'],['seguranca','Segurança','shield-check'],['privacidade','Privacidade','fingerprint']];
+      const hasAvatar=AVATARS.some(avatar=>avatar.id===state.user.avatar);
+      const avatarPrompt=hasAvatar?'':`<p class="avatar-selection-hint">Escolha seu companheiro para completar o perfil.</p>`;
+      let body='';
+      if(tab==='perfil')body=`<section class="account-identity"><button type="button" class="avatar-edit" data-ui="avatar" aria-label="${hasAvatar?'Alterar avatar':'Escolher mascote'}">${avatarMarkup(state.user.avatar)}<span class="avatar-pencil">${icon(hasAvatar?'pencil':'user-round-plus')}</span></button><div><span class="eyebrow">Seu espaço na LISE</span><h2>${esc(state.user.name)}</h2><p>${esc(state.user.email)}</p><span class="chip">${state.user.role==='Aluno'?'Aluno':'Professor'}</span>${avatarPrompt}</div></section><div class="account-columns"><section class="card"><h2>Como podemos te chamar?</h2><form data-form="account-name"><div class="field"><label for="account-name">Nome</label><input id="account-name" name="name" value="${esc(state.user.name)}" minlength="2" maxlength="150" autocomplete="name" required></div><div class="field"><label for="account-email">E-mail</label><input id="account-email" type="email" value="${esc(state.user.email)}" readonly><small>O e-mail de acesso é mantido pelo serviço de autenticação.</small></div><button class="btn btn-primary" type="submit">Salvar nome</button></form></section></div>`;
+      if(tab==='seguranca')body=`<div class="account-columns"><section class="card"><h2>Alterar senha</h2><p class="muted small">Use uma senha que você não utiliza em outros serviços.</p><form data-form="change-password"><div class="field"><label for="current-password">Senha atual</label><input id="current-password" name="current_password" type="password" autocomplete="current-password" required></div><div class="field"><label for="new-password">Nova senha</label><input id="new-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div><div class="field"><label for="confirm-password">Confirme a nova senha</label><input id="confirm-password" name="confirm" type="password" minlength="8" maxlength="128" autocomplete="new-password" required></div><button class="btn btn-primary" type="submit">Salvar nova senha</button></form></section><section class="card"><span class="section-symbol">${icon('monitor-smartphone')}</span><h2>Seus acessos</h2><p>Encerre suas sessões na LISE em todos os dispositivos, incluindo este.</p>${button('Encerrar todas as sessões','revoke-sessions','btn-attention')}<p class="small muted">Você precisará entrar novamente.</p></section></div>`;
+      if(tab==='privacidade')body=d?privacy(d):ctx.loadingCard('Consultando seus dados…');
+      return `${heading('Seu caderno, suas escolhas','Minha conta','Personalize seu perfil e cuide dos seus dados.')}<div class="tabs account-tabs" role="tablist" aria-label="Configurações da conta">${tabs.map(([id,label,mark])=>`<button id="account-tab-${id}" type="button" class="tab ${tab===id?'active':''}" role="tab" aria-selected="${tab===id}" aria-controls="account-tabpanel" tabindex="${tab===id?0:-1}" data-action="account-tab" data-tab="${id}">${icon(mark)}${label}</button>`).join('')}</div><section id="account-tabpanel" role="tabpanel" aria-labelledby="account-tab-${tab}">${body}</section>`;
+    }
+
+    function privacy(d) {
+      return `<div class="account-columns"><section class="card"><h2>Documentos e escolhas</h2>${legalLinks()}<p class="small muted">Versão ${esc(d.legal_version)}</p>${d.accepted?`<p class="accepted-note">${icon('circle-check')}Aceite registrado em ${fmtDate(d.accepted_at)}.</p>`:d.legal_ready?`<form data-form="account-terms"><p>Leia os documentos atualizados para continuar nas atividades.</p><label class="check-row"><input name="accept_terms" type="checkbox" required><span>Li e aceito os Termos de Uso e estou ciente da Política de Privacidade desta versão.</span></label><button class="btn btn-primary" type="submit">Registrar aceite</button></form>`:'<p class="legal-note">Os documentos estão em revisão. O aceite das contas existentes será solicitado após a publicação definitiva.</p>'}</section><section class="card"><span class="section-symbol">${icon('download')}</span><h2>Uma cópia dos seus dados</h2><p>Baixe os dados da sua conta e das suas atividades na aplicação.</p>${button('Baixar meus dados','export-data','btn-soft')}</section></div>
+        <section class="card account-request"><h2>Fale sobre seus dados</h2><p>Registre uma solicitação e acompanhe a resposta da equipe pelo protocolo.</p><form data-form="privacy-request"><div class="form-row"><div class="field"><label for="request-type">Tipo de pedido</label><select id="request-type" name="type">${Object.entries(d.request_types).filter(([key])=>key!=='exclusao').map(([v,l])=>`<option value="${esc(v)}">${esc(l)}</option>`).join('')}</select></div><div class="field"><label for="request-details">Detalhes (opcional)</label><textarea id="request-details" name="details" maxlength="2000"></textarea></div></div><button class="btn btn-primary" type="submit">Registrar pedido</button></form></section>
+        <section class="card request-history"><h2>Acompanhar solicitações</h2>${d.requests.length?d.requests.map(item=>`<article class="privacy-request"><div class="card-top"><h3>${esc(d.request_types[item.type]||item.type)}</h3><span class="chip">${esc(({pendente:'Em análise',concluido:'Concluído',indeferido:'Indeferido',cancelado:'Cancelado'})[item.status]||item.status)}</span></div><p class="small muted">Protocolo <code>${esc(item.id)}</code> · ${fmtDate(item.created_at)}</p>${item.details?`<p>${esc(item.details)}</p>`:''}${item.response?`<p><strong>Resposta da equipe:</strong> ${esc(item.response)}</p>`:''}</article>`).join(''):'<p class="muted">Nenhum pedido registrado.</p>'}</section>`;
+    }
+
+    function auth() {
+      const mode=state.authMode,register=mode==='register',recovery=mode==='recovery';
+      const name=register?`<div class="field"><label for="auth-name">Seu nome</label><input id="auth-name" name="name" minlength="2" maxlength="150" autocomplete="name" required></div><fieldset class="role-options"><legend>Como você vai usar a LISE?</legend><label><input type="radio" name="role" value="ALUNO" checked>${icon('sprout')}<span><strong>Aluno</strong><small>Descobrir e praticar</small></span></label><label><input type="radio" name="role" value="PROFESSOR">${icon('notebook-pen')}<span><strong>Professor</strong><small>Preparar caminhos</small></span></label></fieldset>`:'';
+      return `<div class="auth-page ${register?'auth-register':''}"><a class="skip-link" href="#auth-title" data-action="skip-auth">Pular para o acesso</a><section class="auth-aside"><a class="auth-brand" href="/" data-action="auth-mode" data-mode="login">${icon('dna')}LISE</a><div><span class="eyebrow">Um caderno de descobertas</span><h1>Há uma história<br>em cada palavra.</h1><p>Observe as partes. Conecte os sentidos.<br>Descubra a Biologia.</p></div><span class="auth-caption">Aprender começa por uma raiz.</span></section>
+        <section class="auth-main"><div class="auth-card"><span class="eyebrow">Biologia por etimologia</span><h2 id="auth-title" tabindex="-1">${register?'Abra seu caderno.':recovery?'Vamos recuperar seu acesso.':'Que bom ter você aqui.'}</h2><p>${register?'Escolha seu perfil para começar.':recovery?'Enviaremos as instruções para o e-mail da sua conta.':'Entre para continuar suas descobertas.'}</p><form data-form="${register?'register':recovery?'recovery':'login'}">${name}<div class="field"><label for="auth-email">E-mail</label><input id="auth-email" name="email" type="email" maxlength="255" autocomplete="email" required></div>${!recovery?`<div class="field"><label for="auth-password">Senha</label><input id="auth-password" name="password" type="password" minlength="8" maxlength="128" autocomplete="${register?'new-password':'current-password'}" required></div>`:''}${register?'<label class="check-row terms-check"><input name="accept_terms" type="checkbox" required><span>Li e aceito os <a href="/#termos-de-uso" target="_blank" rel="noopener">Termos de Uso</a> e estou ciente da <a href="/#privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>':!recovery?'<div class="auth-options"><label class="check-row"><input name="remember" type="checkbox"> Manter conectado</label><button class="btn-text" type="button" data-action="auth-mode" data-mode="recovery">Esqueci minha senha</button></div>':''}<button class="btn btn-primary btn-block auth-submit" type="submit">${register?'Criar conta':recovery?'Enviar instruções':'Entrar'}</button></form><p class="auth-switch">${register||recovery?'Já tem acesso?':'Ainda não tem conta?'} ${button(register||recovery?'Entrar':'Criar conta','auth-mode','btn-text',`data-mode="${register||recovery?'login':'register'}"`)}</p>${legalLinks()}</div></section></div>`;
+    }
+
+    return {dashboard,explore,exploreResults,detail,classes,trails,classDetail,students,collections,collection,trail,games,account,auth};
+  };
+})();
