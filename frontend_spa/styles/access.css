@@ -41,7 +41,7 @@
 .access-switch{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:8px;font-size:12px;color:var(--access-subtle);margin:23px 0 0}
 .access-footer{display:flex;flex-direction:column;align-items:center;gap:14px;padding-top:22px;color:var(--access-subtle);font-size:10px;line-height:1.5}
 .access-footer .legal-links{display:flex;flex-wrap:wrap;justify-content:center;gap:18px;padding:0;margin:0;border:0;font-size:11px;color:var(--access-subtle)}
-.access-story{position:relative;isolation:isolate;min-width:0;margin:10px 10px 10px 0;padding:36px;display:flex;flex-direction:column;justify-content:space-between;gap:40px;border-radius:16px;background:linear-gradient(180deg,#12342926 0%,#12342905 35%,#0a281bb8 75%,#0a281beb),url('/assets/auth-panorama.webp') center/cover;color:#fffbed}
+.access-story{position:relative;isolation:isolate;min-width:0;margin:10px 10px 10px 0;padding:36px;display:flex;flex-direction:column;justify-content:space-between;gap:40px;border-radius:16px;background:linear-gradient(180deg,#eef4dc12,#eef4dc00 45%,#eef4dcdd),url('/assets/auth-organic.webp') center/cover;color:#263f2b}
 .access-story::before{content:'';position:absolute;inset:14px;border:1px solid #fffbed2e;pointer-events:none;border-radius:8px;z-index:-1}
 .access-story-top,.access-story-bottom{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .access-index{font-size:9px;line-height:1.5;letter-spacing:.19em;color:#fffbed;font-weight:600;text-shadow:0 1px 8px #0d281a}
@@ -76,3 +76,38 @@
 @media(max-width:380px){.access-stage{padding:10px}.access-panel{min-height:740px;border-radius:16px}.access-form-side{padding:22px}.access-content h1{font-size:36px}.access-register .access-content h1{font-size:33px}.access-options{flex-wrap:wrap;gap:8px}.access-roles{grid-template-columns:1fr}.access-logo{font-size:27px}.access-header{gap:10px}.access-footer .legal-links{gap:12px}}
 @media(max-width:240px){.access-stage{padding:6px}.access-form-side{padding:14px}.access-panel{min-height:0}.access-content h1,.access-register .access-content h1{font-size:27px}.access-header{flex-wrap:wrap}.access-kicker{font-size:9px}.access-switch{display:block;text-align:center}.access-submit{font-size:12px!important}.access-form .access-submit svg{display:none}.access-footer .legal-links{flex-direction:column;align-items:center}}
 @media(prefers-reduced-motion:reduce){.appearance-thumb,.access-submit{transition:none}}
+
+/* Restore the chosen artwork and the two-way sliding authentication panels. */
+.access-story::before{border-color:#345b3d24}
+.access-story .access-index{color:#263f2b;text-shadow:none;background:#f1f6dfd9;padding:7px 9px;border-radius:6px}
+.access-story .access-story-mark svg,.access-story .access-story-copy p{color:#263f2b}
+.access-story .access-story-line{background:#45683d}
+.access-story .access-story-copy>span:last-child,.access-story .access-story-bottom{color:#324e34}
+.access-story .access-story-bottom{border-color:#345b3d38}
+@media(min-width:761px){
+ .access-panel{--story-travel:106.383%;--form-travel:94%}
+ .access-form-side{grid-column:1;grid-row:1;position:relative;z-index:1;background:var(--access-paper)}
+ .access-story{grid-column:2;grid-row:1;z-index:2}
+ .access-panel.access-register{grid-template-columns:minmax(0,.94fr) minmax(0,1fr)}
+ .access-register .access-form-side{grid-column:2}
+ .access-register .access-story{grid-column:1;margin:10px 0 10px 10px}
+ .access-changing.access-register .access-story{animation:access-story-to-register 620ms cubic-bezier(.22,.7,.22,1) both}
+ .access-changing.access-register .access-form-side{animation:access-form-to-register 620ms cubic-bezier(.22,.7,.22,1) both}
+ .access-changing:not(.access-register) .access-story{animation:access-story-to-login 620ms cubic-bezier(.22,.7,.22,1) both}
+ .access-changing:not(.access-register) .access-form-side{animation:access-form-to-login 620ms cubic-bezier(.22,.7,.22,1) both}
+}
+@media(min-width:761px) and (max-width:1000px){
+ .access-panel{--story-travel:122.222%;--form-travel:81.818%}
+ .access-panel.access-register{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
+}
+@keyframes access-story-to-register{from{transform:translateX(var(--story-travel))}to{transform:translateX(0)}}
+@keyframes access-story-to-login{from{transform:translateX(calc(0% - var(--story-travel)))}to{transform:translateX(0)}}
+@keyframes access-form-to-register{from{transform:translateX(calc(0% - var(--form-travel)));opacity:.35}to{transform:translateX(0);opacity:1}}
+@keyframes access-form-to-login{from{transform:translateX(var(--form-travel));opacity:.35}to{transform:translateX(0);opacity:1}}
+@media(max-width:760px){
+ .access-changing .access-content{animation:access-form-mobile 300ms ease both}
+}
+@keyframes access-form-mobile{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){
+ .access-changing .access-story,.access-changing .access-form-side,.access-changing .access-content{animation:none!important;transform:none!important}
+}

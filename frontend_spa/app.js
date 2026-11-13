@@ -562,18 +562,23 @@
       }
       else if (action === 'open-account') await loadAccount();
       else if (action === 'export-data') {
-        const data = await api('/account/data', {method:'POST', body:{}});
-        const url = URL.createObjectURL(new Blob([JSON.stringify(data,null,2)], {type:'application/json;charset=utf-8'}));
-        const link = document.createElement('a'); link.href=url; link.download='meus-dados-lise.json';
-        document.body.append(link); link.click(); link.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
-        toast('Cópia dos dados preparada para download.');
+        const end=window.LiseInteractions?.busy(buttonEl,'Preparando PDF…')||(()=>{});
+        const token=state.token,user={...state.user};
+        try {
+          const [exported,privacy,sessions]=await Promise.allSettled([api('/account/data',{method:'POST',body:{}}),api('/account'),api('/account/sessions')]);
+          if(token!==state.token)throw new Error('Sua sessão mudou. Entre novamente para exportar seus dados.');
+          if(exported.status!=='fulfilled')throw exported.reason;
+          if(!window.LiseDataReport)throw new Error('O gerador de PDF não carregou. Atualize a página e tente novamente.');
+          await window.LiseDataReport.download(exported.value,{user,account:privacy.status==='fulfilled'?privacy.value:null,sessions:sessions.status==='fulfilled'?sessions.value:null});
+          toast('PDF dos seus dados preparado para download.');
+        } finally {end();}
       }
       else if (action === 'revoke-sessions') {
         if (!await window.LiseInteractions.confirm('Encerrar todas as sessões','Você sairá da LISE em todos os dispositivos, incluindo este. Será necessário entrar novamente.',buttonEl,true))return;
         const result = await api('/account/sessions/revoke', {method:'POST', body:{}});
         localStorage.removeItem('lise_access_token');forgetSession();history.replaceState({},'', '/');renderAuth();toast(result.message);
       }
-      else if (action === 'auth-mode') { state.authMode=buttonEl.dataset.mode; renderAuth();document.querySelector('#auth-title')?.focus(); }
+      else if (action === 'auth-mode') { state.authMode=buttonEl.dataset.mode; renderAuth();document.querySelector('#auth-title')?.focus({preventScroll:true}); }
       else if (action === 'navigate') await navigate(buttonEl.dataset.view);
       else if (action === 'go-dashboard') await loadDashboard();
       else if (action === 'retry-current') { location.reload(); }
@@ -1031,7 +1036,7 @@
   }
   function afterRender(focusBefore) {
     navigation.mount();
-    window.LiseInteractions?.mount(app,state.view);window.LiseCrud?.mount(app);
+    window.LiseInteractions?.mount(app,state.view);window.LiseCrud?.mount(app);window.LiseCompact?.mount(app,state);
     if(state.view==='trail-create'&&state.trailDraft){const f=app.querySelector('[data-form=trail-create]');for(const [name,value] of state.trailDraft.values){const el=f?.elements.namedItem(name);if(el&&'value' in el&&el.type!=='checkbox')el.value=value;}f?.querySelector(`[data-step="${state.trailDraft.step}"]`)?.click();}
     let fieldIndex=0;
     for(const label of app.querySelectorAll('.field>label:not([for])')){
@@ -1067,7 +1072,7 @@
   }
   function refreshExplore(){
     const results=app.querySelector('#explore-results');if(!results)return;
-    const previousCards=[...results.querySelectorAll('[data-term]')].map(el=>[el.dataset.term,el.getBoundingClientRect()]);results.innerHTML=screens.exploreResults();for(const el of results.querySelectorAll('[data-term]')){const before=previousCards.find(([id])=>id===el.dataset.term)?.[1],now=el.getBoundingClientRect();window.LiseInteractions?.motion(el,before?[{transform:`translate(${before.x-now.x}px,${before.y-now.y}px)`,opacity:.6},{transform:'none',opacity:1}]:[{opacity:0},{opacity:1}]);}window.lucide?.createIcons({attrs:{'stroke-width':1.7}});
+    const previousCards=[...results.querySelectorAll('[data-term]')].map(el=>[el.dataset.term,el.getBoundingClientRect()]);results.innerHTML=screens.exploreResults();for(const el of results.querySelectorAll('[data-term]')){const before=previousCards.find(([id])=>id===el.dataset.term)?.[1],now=el.getBoundingClientRect();window.LiseInteractions?.motion(el,before?[{transform:`translate(${before.x-now.x}px,${before.y-now.y}px)`,opacity:.6},{transform:'none',opacity:1}]:[{opacity:0},{opacity:1}]);}window.lucide?.createIcons({attrs:{'stroke-width':1.7}});window.LiseCompact?.mount(app,state);
     const wasRestoring=restoringRoute;restoringRoute=false;
     // Filtros substituem a entrada atual, sem criar um histórico por tecla.
     const previous=history.state;if(previous?.lise)history.replaceState({...previous,key:null},'',location.href);

@@ -29,6 +29,17 @@ for(const [mode,form] of [['login','login'],['register','register'],['recovery',
  assert.ok(markup.includes('class="access-panel '));assert.ok(markup.includes('data-form="'+form+'"'));assert.ok(markup.includes('data-theme-toggle'));assert.ok(!markup.includes('<select'));assert.ok(markup.includes('id="auth-email"'));
  if(mode==='register'){assert.ok(markup.includes('name="accept_terms"'));assert.ok(markup.includes('value="PROFESSOR"'));assert.ok(markup.includes('value="ALUNO"'));}
 }
+// Switching either direction must attach the animation hook; a fresh login must not.
+const transitions=[];
+for(const [wasRegister,mode] of [[false,'register'],[true,'login']]){
+ box.qa.node.querySelector=selector=>selector==='[type=submit]'?{isConnected:false}:selector==='.access-panel'?{classList:{contains:()=>wasRegister,add:name=>transitions.push(name)}}:null;
+ s.authMode=mode;t.renderAuth();
+}
+assert.deepEqual(transitions,['access-changing','access-changing']);
+const accessCSS=fs.readFileSync(path.join(root,'styles/access.css'),'utf8');
+assert.ok(accessCSS.includes("url('/assets/auth-organic.webp')"));assert.ok(!accessCSS.includes('auth-panorama.webp'));
+assert.match(accessCSS,/access-changing\.access-register \.access-story\{animation:access-story-to-register/);
+assert.match(accessCSS,/access-changing:not\(\.access-register\) \.access-story\{animation:access-story-to-login/);
 box.qa.node.querySelector=originalQuery;
 (async()=>{
  s.user={name:'Professor',role:'Professor',avatar:'leaf'};s.view='trails';let calls=[],confirmations=0;ctx.window.LiseInteractions={notify:()=>{},busy:()=>()=>{},confirm:async()=>{confirmations++;return true;}};

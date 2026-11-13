@@ -1,17 +1,18 @@
-@import url('/styles/tokens.css?v=20261113-ui8');
-@import url('/styles/layout.css?v=20261113-ui8');
-@import url('/styles/components.css?v=20261113-ui8');
-@import url('/styles/screens.css?v=20261113-ui8');
-@import url('/styles/activities.css?v=20261113-ui8');
-@import url('/styles/interactions.css?v=20261113-ui8');
-@import url('/styles/polish.css?v=20261113-ui8');
-@import url('/styles/refinements.css?v=20261113-ui8');
-@import url('/styles/elegance.css?v=20261113-ui8');
-@import url('/styles/memory-focus.css?v=20261113-ui8');
-@import url('/styles/responsive.css?v=20261113-ui8');
-@import url('/styles/palette.css?v=20261113-ui8');
-@import url('/styles/themes.css?v=20261113-ui8');
-@import url('/styles/access.css?v=20261113-ui8');
+@import url('/styles/tokens.css?v=20261113-ui10');
+@import url('/styles/layout.css?v=20261113-ui10');
+@import url('/styles/components.css?v=20261113-ui10');
+@import url('/styles/screens.css?v=20261113-ui10');
+@import url('/styles/activities.css?v=20261113-ui10');
+@import url('/styles/interactions.css?v=20261113-ui10');
+@import url('/styles/polish.css?v=20261113-ui10');
+@import url('/styles/refinements.css?v=20261113-ui10');
+@import url('/styles/elegance.css?v=20261113-ui10');
+@import url('/styles/memory-focus.css?v=20261113-ui10');
+@import url('/styles/responsive.css?v=20261113-ui10');
+@import url('/styles/palette.css?v=20261113-ui10');
+@import url('/styles/themes.css?v=20261113-ui10');
+@import url('/styles/access.css?v=20261113-ui10');
+@import url('/styles/compact.css?v=20261113-ui10');
 /* Ordem única: tokens, estrutura, componentes, telas e atividades. */
 
 
