@@ -148,6 +148,7 @@
   function shell(content) { return navigation.shell(content); }
 
   function renderAuth() {
+    window.LiseSpeech?.stop();
     state.view='auth';
     const previous=app.querySelector('.access-panel');const wasRegister=previous?.classList.contains('access-register');
     app.innerHTML=screens.auth();window.LiseInteractions?.mount(app,'auth');
@@ -321,6 +322,7 @@
     try{if(legalRoute())await loadLegal(legalRoute(),false);else if(state.user)await restoreLocation();else if(state.token)await init();else renderAuth();lastRouteHash=location.hash;}catch(error){toast(error.message,'error');}
   });
   function render() {
+    window.LiseSpeech?.stop();
     const draft=app.querySelector('[data-form=trail-create]');if(draft&&state.view==='trail-create'){state.trailDraft={values:[...new FormData(draft).entries()],step:Number(draft.dataset.currentStep)||0};}
     const focusBefore=captureFocus();
     if (state.view === 'legal' && state.legal) { app.innerHTML = shell(renderLegal());navigation.mount();window.LiseInteractions?.mount(app,'legal');return; }

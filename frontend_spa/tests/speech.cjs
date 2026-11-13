@@ -1,0 +1,13 @@
+const fs=require('fs'),path=require('path'),vm=require('vm'),assert=require('assert/strict');const source=fs.readFileSync(path.join(__dirname,'../speech.js'),'utf8');
+let spoken=[],canceled=0,errors=[],voiceEvent;let voices=[{name:'English',lang:'en-US'},{name:'Português',lang:'pt-PT'},{name:'Brasil local',lang:'pt-BR',localService:true}];
+const synth={getVoices:()=>voices,cancel:()=>canceled++,speak:u=>spoken.push(u),addEventListener:(event,fn)=>voiceEvent=fn};
+const events={};const ctx={window:{speechSynthesis:synth,SpeechSynthesisUtterance:class{constructor(text){this.text=text}},LiseInteractions:{notify:m=>errors.push(m),icons(){}},addEventListener(){}},document:{addEventListener:(event,fn)=>events[event]=fn}};vm.runInNewContext(source,ctx);
+const api=ctx.window.LiseSpeech;
+const button=()=>({innerHTML:'Ouvir palavra',isConnected:true,classList:{add(){},remove(){}},setAttribute(k,v){this[k]=v}});
+assert.equal(spoken.length,0,'Speech never starts on load');const b=button();assert.equal(api.speak('Biologia',b),true);assert.equal(spoken[0].voice.name,'Brasil local');assert.equal(spoken[0].lang,'pt-BR');assert.equal(b['aria-pressed'],'true');
+const b2=button();api.speak('Fotossíntese',b2);assert.equal(canceled,1);assert.equal(b.innerHTML,'Ouvir palavra');spoken[0].onend();assert.equal(b2['aria-pressed'],'true','Old callbacks cannot stop a new word');spoken[1].onerror({error:'audio-busy'});assert.equal(b2['aria-pressed'],'false');assert.equal(errors.length,1);
+api.speak('Célula',b);api.speak('Célula',b);assert.equal(b['aria-pressed'],'false','Same button stops playback');
+voices=[];voiceEvent();api.speak('Raiz',b);assert.equal(spoken.at(-1).lang,'pt-BR');assert.equal(spoken.at(-1).voice,undefined);api.stop();
+assert.ok(api.button('<script>"&').includes('&lt;script&gt;&quot;&amp;'));assert.ok(!api.button('<script>').includes('<script>'));
+const unsupported={window:{LiseInteractions:{notify:m=>errors.push(m)},addEventListener(){}},document:{addEventListener(){}}};vm.runInNewContext(source,unsupported);assert.equal(unsupported.window.LiseSpeech.available,false);assert.equal(unsupported.window.LiseSpeech.speak('Biologia',b),false);assert.equal(errors.length,2);
+console.log('PASS: no autoplay, pt-BR voice, asynchronous voices, stop/replacement, callback races, errors, unsupported engines and escaped text.');

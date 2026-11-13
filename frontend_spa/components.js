@@ -36,7 +36,7 @@
       ${status?`<p class="practice-mark">${icon(status==='Praticado'?'circle-check':'circle')}${esc(status)}</p>`:''}
       <div class="card-actions">${isHidden?button('Revelar significado','reveal-study','btn-primary btn-small',`data-id="${term.id}"`):button('Investigar palavra '+icon('arrow-right'),'open-term','btn-text btn-small',`data-id="${term.id}"`)}
       ${button(icon(term.favorite?'bookmark-check':'bookmark'),'toggle-favorite','icon-button',`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
-      ${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
+      ${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
   }
 
   function statsStrip(items) {
