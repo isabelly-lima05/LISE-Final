@@ -44,7 +44,9 @@
   }
 
   function classCard(c, teacher) {
-    return `<article class="class-card"><div class="card-top"><span class="eyebrow">${teacher?'Sua turma':'Turma'}</span>${teacher?codeChip(c.code):icon('users')}</div><h3><button class="stretched-link" type="button" data-action="open-class" data-id="${c.id}">${esc(c.name)}</button></h3><div class="class-counts"><span>${icon('users')}${Number.isFinite(c.student_count)?`${c.student_count} aluno(s)`:Array.isArray(c.alunos)?`${c.alunos.length} aluno(s)`:'Alunos não informados'}</span><span>${icon('route')}${Array.isArray(c.trilhas)?`${c.trilhas.length} trilha(s)`:'Trilhas não informadas'}</span></div><span class="class-open" aria-hidden="true">Abrir turma ${icon('arrow-up-right')}</span></article>`;
+    const studentCount=Number.isFinite(c.student_count)?c.student_count:Array.isArray(c.alunos)?c.alunos.length:null;
+    const trailCount=Array.isArray(c.trilhas)?c.trilhas.length:null;
+    return `<article class="class-card"><div class="card-top"><span class="class-emblem" aria-hidden="true">${icon('users')}</span>${teacher?codeChip(c.code):'<span class="class-kicker">Aprender em conjunto</span>'}</div><span class="eyebrow">${c.archived_at?'Turma arquivada':teacher?'Sua turma':'Sua comunidade'}</span><h3><button class="stretched-link" type="button" data-action="open-class" data-id="${c.id}">${esc(c.name)}</button></h3><div class="class-counts"><span>${icon('users')}<strong>${value(studentCount)}</strong> ${studentCount===1?'aluno':'alunos'}</span><span>${icon('route')}<strong>${value(trailCount)}</strong> ${trailCount===1?'trilha':'trilhas'}</span></div><span class="class-open" aria-hidden="true">Acessar turma ${icon('arrow-up-right')}</span></article>`;
   }
 
   function gameArt(game) {

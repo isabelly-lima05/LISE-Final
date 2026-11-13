@@ -1,0 +1,325 @@
+/* UI.6: adaptação por espaço disponível, de visores compactos a telas grandes. */
+html,body{min-width:0;width:100%;max-width:100%}
+#app,.main-column,.content,.auth-stage,.auth-page,.auth-main,.auth-card,form,fieldset,section,article{min-width:0}
+img,video,canvas,svg{max-width:100%}
+img,video{height:auto}
+.avatar-image{height:100%}
+fieldset{max-width:100%;margin-inline:0}
+input,select,textarea,button{max-width:100%}
+input[type=date],input[type=datetime-local]{min-width:0}
+.card-actions,.section-heading,.split-heading,.form-row,.inline-form,.toolbar,.class-counts,.tabs,.account-tabs,.legal-links{min-width:0}
+.app-layout h1,.app-layout h2,.app-layout h3,.app-layout p,.auth-card h2,.auth-card p,.source-badge strong{overflow-wrap:anywhere}
+.account-identity p,.student-table td,.privacy-request,.request-history,.legal-copy,.collection-cover h2{overflow-wrap:anywhere;word-break:normal}
+pre{max-width:100%;overflow:auto}
+.table-wrap,.legal-table-wrap{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+.table-wrap table,.legal-table-wrap table{max-width:none}
+.side-drawer,.app-dialog,.interaction-dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);overscroll-behavior:contain}
+.side-drawer{overflow-y:auto}
+.card-actions,.class-counts,.legal-links,.date-shortcuts,.privacy-links{flex-wrap:wrap}
+@media(pointer:coarse){
+  .app-layout .btn,.app-layout .icon-button,.auth-card button,.app-layout .nav-button,.side-drawer button,.collection-menu summary,.trail-menu summary,.management-menu>summary{min-height:44px}
+  .app-layout .field input,.app-layout .field select,.app-layout .field textarea,.auth-card input:not([type=checkbox]):not([type=radio]){min-height:46px}
+  .app-layout .btn-text{padding-block:10px}
+  .memory-read-button{pointer-events:none}
+}
+@media(max-width:1023px){
+  .side-drawer{width:min(300px,calc(100vw - 24px));min-width:0;height:100dvh;max-height:100dvh;margin:0;padding:22px 18px;padding-bottom:max(22px,env(safe-area-inset-bottom))}
+  .side-drawer .nav-list{gap:8px}.side-drawer .nav-button{min-height:46px}
+  .interaction-dialog .avatar-options{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .form-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .legal-toc{max-width:100%;overscroll-behavior-inline:contain}
+}
+@media(max-width:760px){
+  .form-row,.grid-2,.grid-3,.grid-4,.account-columns,.student-overview,.student-detail-columns{grid-template-columns:1fr}
+  .app-layout .section-heading{align-items:flex-start}
+  .app-layout .section-heading>.card-actions{flex-wrap:wrap;max-width:100%}
+  .app-layout .section-heading>.card-actions .btn{white-space:normal}
+  .app-layout .explore-filters>label:not(.check-row){min-width:min(150px,100%)}
+  .app-layout .trail-actions{flex-wrap:wrap}
+  .app-layout .teacher-welcome .section-heading>.card-actions .btn{white-space:normal}
+  .student-controls,.student-controls .switch-row{max-width:100%;flex-wrap:wrap}
+  .inline-form>*{min-width:0}.inline-form select{flex:1 1 180px}
+  .app-layout .tabs{max-width:100%;overflow-x:auto;overscroll-behavior-inline:contain}
+}
+@media(max-width:600px){
+  .app-layout .field input,.app-layout .field select,.app-layout .field textarea,.auth-card input:not([type=checkbox]):not([type=radio]),.auth-card select{font-size:16px}
+  .app-layout .table-wrap:has(.student-table){overflow:visible;border:0;background:none}
+  .student-table{min-width:0!important;width:100%;border:0;border-collapse:separate;border-spacing:0}
+  .student-table thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+  .student-table tbody{display:block}
+  .app-layout .student-table tbody tr{display:block;max-width:100%;padding:10px 14px;margin-bottom:12px;border:1px solid #dfe7d3;border-radius:13px;background:#fffefa}
+  .app-layout .student-table td{display:grid;grid-template-columns:minmax(70px,.65fr) minmax(0,1.35fr);align-items:start;gap:7px;padding:10px 0;border:0;text-align:left;min-width:0}
+  .student-table td::before{content:attr(data-label);font-weight:500;font-size:11px;color:#697b5c;grid-column:1}
+  .student-table td>*{grid-column:2;max-width:100%;margin:0}
+  .student-table td br{display:none}
+  .student-table td.numeric{font-variant-numeric:tabular-nums}
+  .student-table td:empty{display:none}
+  .app-layout .student-table td .btn{justify-content:flex-start;white-space:normal;font-size:12px}
+  .auth-card .role-options{min-inline-size:0}
+  .interaction-dialog .avatar-option .avatar-art{width:min(60px,100%);height:auto;aspect-ratio:1}
+  .interaction-dialog .avatar-option strong{font-size:12px}.interaction-dialog .avatar-option small{font-size:10px}
+  .app-layout .trail-menu>div{max-width:min(250px,calc(100vw - 70px));right:0;left:auto}
+  .app-layout .trail-menu .btn{min-width:0!important;white-space:normal;max-width:100%}
+}
+/* Pequenos celulares: o menu deixa de consumir uma faixa lateral. */
+@media(max-width:480px){
+  .app-layout,.app-layout.sidebar-collapsed{padding-left:0}
+  .app-layout .workspace-topbar{padding:16px 14px 12px 65px;min-height:66px;align-items:center}
+  .workspace-role{display:none}
+  .workspace-label{font-size:10px;line-height:1.4}
+  .app-layout .sidebar-launcher{position:fixed;left:max(12px,env(safe-area-inset-left));top:max(13px,env(safe-area-inset-top));transform:none;width:40px;height:40px;border:1px solid #c8d8b9;border-radius:12px;background:#f7faef;box-shadow:0 3px 10px #365b3b0b}
+  .app-layout .sidebar-launcher>svg{width:22px;height:22px}
+  .app-layout .content{padding:14px 14px 26px}
+  .app-layout .app-footer{padding:20px 14px;padding-bottom:max(20px,env(safe-area-inset-bottom));font-size:11px}
+  .app-layout .page-title{font-size:32px}
+  .app-layout .teacher-welcome{padding:22px 20px 17px}
+  .app-layout .teacher-welcome .page-title{font-size:34px}
+  .app-layout .teacher-hero-foot .hero-signature{display:none}
+  .app-layout .teacher-metrics .stat-strip>div{padding:15px}
+  .app-layout .teacher-metrics .stat-strip>div>svg{display:none}
+  .app-layout .teacher-metrics .stat-strip dt{padding:0;line-height:1.5}
+  .app-layout .account-identity{padding:20px 16px;gap:16px}
+  .app-layout .account-identity h2{font-size:24px}
+  .app-layout .account-identity .avatar-edit{width:64px;height:64px;min-width:64px;min-height:64px}
+  .app-layout .growth-strip .stat-strip dt{line-height:1.4;font-size:10px}
+  .app-layout .growth-strip .stat-strip dd{font-size:26px}
+  .app-layout .explore-filters>label:not(.check-row){min-width:calc(50% - 8px)}
+  .app-layout .search-field input{font-size:15px}
+  .app-layout .trail-actions,.app-layout:not(.sidebar-collapsed) [data-form=trail-create] .trail-actions{left:12px;right:12px;bottom:0;padding:12px;padding-bottom:max(12px,env(safe-area-inset-bottom));max-width:calc(100vw - 24px)}
+  .app-layout .memory-focus .workspace-topbar{display:none}
+  .app-layout.memory-focus .sidebar-launcher{left:14px;top:20px;width:30px;height:32px;border-radius:9px;box-shadow:none}
+  .app-layout.memory-focus .sidebar-launcher>svg{width:18px;height:18px}
+  .app-layout.memory-focus .content{padding:10px}
+  .app-layout.memory-focus .question.memory-session{padding:14px 12px 12px}
+  .memory-title-row{padding-left:30px}
+  .app-layout .memory-heading .eyebrow{display:none}
+  .app-layout .memory-heading h1{font-size:27px}
+  .memory-head-actions{gap:6px}.memory-head-actions .btn{font-size:0;width:30px;min-width:30px;min-height:32px;padding:7px}
+  .memory-head-actions .btn svg{width:15px;height:15px}
+  .memory-instruction p{font-size:10px;line-height:1.45}
+  .memory-card-text{font-size:12px}
+}
+/* Visores compactos: conteúdo essencial em uma coluna, sem largura mínima artificial. */
+@media(max-width:320px){
+  .app-layout .content{padding:12px 10px 22px}
+  .app-layout .workspace-topbar{padding:15px 10px 10px 59px}
+  .app-layout .page-title{font-size:28px;letter-spacing:-.025em}
+  .app-layout .section-heading p:not(.eyebrow){font-size:12px}
+  .app-layout .section-heading>.card-actions{display:grid;width:100%;grid-template-columns:1fr;gap:8px}
+  .app-layout .section-heading>.card-actions .btn{width:100%}
+  .app-layout .card,.app-layout .word-sheet,.app-layout .class-card,.app-layout .specimen-card,.app-layout .collection-cover{padding:18px}
+  .app-layout .split-heading{align-items:flex-start;flex-wrap:wrap;gap:8px}
+  .app-layout .split-heading h2{font-size:24px}
+  .app-layout .teacher-welcome{padding:20px 16px}
+  .app-layout .teacher-welcome .page-title{font-size:30px}
+  .app-layout .teacher-welcome .section-heading>.card-actions{display:grid;grid-template-columns:1fr}
+  .app-layout .teacher-welcome .card-actions .btn{width:100%;white-space:normal}
+  .app-layout .teacher-metrics .stat-strip{gap:8px}
+  .app-layout .teacher-metrics .stat-strip dt{font-size:11px}
+  .app-layout .teacher-metrics .stat-strip dd{font-size:29px}
+  .workspace-shortcuts{gap:6px 12px}.workspace-shortcuts>span{font-size:11px}
+  .workspace-shortcuts .btn-text{font-size:11px}
+  .app-layout .trail-list>article{grid-template-columns:minmax(0,1fr) 26px;gap:10px;padding:16px}
+  .trail-order{display:none}.app-layout .trail-list h3{font-size:23px}
+  .app-layout .class-card h3{font-size:25px}
+  .app-layout .discovery-sheet{padding:18px}.app-layout .discovery-label{align-items:flex-start;flex-wrap:wrap;gap:8px}
+  .app-layout .discovery-label .catalog-id{font-size:10px}
+  .app-layout .word-display{font-size:31px}
+  .app-layout .anatomy-parts{gap:6px}.app-layout .anatomy-part{padding:7px 9px;min-width:0}
+  .app-layout .discovery-definition{font-size:16px}
+  .app-layout .field-note{grid-template-columns:1fr;font-size:21px;padding:16px;gap:10px}
+  .app-layout .notebook-sprig{display:none}.app-layout .field-note small{grid-column:auto}
+  .app-layout .growth-strip{padding:15px}
+  .app-layout .growth-strip .stat-strip>div{padding:0 8px}
+  .app-layout .growth-strip .stat-strip dt{font-size:9px}
+  .app-layout .growth-strip .stat-strip dd{font-size:23px}
+  .app-layout .level-progress{min-width:0}
+  .app-layout .explorer-controls{padding:15px 12px}
+  .app-layout .explore-heading{gap:12px}
+  .app-layout .anatomy-legend{gap:6px}.app-layout .anatomy-legend>span[data-tone]{font-size:10px}
+  .app-layout .explore-filters>label:not(.check-row){min-width:100%;width:100%}
+  .app-layout .explore-filters>.check-row{min-width:100%;justify-content:flex-start;font-size:12px}
+  .app-layout .search-field{padding:0 10px;gap:6px}.app-layout .search-field input{font-size:14px;min-height:44px}
+  .app-layout .search-field>svg{width:15px;height:15px}
+  .app-layout .segmented{width:100%;display:flex}.app-layout .segmented button{flex:1;min-width:0;padding:8px;font-size:12px}
+  .collection-cover-top{flex-wrap:wrap}.collection-count{font-size:11px}
+  .collection-card-actions{display:grid;grid-template-columns:1fr}.collection-card-actions .btn{width:100%}
+  .app-layout .collection-cover h2{font-size:27px}
+  .app-layout .activity-sheet{grid-template-columns:1fr}.activity-sheet .game-illustration{width:84px;height:74px;max-width:100%}
+  .app-layout .activity-sheet h2{font-size:27px}.app-layout .activity-sheet .btn{width:100%}
+  .practice-setup{padding:18px 14px;gap:20px}.setup-art{float:none;margin:0}.setup-art .game-illustration{width:80px;height:70px}
+  .app-layout .practice-intro .page-title{font-size:29px}.source-badge{padding:12px;gap:8px}.source-badge strong{font-size:12px}
+  .setup-form{padding:20px 15px!important}.setup-form h2{font-size:24px}.setup-availability{padding:12px;gap:8px}
+  .app-layout .account-identity{display:grid;grid-template-columns:1fr;gap:14px}.app-layout .account-identity h2{font-size:25px}
+  .app-layout .account-tabs{gap:2px;flex-wrap:wrap;overflow:visible}.app-layout .account-tabs .tab{padding:9px 8px;font-size:11px;min-width:0}
+  .app-layout .account-tabs .tab svg{width:14px;height:14px}
+  .app-layout .account-columns .card{padding:18px}
+  .student-table td{grid-template-columns:1fr!important;gap:5px!important}.student-table td>*{grid-column:1!important}
+  .student-table td::before{font-size:10px}.app-layout .student-table tbody tr{padding:10px 12px}
+  .auth-stage{padding:14px 10px}.auth-stage .auth-page{border-radius:17px}
+  .auth-stage .auth-aside{padding:17px;gap:0}.auth-stage .auth-aside>div{display:none}
+  .auth-stage .auth-brand{font-size:23px;padding:5px 8px}.auth-stage .auth-brand svg{width:21px;height:21px}
+  .auth-stage .auth-main{padding:22px 17px}.auth-stage .auth-card>h2{font-size:25px}
+  .auth-stage .auth-card>.eyebrow{font-size:9px}.auth-stage .auth-card>p{font-size:13px}
+  .auth-stage .auth-card input:not([type=checkbox]):not([type=radio]){padding:12px 10px;font-size:16px}
+  .auth-card .role-options{display:grid;grid-template-columns:1fr}.auth-card .role-options label{width:100%;min-width:0}
+  .auth-card .role-options strong{font-size:13px}.auth-card .role-options small{font-size:11px}
+  .auth-options{align-items:flex-start}.auth-options>*{max-width:100%}
+  .app-dialog,.interaction-dialog{padding:18px;width:calc(100vw - 20px);max-width:calc(100vw - 20px)}
+  .interaction-dialog .dialog-heading{gap:10px}.interaction-dialog .dialog-heading h2{font-size:24px}
+  .interaction-dialog .avatar-options{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+  .interaction-dialog .avatar-option .avatar-art{width:55px}
+  .trail-stepper{flex-wrap:wrap;gap:4px}.trail-stepper button{font-size:11px}
+  .trail-actions .btn{min-width:0;white-space:normal;font-size:11px;padding:9px}
+  .selection-tray .selected-term-chip{max-width:100%;flex-wrap:wrap}
+  .app-layout .word-path>li{gap:6px}.word-path .path-node{width:22px;height:22px;font-size:11px;flex:none}
+  .app-layout .word-path .specimen-card{padding:13px;min-width:0}.app-layout .word-path .word-name{font-size:24px}
+  #toast.toast-stack{right:8px;bottom:10px;max-width:calc(100vw - 16px)}
+  #toast .notice{font-size:12px;gap:7px;padding:10px;overflow-wrap:anywhere}
+  #toast .notice .icon-button{width:28px;min-width:28px;min-height:30px;padding:5px}
+  .memory-reading-dialog{padding:18px}.memory-reader-copy{font-size:18px;line-height:1.65}
+}
+/* Visores de relógio ou widgets estreitos: manter os controles utilizáveis. */
+@media(max-width:240px){
+  .app-layout .workspace-topbar{min-height:57px;padding-left:49px;padding-right:8px}
+  .workspace-label{font-size:9px;line-height:1.4}.workspace-label>svg{display:none}
+  .app-layout .sidebar-launcher{width:32px;height:34px;left:8px;top:10px;border-radius:10px}
+  .app-layout .sidebar-launcher>svg{width:18px;height:18px}
+  .app-layout .content{padding:10px 8px 18px}
+  .app-layout .page-title{font-size:25px}.app-layout .eyebrow{font-size:9px;letter-spacing:.08em}
+  .app-layout .section-heading p:not(.eyebrow){font-size:12px;line-height:1.6}
+  .app-layout .teacher-metrics .stat-strip{grid-template-columns:1fr}
+  .app-layout .teacher-welcome{padding:16px 13px}.app-layout .teacher-welcome .page-title{font-size:27px}
+  .teacher-hero-foot{display:none}.workspace-shortcuts{display:grid;grid-template-columns:1fr;gap:3px}
+  .workspace-shortcuts .btn-text{justify-content:flex-start}
+  .app-layout .teacher-columns,.app-layout .home-columns{gap:22px}
+  .app-layout .class-card,.app-layout .collection-cover,.app-layout .specimen-card,.app-layout .word-sheet{padding:15px}
+  .app-layout .class-card h3{font-size:24px}.class-card .card-top{flex-wrap:wrap;gap:9px}
+  .app-layout .class-counts{gap:8px;font-size:11px}.class-kicker{font-size:10px}
+  .app-layout .word-display{font-size:29px}.app-layout .specimen-title .word-name{font-size:25px}
+  .app-layout .discovery-sheet{padding:15px}.app-layout .discovery-label .catalog-id{display:none}
+  .app-layout .growth-strip .stat-strip{display:grid;grid-template-columns:1fr;gap:11px;width:100%}
+  .app-layout .growth-strip .stat-strip>div{border:0;padding:0;display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .app-layout .growth-strip .stat-strip dt{font-size:10px;margin:0}.app-layout .growth-strip .stat-strip dd{font-size:23px}
+  .app-layout .anatomy-legend>span[data-tone]{width:100%;font-size:10px}
+  .app-layout .explore-filters select{padding-right:28px}
+  .app-layout .planning-panel{padding:15px}.planning-heading{flex-wrap:wrap}.planning-count{margin-left:0}.planning-icon{display:none}
+  .app-layout .planning-heading h2{font-size:22px!important}.planning-panel li{gap:6px}
+  .app-layout .account-tabs .tab{font-size:10px;padding:8px 6px}.app-layout .account-tabs .tab svg{display:none}
+  .app-layout .collection-cover h2{font-size:25px}.collection-emblem{width:38px;height:38px}
+  .app-layout .breadcrumb{font-size:10px;gap:6px}.app-layout .breadcrumb button{font-size:10px}
+  .app-layout .app-footer .legal-links{gap:10px;flex-direction:column}.app-layout .app-footer p{font-size:11px}
+  .auth-stage{padding:10px 7px}.auth-stage .auth-main{padding:19px 13px}.auth-stage .auth-aside{padding:15px 13px}
+  .auth-stage .auth-card>h2{font-size:23px}.auth-stage .auth-card>.eyebrow{letter-spacing:.07em;font-size:8px}
+  .auth-stage .auth-card .legal-links{display:grid;gap:12px}.auth-stage .auth-options{display:grid;gap:5px}
+  .auth-stage .auth-card .role-options label{padding:10px 8px;gap:7px}.auth-card .role-options svg{display:none}
+  .side-drawer{padding:15px 12px;width:calc(100vw - 12px);max-width:calc(100vw - 12px)}
+  .side-drawer .drawer-heading .brand{font-size:23px}.side-drawer .drawer-heading .brand svg{width:22px;height:22px}
+  .side-drawer .nav-button{font-size:12px;padding:10px;gap:9px}.side-drawer .brand{gap:6px}
+  .interaction-dialog .avatar-options{grid-template-columns:1fr}.interaction-dialog .avatar-option .avatar-art{width:64px}
+  .interaction-dialog .card-actions{display:grid;grid-template-columns:1fr}
+  .memory-reading-dialog h2{font-size:22px}.memory-reader-copy{font-size:17px;line-height:1.6}
+  .app-layout.memory-focus .content{padding:6px}
+  .app-layout.memory-focus .question.memory-session{padding:9px 7px 8px;gap:6px;border-radius:12px}
+  .app-layout.memory-focus .sidebar-launcher{left:13px;top:14px;width:25px;height:26px;border-radius:7px}
+  .app-layout.memory-focus .sidebar-launcher>svg{width:15px;height:15px}
+  .memory-title-row{padding-left:27px;gap:5px}
+  .app-layout .memory-heading h1{font-size:20px}
+  .memory-head-actions{gap:4px}.memory-pair-count{padding:5px;font-size:8px;border-radius:6px}.memory-pair-count strong{font-size:11px}
+  .memory-head-actions .btn{min-height:26px;width:24px;min-width:24px;padding:4px}.memory-head-actions .btn svg{width:12px;height:12px}
+  .memory-instruction{display:none}.memory-heading .progress-track{margin-top:7px;height:3px}
+  .app-layout .memory-session .memory-grid{gap:5px}
+  .app-layout .memory-session .memory-card{border-radius:7px}
+  .app-layout .memory-session .memory-back,.app-layout .memory-session .memory-front{border-radius:7px;padding:4px;min-height:0}
+  .app-layout .memory-session .memory-back::before{display:none}
+  .app-layout .memory-session .memory-back{gap:2px}.app-layout .memory-session .memory-back>svg{width:17px;height:17px}
+  .app-layout .memory-session .memory-back>span{font-size:8px;letter-spacing:.06em}.memory-back>small{display:none}
+  .app-layout .memory-session .memory-front{padding:4px;justify-content:center}
+  .memory-card-text{font-size:10px;line-height:1.25;-webkit-line-clamp:2;line-clamp:2}
+  .memory-read-button{display:none!important}.memory-game-stats{font-size:9px;gap:5px}.memory-game-stats>span{gap:3px}
+  .memory-game-stats svg{display:none}.memory-game-stats time{min-width:29px}.memory-game-stats strong{font-size:10px}
+  .memory-save-status{font-size:10px}.memory-save-status .btn{width:100%;font-size:10px;padding:7px;min-height:30px}
+}
+@media(max-width:240px) and (max-height:280px){
+  .app-layout .memory-heading h1{display:none}.memory-title-row{justify-content:flex-end;min-height:26px}
+  .app-layout .memory-session .memory-back>span{display:none}.app-layout .memory-session .memory-back>svg{width:15px;height:15px}
+  .memory-card-text{font-size:9px;-webkit-line-clamp:1;line-clamp:1}
+  .memory-game-stats{font-size:8px}.memory-game-stats svg{display:none}
+}
+/* Telas grandes e TVs: conteúdo mais amplo e leitura proporcional, sem esticar linhas. */
+@media(min-width:1800px){
+  .app-layout{grid-template-columns:280px minmax(0,1fr)}.app-layout.sidebar-collapsed{grid-template-columns:104px minmax(0,1fr)}
+  .app-layout .sidebar{padding:27px 17px 20px;gap:38px}.sidebar-collapsed .sidebar{padding:27px 12px 20px}
+  .app-layout .nav-button{font-size:16px;min-height:56px;gap:15px}.app-layout .nav-button>svg{width:23px;height:23px}
+  .app-layout .brand-word{font-size:34px}.app-layout .brand-toggle>svg{width:35px;height:35px}
+  .workspace-topbar,.app-layout .content,.app-layout .app-footer{max-width:clamp(1450px,77vw,2200px)}
+  .workspace-topbar{min-height:100px;padding-top:30px}.workspace-label,.workspace-role{font-size:14px}
+  .app-layout .content{padding-top:28px;padding-bottom:50px}.app-layout .page-title{font-size:clamp(46px,2.4vw,66px)}
+  .app-layout .section-heading p:not(.eyebrow){font-size:18px;max-width:760px;line-height:1.75}
+  .app-layout .eyebrow{font-size:13px}.app-layout .btn{font-size:16px;min-height:52px;padding:13px 22px;border-radius:12px}
+  .app-layout .btn-text{font-size:14px}.app-layout .icon-button{width:46px;min-height:46px}
+  .app-layout .split-heading h2{font-size:34px}.app-layout .split-heading .eyebrow{font-size:12px}
+  .app-layout .card,.app-layout .word-sheet{padding:30px;border-radius:20px}
+  .app-layout .class-card{padding:30px}.app-layout .class-card h3{font-size:35px}.app-layout .class-card>.eyebrow{font-size:12px}
+  .app-layout .class-counts>span{font-size:14px}.app-layout .class-counts strong{font-size:16px}.app-layout .class-open{font-size:14px}
+  .app-layout .code-chip{font-size:14px;min-height:44px;padding:10px 13px}.app-layout .class-card .crud-actions .btn{font-size:13px}
+  .class-emblem{width:48px;height:48px}.class-emblem svg{width:25px;height:25px}.class-kicker{font-size:13px}
+  .teacher-layout .teacher-welcome{padding:39px 43px 27px}.teacher-layout .teacher-welcome .page-title{font-size:clamp(52px,2.8vw,76px)}
+  .teacher-layout .teacher-welcome .eyebrow{font-size:13px}.teacher-layout .teacher-welcome .section-heading p:not(.eyebrow){font-size:18px;max-width:680px}
+  .teacher-hero-foot{font-size:13px}.hero-signature{font-size:17px}.teacher-layout .teacher-metrics .stat-strip{gap:20px}
+  .teacher-layout .teacher-metrics .stat-strip>div{padding:26px}.teacher-layout .teacher-metrics .stat-strip dt{font-size:15px}
+  .teacher-layout .teacher-metrics .stat-strip dd{font-size:47px}.teacher-layout .teacher-metrics .stat-strip>div>svg{width:35px;height:35px;right:20px;top:20px}
+  .teacher-layout .teacher-columns{gap:34px}.teacher-layout .teacher-columns .class-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .workspace-shortcuts>span{font-size:14px}.workspace-shortcuts .btn-text{font-size:15px}.workspace-shortcuts{padding:22px 0;margin-bottom:34px}
+  .app-layout .trail-list>article{padding:25px;gap:18px;grid-template-columns:45px minmax(0,1fr) 36px}.trail-order{width:44px;height:48px;font-size:20px}
+  .app-layout .trail-list .eyebrow{font-size:11px}.app-layout .trail-list h3{font-size:30px}.app-layout .trail-list p{font-size:14px}
+  .app-layout .planning-heading h2{font-size:31px}.planning-panel{padding:29px 34px}.planning-panel li strong{font-size:16px}.planning-panel li small{font-size:13px}.planning-panel .btn-text{font-size:14px}
+  .app-layout .discovery-sheet{padding:37px 42px}.app-layout .word-display{font-size:clamp(64px,3.3vw,90px)}
+  .app-layout .discovery-body{grid-template-columns:minmax(0,1fr) 235px;gap:45px}.app-layout .discovery-definition{font-size:24px;max-width:900px}
+  .app-layout .discovery-label .eyebrow,.app-layout .discovery-label .catalog-id{font-size:13px}.app-layout .subject-label{font-size:15px}
+  .app-layout .anatomy-part strong{font-size:23px}.app-layout .anatomy-part span{font-size:16px}.app-layout .anatomy-part small{font-size:13px}
+  .app-layout .field-note{font-size:33px;padding:30px 26px}.app-layout .field-note small{font-size:15px}
+  .app-layout .growth-strip{padding:24px 29px;gap:29px}.app-layout .growth-strip .stat-strip dt{font-size:13px}.app-layout .growth-strip .stat-strip dd{font-size:40px}
+  .app-layout .level-progress{min-width:240px;font-size:14px}.app-layout .level-progress small{font-size:12px}
+  .app-layout .collection-notes h3{font-size:31px}.app-layout .collection-notes p,.app-layout .collection-notes .eyebrow,.app-layout .collection-notes .btn{font-size:13px}
+  .app-layout .specimen-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:26px}.app-layout .specimen-card{padding:30px}
+  .app-layout .specimen-title .word-name{font-size:38px}.app-layout .specimen-definition{font-size:21px;line-height:1.7}
+  .app-layout .specimen-meta,.app-layout .specimen-meta .catalog-id,.app-layout .specimen-card .btn-text{font-size:13px}
+  .app-layout .search-field input{font-size:20px;min-height:64px}.app-layout .explore-filters>label:not(.check-row){font-size:14px}
+  .app-layout .explore-filters select{font-size:16px;min-height:50px}.app-layout .explore-filters>.check-row{font-size:14px;min-height:50px}
+  .app-layout .segmented button{font-size:15px;padding:12px 20px}.app-layout .anatomy-legend>span[data-tone]{font-size:13px}.app-layout .anatomy-legend .legend-title{font-size:13px}
+  .app-layout .collection-grid{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+  .app-layout .activity-sheet h2{font-size:36px}.app-layout .activity-sheet>p{font-size:17px}.app-layout .activity-sheet .btn{font-size:15px}
+  .app-layout .table-wrap th{font-size:14px;padding:19px}.app-layout .table-wrap td,.app-layout .table-wrap td strong{font-size:16px;padding:22px 19px}.app-layout .table-wrap td small{font-size:13px}
+  .app-layout .field label{font-size:15px}.app-layout .field input,.app-layout .field select,.app-layout .field textarea{font-size:18px;min-height:54px}
+  .app-layout .tab{font-size:16px;min-height:52px}.app-layout .chip{font-size:13px}
+  .app-layout .account-identity h2{font-size:40px}.app-layout .account-identity p{font-size:16px}.app-layout .account-columns h2{font-size:31px}
+  .app-layout .app-footer .brand{font-size:24px}.app-layout .app-footer p,.app-layout .app-footer .legal-links{font-size:13px}
+  .app-layout.memory-focus .content{max-width:2200px;padding:26px 35px}.app-layout.memory-focus .question.memory-session{padding:30px 34px 24px;gap:20px}
+  .app-layout .memory-heading h1{font-size:45px}.app-layout .memory-heading .eyebrow{font-size:13px}.memory-instruction p{font-size:17px}.memory-instruction>span{font-size:14px}
+  .memory-card-text{font-size:clamp(17px,1vw,25px);-webkit-line-clamp:8;line-clamp:8;line-height:1.65}
+  .app-layout .memory-session .memory-grid{gap:20px}.app-layout .memory-session .memory-back>svg{width:55px;height:55px}.app-layout .memory-session .memory-back>span{font-size:21px}
+  .memory-game-stats{font-size:16px}.memory-footer-note{font-size:20px}.memory-pair-count{font-size:15px;padding:12px 16px}.memory-pair-count strong{font-size:23px}
+  .memory-head-actions .btn{font-size:15px;min-height:49px}.app-layout .memory-read-button{width:40px;height:40px;min-height:40px}.memory-read-button svg{width:20px;height:20px}
+  .auth-stage .auth-page{width:min(1240px,100%)}.auth-stage .auth-aside{padding:44px}.auth-stage .auth-main{padding:44px 48px}
+  .auth-stage .auth-aside h1{font-size:51px;max-width:420px}.auth-stage .auth-card{max-width:500px}.auth-stage .auth-card>h2{font-size:38px}
+  .auth-stage .auth-card>p{font-size:17px}.auth-stage .auth-card input:not([type=checkbox]):not([type=radio]){font-size:18px;min-height:55px}
+  .auth-stage .auth-card .field label{font-size:16px}.auth-stage .auth-submit{font-size:18px;min-height:55px}
+  .app-layout.sidebar-collapsed [data-form=trail-create] .trail-actions{left:140px}.app-layout:not(.sidebar-collapsed) [data-form=trail-create] .trail-actions{left:316px}
+}
+@media(min-width:2600px){
+  .app-layout .specimen-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .app-layout .collection-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .app-layout .games-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:30px}
+  .app-layout .class-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .app-layout .home-columns .class-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .interaction-dialog{width:min(850px,calc(100vw - 80px));padding:36px;font-size:19px}.interaction-dialog h2{font-size:34px}
+  .memory-reader-copy{font-size:29px}.memory-reader-hint{font-size:16px}
+}
+@media(hover:none) and (min-width:1400px){
+  :focus-visible{outline:4px solid #365c46;outline-offset:6px}
+  .app-layout .btn,.app-layout .nav-button,.app-layout .icon-button{min-height:52px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+}

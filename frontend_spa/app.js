@@ -713,6 +713,14 @@
         }
       }
       else if (action === 'again-game') { state.view='game-config'; state.result=null; render(); }
+      else if (action === 'memory-read') {
+        const question=state.gameSession?.questions[state.gameIndex];
+        const card=question?.cards?.find(item=>item.id===buttonEl.dataset.card);
+        if(card&&(state.memorySelected.includes(card.id)||state.memoryMatched.has(card.id))){
+          const dialog=window.LiseInteractions.dialog('Leia e conecte',`<span class="eyebrow">Carta da memória</span><p class="memory-reader-copy">${esc(card.text)}</p><p class="memory-reader-hint">Feche para continuar sua partida.</p>`,buttonEl);
+          dialog.classList.add('memory-reading-dialog');
+        }
+      }
       else if (action === 'memory-card') await memoryCard(buttonEl.dataset.card);
       else if (action === 'memory-complete') await completeMemory();
       else if (action === 'add-to-collection') { /* submitted by the form handler */ }
