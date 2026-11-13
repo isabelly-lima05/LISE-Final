@@ -16,7 +16,7 @@
   justify-self:center;
   border-radius:50%;
 }
-.sidebar-collapsed .side-account{--account-size:52px;width:var(--account-size);height:var(--account-size)}
+.sidebar-collapsed .side-account{--account-size:52px;width:var(--account-size);height:var(--account-size);}
 .side-account .account-mini-avatar{
   display:grid;
   place-items:center;
@@ -49,9 +49,9 @@
   object-position:center;
   margin:0;
 }
-.side-drawer .side-account{justify-self:center}
-.account-identity .avatar-edit{display:grid;place-items:center;line-height:0;padding:0;width:96px;height:96px;min-width:96px;min-height:96px}
-.account-identity .avatar-edit>.avatar-art{display:grid;place-items:center;width:100%;height:100%;margin:0;vertical-align:initial}
+.side-drawer .side-account{justify-self:center;}
+.account-identity .avatar-edit{display:grid;place-items:center;line-height:0;padding:0;width:96px;height:96px;min-width:96px;min-height:96px;}
+.account-identity .avatar-edit>.avatar-art{display:grid;place-items:center;width:100%;height:100%;margin:0;vertical-align:initial;}
 /* Card de acesso delimitado: a composição não ocupa mais toda a janela. */
 .auth-stage{
   box-sizing:border-box;
@@ -60,7 +60,7 @@
   display:grid;
   place-items:center;
   padding:48px 32px;
-  background:radial-gradient(ellipse at 12% 16%,#e2ead780,transparent 52%),radial-gradient(ellipse at 88% 82%,#e9eddd80,transparent 50%),#f6f7ef;
+  background:radial-gradient(ellipse at 12% 16%,var(--paint-bg-e2ead780),transparent 52%),radial-gradient(ellipse at 88% 82%,var(--paint-bg-e9eddd80),transparent 50%),var(--paint-bg-f6f7ef);
 }
 .auth-stage .auth-page{
   display:grid;
@@ -68,10 +68,10 @@
   width:min(1040px,100%);
   min-height:0;
   margin:0;
-  border:1px solid #d5dfcb;
+  border:1px solid var(--paint-line-d5dfcb);
   border-radius:28px;
   overflow:hidden;
-  background:#fffefb;
+  background:var(--paint-bg-fffefb);
   box-shadow:0 24px 70px #35483a12,0 3px 14px #35483a06;
 }
 .auth-stage .auth-aside{
@@ -82,21 +82,21 @@
   align-self:stretch;
   background-position:center;
 }
-.auth-stage .auth-aside::after{inset:12px;border-radius:19px}
-.auth-stage .auth-brand{font-size:27px;padding:8px 12px;gap:8px}
-.auth-stage .auth-brand svg{width:25px;height:25px}
-.auth-stage .auth-aside>div{padding:10px 0}
-.auth-stage .auth-aside h1{font-size:clamp(32px,3.2vw,45px);line-height:1.16;margin:18px 0;max-width:360px;text-wrap:balance}
-.auth-stage .auth-aside p{font-size:14px;line-height:1.75;margin:0}
-.auth-stage .auth-aside .eyebrow{font-size:10px;letter-spacing:.12em;padding:7px 9px}
-.auth-stage .auth-caption{font-size:11px;padding:7px 9px}
+.auth-stage .auth-aside::after{inset:12px;border-radius:19px;}
+.auth-stage .auth-brand{font-size:27px;padding:8px 12px;gap:8px;}
+.auth-stage .auth-brand svg{width:25px;height:25px;}
+.auth-stage .auth-aside>div{padding:10px 0;}
+.auth-stage .auth-aside h1{font-size:clamp(32px,3.2vw,45px);line-height:1.16;margin:18px 0;max-width:360px;text-wrap:balance;}
+.auth-stage .auth-aside p{font-size:14px;line-height:1.75;margin:0;}
+.auth-stage .auth-aside .eyebrow{font-size:10px;letter-spacing:.12em;padding:7px 9px;}
+.auth-stage .auth-caption{font-size:11px;padding:7px 9px;}
 .auth-stage .auth-main{
   order:1;
   display:grid;
   place-items:center;
   padding:34px 38px;
   min-width:0;
-  background:linear-gradient(145deg,#fffefb,#fafbf5);
+  background:linear-gradient(145deg,var(--paint-bg-fffefb),var(--paint-bg-fafbf5));
 }
 .auth-stage .auth-card,.auth-stage .auth-register .auth-card{
   width:100%;
@@ -107,43 +107,43 @@
   box-shadow:none;
   background:transparent;
 }
-.auth-stage .auth-form-emblem{width:40px;height:40px;border-radius:12px;margin-bottom:18px}
-.auth-stage .auth-form-emblem svg{width:21px;height:21px}
-.auth-stage .auth-card>h2{font-size:31px;line-height:1.2;margin:10px 0 12px;max-width:390px;text-wrap:balance}
-.auth-stage .auth-card>p{font-size:14px;margin-bottom:22px}
-.auth-stage .auth-card>.eyebrow{font-size:10px;letter-spacing:.12em}
-.auth-stage .auth-card form{margin-top:22px}
-.auth-stage .auth-card .field{margin:16px 0;gap:8px}
-.auth-stage .auth-card input:not([type=checkbox]):not([type=radio]){min-height:48px;padding:12px 14px}
-.auth-stage .auth-submit{min-height:48px;margin-top:16px}
-.auth-stage .auth-switch{margin:20px 0!important}
-.auth-stage .auth-card .legal-links{padding-top:18px;gap:12px 16px;font-size:11px}
-.auth-stage .auth-register .auth-form-emblem{margin-bottom:12px}
-.auth-stage .auth-register .auth-card>p{margin-bottom:16px}
-.auth-stage .auth-register .auth-card form{margin-top:16px}
+.auth-stage .auth-form-emblem{width:40px;height:40px;border-radius:12px;margin-bottom:18px;}
+.auth-stage .auth-form-emblem svg{width:21px;height:21px;}
+.auth-stage .auth-card>h2{font-size:31px;line-height:1.2;margin:10px 0 12px;max-width:390px;text-wrap:balance;}
+.auth-stage .auth-card>p{font-size:14px;margin-bottom:22px;}
+.auth-stage .auth-card>.eyebrow{font-size:10px;letter-spacing:.12em;}
+.auth-stage .auth-card form{margin-top:22px;}
+.auth-stage .auth-card .field{margin:16px 0;gap:8px;}
+.auth-stage .auth-card input:not([type=checkbox]):not([type=radio]){min-height:48px;padding:12px 14px;}
+.auth-stage .auth-submit{min-height:48px;margin-top:16px;}
+.auth-stage .auth-switch{margin:20px 0!important;}
+.auth-stage .auth-card .legal-links{padding-top:18px;gap:12px 16px;font-size:11px;}
+.auth-stage .auth-register .auth-form-emblem{margin-bottom:12px;}
+.auth-stage .auth-register .auth-card>p{margin-bottom:16px;}
+.auth-stage .auth-register .auth-card form{margin-top:16px;}
 @media(max-width:760px){
-  .auth-stage{padding:28px 20px;place-items:center}
-  .auth-stage .auth-page{grid-template-columns:1fr;max-width:520px;border-radius:24px}
-  .auth-stage .auth-aside{padding:24px 28px;gap:16px;min-height:0;background-position:center 55%}
-  .auth-stage .auth-aside>div{padding:0}
-  .auth-stage .auth-aside .eyebrow{display:none}
-  .auth-stage .auth-aside h1{font-size:28px;max-width:none;margin:8px 0 0}
-  .auth-stage .auth-aside h1 br{display:none}
-  .auth-stage .auth-aside p,.auth-stage .auth-caption{display:none}
-  .auth-stage .auth-brand{font-size:24px;padding:6px 10px}
-  .auth-stage .auth-main{padding:28px}
-  .auth-stage .auth-card>h2{font-size:29px}
-  .auth-stage .auth-form-emblem{display:none}
+  .auth-stage{padding:28px 20px;place-items:center;}
+  .auth-stage .auth-page{grid-template-columns:1fr;max-width:520px;border-radius:24px;}
+  .auth-stage .auth-aside{padding:24px 28px;gap:16px;min-height:0;background-position:center 55%;}
+  .auth-stage .auth-aside>div{padding:0;}
+  .auth-stage .auth-aside .eyebrow{display:none;}
+  .auth-stage .auth-aside h1{font-size:28px;max-width:none;margin:8px 0 0;}
+  .auth-stage .auth-aside h1 br{display:none;}
+  .auth-stage .auth-aside p,.auth-stage .auth-caption{display:none;}
+  .auth-stage .auth-brand{font-size:24px;padding:6px 10px;}
+  .auth-stage .auth-main{padding:28px;}
+  .auth-stage .auth-card>h2{font-size:29px;}
+  .auth-stage .auth-form-emblem{display:none;}
 }
 @media(max-width:420px){
-  .auth-stage{padding:20px 14px}
-  .auth-stage .auth-page{border-radius:21px}
-  .auth-stage .auth-aside{padding:22px;gap:12px}
-  .auth-stage .auth-aside h1{font-size:26px}
-  .auth-stage .auth-main{padding:25px 22px}
-  .auth-stage .auth-card>h2{font-size:27px}
-  .auth-stage .auth-options{gap:4px 10px}
-  .auth-stage .auth-options .btn-text{font-size:12px}
-  .auth-stage .auth-card .legal-links{gap:10px 12px;justify-content:flex-start}
+  .auth-stage{padding:20px 14px;}
+  .auth-stage .auth-page{border-radius:21px;}
+  .auth-stage .auth-aside{padding:22px;gap:12px;}
+  .auth-stage .auth-aside h1{font-size:26px;}
+  .auth-stage .auth-main{padding:25px 22px;}
+  .auth-stage .auth-card>h2{font-size:27px;}
+  .auth-stage .auth-options{gap:4px 10px;}
+  .auth-stage .auth-options .btn-text{font-size:12px;}
+  .auth-stage .auth-card .legal-links{gap:10px 12px;justify-content:flex-start;}
 }
-@media(prefers-reduced-motion:reduce){.auth-stage .auth-page,.auth-stage .auth-aside,.auth-stage .auth-card{animation:none}}
+@media(prefers-reduced-motion:reduce){.auth-stage .auth-page,.auth-stage .auth-aside,.auth-stage .auth-card{animation:none;}}

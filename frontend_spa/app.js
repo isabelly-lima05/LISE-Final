@@ -149,9 +149,9 @@
 
   function renderAuth() {
     state.view='auth';
-    const previous=app.querySelector('.auth-page');const wasRegister=previous?.classList.contains('auth-register');
+    const previous=app.querySelector('.access-panel');const wasRegister=previous?.classList.contains('access-register');
     app.innerHTML=screens.auth();window.LiseInteractions?.mount(app,'auth');
-    if(previous&&wasRegister!==(state.authMode==='register'))app.querySelector('.auth-page').classList.add('auth-changing');
+    if(previous&&wasRegister!==(state.authMode==='register'))app.querySelector('.access-panel')?.classList.add('access-changing');
     if(state.authMode==='register') {
       const submit=app.querySelector('[type=submit]'); submit.disabled=!state.legalVersion;
       ensureLegalVersion().then(()=>{if(submit.isConnected)submit.disabled=false;}).catch(error=>toast(error.message,'error'));
