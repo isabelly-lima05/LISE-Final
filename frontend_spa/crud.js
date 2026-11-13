@@ -43,7 +43,7 @@
    root.querySelectorAll('.class-card').forEach(card=>{const id=card.querySelector('[data-action=open-class]')?.dataset.id;const item=s.dashboard.classes.find(c=>String(c.id)===id);if(item)add(card,teacher?classControls(item):control('Sair da turma','class-leave',`data-id="${item.id}"`));});
   }
   if(s.view==='class'&&s.classDetail){const d=s.classDetail;
-   if(teacher){add(heading,classControls(d)+`<div class="card-actions crud-actions">${control('Gerar novo código','class-code',`data-id="${d.id}"`)}${control(d.enrollment_open?'Fechar matrículas':'Abrir matrículas','class-enrollment',`data-id="${d.id}"`)}</div>`);
+   if(teacher){add(heading,`<details class="management-menu"><summary>Gerenciar turma <i data-lucide="chevron-down" aria-hidden="true"></i></summary><div class="management-options">${classControls(d)}<div class="card-actions crud-actions">${control('Gerar novo código','class-code',`data-id="${d.id}"`)}${control(d.enrollment_open?'Fechar matrículas':'Abrir matrículas','class-enrollment',`data-id="${d.id}"`)}</div></div></details>`);
     root.querySelectorAll('[data-student-row]').forEach(row=>add(row.querySelector('td:last-child'),control('Remover da turma','student-remove',`data-class="${d.id}" data-user="${row.dataset.studentRow}"`,'btn-text danger-text')));
     if(s.classTab==='trails'){
      add(root.querySelector('#class-tabpanel'),control('Atribuições arquivadas','assignments-archived',`data-class="${d.id}"`));
@@ -57,7 +57,7 @@
   }
   if(['dashboard','trails'].includes(s.view)&&teacher)for(const t of s.dashboard?.trails||[]){const menu=root.querySelector(`[data-action=delete-trail][data-id="${t.id}"]`)?.parentElement;if(menu)add(menu,control('Editar trilha','trail-edit',`data-id="${t.id}"`,'btn-text')+control(t.archived_at?'Restaurar':'Arquivar','trail-archive',`data-id="${t.id}" data-revision="${t.revision}" data-restore="${!!t.archived_at}"`,'btn-text'));}
   if(s.view==='trail-create'&&s.editingTrail){const t=s.editingTrail;root.querySelector('.page-title').textContent='Editar trilha';const f=root.querySelector('[data-form=trail-create]');f.elements.name.value=t.name;f.elements.description.value=t.description;f.elements.area.value=t.area;f.querySelector('[data-step-panel="2"]').innerHTML='<h2>Confirmar alterações</h2><p>As atribuições existentes serão mantidas. Palavras com prática ou avaliação vinculada não podem ser removidas.</p>';f.querySelector('[data-step="2"]').innerHTML='<b>3</b>Confirmar';f.querySelector('[type=submit]').textContent='Salvar alterações';}
-  if(s.view==='collections')for(const c of s.collections){const card=root.querySelector(`[data-action=open-collection][data-id="${c.id}"]`)?.closest('article');if(card)add(card,control('Renomear','collection-edit',`data-id="${c.id}"`,'btn-text'));}
+  if(s.view==='collections')for(const c of s.collections){const card=root.querySelector(`[data-action=open-collection][data-id="${c.id}"]`)?.closest('article');if(card)add(card.querySelector('.collection-menu-content')||card,control('Renomear','collection-edit',`data-id="${c.id}"`,'btn-text'));}
   if(s.view==='collection')add(heading,control('Renomear coleção','collection-edit',`data-id="${s.collection.id}"`));
   if(s.view==='explore')add(heading,control('Meus termos','terms'));
   if(s.view==='account'&&s.accountTab==='seguranca'){const panel=document.createElement('section');panel.className='card crud-sessions';panel.textContent='Consultando acessos…';root.querySelector('#account-tabpanel').append(panel);accountSessions(panel);}

@@ -534,6 +534,7 @@
     if(state.view==='trail-create'&&['navigate','go-dashboard','open-account','open-profile','logout','open-legal'].includes(buttonEl.dataset.action)){if(window.LiseInteractions&&!await window.LiseInteractions.mayLeave(buttonEl))return;window.LiseInteractions?.clearDirty();}
     if(!['open-menu','close-menu'].includes(buttonEl.dataset.action))navigation.close();
     const action = buttonEl.dataset.action;
+    if(action==='back-to-top'){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main-content')?.focus({preventScroll:true});return;}
     if(buttonEl.dataset.pending==='1' || buttonEl.disabled) return;
     buttonEl.dataset.pending='1'; buttonEl.setAttribute('aria-busy','true');
     try {
