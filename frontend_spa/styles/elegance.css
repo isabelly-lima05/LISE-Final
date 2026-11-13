@@ -33,7 +33,7 @@ body::before{opacity:.012}
 .app-layout h2{font-weight:500;letter-spacing:-.02em}
 .app-layout .btn{border-radius:10px;font-size:12px;min-height:44px;padding:11px 17px;box-shadow:none;font-weight:600;gap:8px}
 .app-layout .btn svg{width:16px;height:16px}
-.app-layout .btn-primary{background:#365c46;border-color:#365c46;color:#6e6d6b}
+.app-layout .btn-primary{background:#365c46;border-color:#365c46;color:#ffffff}
 .app-layout .btn-primary:hover{background:#294d38;border-color:#294d38;box-shadow:0 4px 12px #25463013}
 .app-layout .btn-soft{background:#eef3e7;border-color:#e1e8d8;color:#45643d}
 .app-layout .btn-soft:hover{background:#e6eedb;border-color:#d6e2c9}

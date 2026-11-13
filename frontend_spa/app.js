@@ -113,7 +113,7 @@
         localStorage.removeItem('lise_access_token');forgetSession();renderAuth();
       }
       if (data.code === 'terms_required' && state.user) await loadAccount('privacidade');
-      throw new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.');
+      const error=new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.'); error.status=response.status; error.code=data.code; throw error;
     }
     return data;
   }
@@ -645,8 +645,17 @@
         item.favorite=!item.favorite; render();
       }
       else if (action === 'delete-trail') {
-        if (!await window.LiseInteractions.confirm('Excluir trilha','A exclusão é definitiva. Trilhas atribuídas a turmas são protegidas pelo servidor.',buttonEl))return;
-        await api(`/trails/${buttonEl.dataset.id}`,{method:'DELETE'}); await loadDashboard(); toast('Trilha apagada.');
+        if (!await window.LiseInteractions.confirm('Excluir trilha','Excluir esta trilha definitivamente? Os termos do catálogo continuam disponíveis. Se houver vínculo com turmas, você poderá arquivá-la.',buttonEl))return;
+        const id=buttonEl.dataset.id;
+        try { await api(`/trails/${id}`,{method:'DELETE'}); }
+        catch(error) {
+          if(error.status!==409)throw error;
+          if(!await window.LiseInteractions.confirm('Esta trilha tem vínculos',error.message+' Você deseja arquivar a trilha para retirá-la da lista ativa e preservar o histórico?',buttonEl))return;
+          const detail=await api(`/trails/${id}`);
+          await api(`/trails/${id}/archive`,{method:'POST',body:{revision:detail.trail.revision}});
+          state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));render();toast('Trilha arquivada. O histórico foi preservado.');return;
+        }
+        state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));render();toast('Trilha apagada.');
       }
       else if (action === 'delete-collection') {
         if (!await window.LiseInteractions.confirm('Excluir coleção','Esta ação exclui o caderno pessoal. Os termos do catálogo serão preservados.',buttonEl))return;
