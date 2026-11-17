@@ -392,7 +392,7 @@ def dashboard():
     uid = g.user.id_usuario
     if g.user.perfil == 'Professor':
         classes = g.db.scalars(select(Turma).where(Turma.fk_professor == uid,Turma.arquivada_em.is_not(None) if request.args.get('archived')=='1' else Turma.arquivada_em.is_(None)).order_by(Turma.criado_em.desc())).all()
-        trails = g.db.scalars(select(Trilha).where(Trilha.fk_professor == uid,Trilha.arquivada_em.is_not(None) if request.args.get('archived')=='1' else Trilha.arquivada_em.is_(None)).order_by(Trilha.criado_em.desc())).all()
+        trails = g.db.scalars(select(Trilha).where(Trilha.fk_professor == uid,Trilha.excluida_em.is_(None),Trilha.arquivada_em.is_not(None) if request.args.get('archived')=='1' else Trilha.arquivada_em.is_(None)).order_by(Trilha.criado_em.desc())).all()
         return jsonify(role='Professor', classes=_class_list_data(classes), trails=trail_views(g.db, trails),
                        areas=[dict(id=a.id_area, name=a.nome) for a in g.db.scalars(select(Area).order_by(Area.nome))])
     classes = g.db.scalars(select(Turma).join(Matricula, Matricula.fk_turma == Turma.id_turma)
@@ -715,7 +715,7 @@ def _bulk_assignment_learning_status(uid, links, include_attempts=False):
                 passed=bool(first_passed), window_state=window_state,
                 opens_at=opens_at.isoformat() if opens_at else None,
                 closes_at=closes_at.isoformat() if closes_at else None,
-                can_start=total > 0 and percent == 100 and window_state == 'aberto',
+                can_start=total > 0 and percent == 100 and window_state == 'aberto' and not any(s.janela_versao==assessment.janela_versao for s in sessions),
             )
         detail = dict(**progress, status=status, status_label=labels[status],
                       due_date=due.isoformat() if due else None,
@@ -856,6 +856,9 @@ def _class_metrics(class_row, daily_day):
     accumulate(standalone.where(Partida.respondida_em >= day_start, Partida.respondida_em < day_end), points_today)
     accumulate(standalone.where(Partida.respondida_em >= week_start_utc,
                                 Partida.respondida_em < week_end_utc), points_week)
+    points_week={ident:0 for ident in student_ids}
+    accumulate(select(Partida.fk_usuario,func.sum(Partida.xp)).where(Partida.fk_usuario.in_(student_ids),Partida.respondida.is_(True),Partida.respondida_em>=week_start_utc,Partida.respondida_em<week_end_utc).group_by(Partida.fk_usuario),points_week)
+    links=[link for link in links if link.desvinculada_em is None and not g.db.get(Trilha,link.fk_trilha).arquivada_em]
     by_id = {u.id_usuario: u for u, _m in students}
     total_rank = [dict(user_id=str(ident), name=by_id[ident].nome, xp=points_all[ident], is_me=ident == uid)
                   for ident in student_ids]
@@ -894,7 +897,7 @@ def class_detail(class_id):
         daily_day = datetime.strptime(day_text, '%Y-%m-%d').date() if day_text else utcnow().astimezone(TZ).date()
     except ValueError:
         _fail(400, 'Data inválida.')
-    links = g.db.scalars(select(TurmaTrilha).where(TurmaTrilha.fk_turma == row.id_turma,TurmaTrilha.desvinculada_em.is_(None))).all()
+    links = g.db.scalars(select(TurmaTrilha).join(Trilha,Trilha.id_trilha==TurmaTrilha.fk_trilha).where(TurmaTrilha.fk_turma == row.id_turma,TurmaTrilha.desvinculada_em.is_(None),Trilha.arquivada_em.is_(None),Trilha.excluida_em.is_(None))).all()
     trail_ids = list({link.fk_trilha for link in links})
     trail_rows = g.db.scalars(select(Trilha).where(Trilha.id_trilha.in_(trail_ids))).all() if trail_ids else []
     trail_data = {item['id']: item for item in trail_views(g.db, trail_rows)}
@@ -928,8 +931,16 @@ def class_detail(class_id):
     if g.user.perfil == 'Professor':
         result['students'] = metrics['students']
         result['assessment_results'] = _assessment_results_for_class(row.id_turma)
-        own_trails = g.db.scalars(select(Trilha).where(Trilha.fk_professor == g.user.id_usuario,Trilha.arquivada_em.is_(None)).order_by(Trilha.nome)).all()
+        own_trails = g.db.scalars(select(Trilha).where(Trilha.fk_professor == g.user.id_usuario,Trilha.excluida_em.is_(None),Trilha.arquivada_em.is_(None)).order_by(Trilha.nome)).all()
         result['available_trails'] = trail_views(g.db, own_trails)
+    from .assessment_reports import class_assessments
+    result['assessments']=class_assessments(row,g.user)
+    if g.user.perfil=='Aluno':
+        for item in result['assessments']:
+            learning=learning_by_link.get(item['assignment_id'],{})
+            if item['can_start'] and (not learning.get('total') or learning.get('percent')!=100):
+                item['can_start']=False
+                item['blocked_reason']='Pratique todos os termos da trilha antes de iniciar.'
     return jsonify(**result)
 
 
@@ -947,7 +958,7 @@ def class_student_detail(class_id, student_id):
     day = utcnow().astimezone(TZ).date()
     metrics = _class_metrics(class_row, day)
     summary = next((item for item in metrics['students'] if item['user_id'] == str(user.id_usuario)), None)
-    links = g.db.scalars(select(TurmaTrilha).where(TurmaTrilha.fk_turma == class_row.id_turma)
+    links = g.db.scalars(select(TurmaTrilha).join(Trilha,Trilha.id_trilha==TurmaTrilha.fk_trilha).where(TurmaTrilha.fk_turma == class_row.id_turma,TurmaTrilha.desvinculada_em.is_(None),Trilha.arquivada_em.is_(None),Trilha.excluida_em.is_(None))
                          .order_by(TurmaTrilha.id)).all()
     trail_ids = list({link.fk_trilha for link in links})
     trails_by_id = {trail.id_trilha: trail for trail in g.db.scalars(
@@ -992,7 +1003,7 @@ def _trail_data(trail, uid, assignment_id=None):
 @_require_user
 def trail_detail(trail_id):
     trail = g.db.get(Trilha, trail_id)
-    if not trail:
+    if not trail or trail.excluida_em:
         _fail(404, 'Trilha não encontrada.')
     link_id = request.args.get('assignment_id')
     if g.user.perfil == 'Professor':
@@ -1032,7 +1043,7 @@ def catalog_terms():
     area = request.args.get('area', '').strip()
     search = request.args.get('search', '').strip()[:150]
     if area:
-        query = query.join(Area).where(Area.nome == area)
+        query = query.outerjoin(Area).where(or_(Area.nome==area,Termo.fk_area.is_(None))) if area=='Geral' else query.join(Area).where(Area.nome == area)
     if search:
         query = query.where(or_(
             func.lower(Termo.palavra_completa).contains(search.lower(), autoescape=True),
@@ -1040,7 +1051,7 @@ def catalog_terms():
         ))
     if request.args.get('mine') == '1':
         query = query.where(Termo.criado_por == g.user.id_usuario)
-    rows = g.db.scalars(query.order_by(Termo.palavra_completa).limit(100)).all()
+    rows = g.db.scalars(query.order_by(Termo.palavra_completa)).all()
     return jsonify(terms=_term_data(rows, g.user.id_usuario), count=len(rows))
 
 
@@ -1123,10 +1134,18 @@ def trail_add_terms(trail_id):
 @_teacher
 def trail_delete(trail_id):
     trail = owned_trail(g.db, g.user.id_usuario, trail_id)
-    # Removing an assigned trail would cascade through student history.
-    if g.db.scalar(select(TurmaTrilha.id).where(TurmaTrilha.fk_trilha == trail_id).limit(1)):
-        _fail(409, 'Esta trilha está atribuída a turmas. Remova os vínculos sem histórico antes de excluir.')
-    g.db.delete(trail)
+    from .assessment_reports import close_session
+    now=utcnow()
+    trail.excluida_em=now
+    trail.arquivada_em=now
+    trail.revisao+=1
+    links=g.db.scalars(select(TurmaTrilha).where(TurmaTrilha.fk_trilha==trail_id)).all()
+    for link in links:
+        link.desvinculada_em=now
+        link.revisao+=1
+    assessment_ids=select(Avaliacao.id).where(Avaliacao.fk_turma_trilha.in_([link.id for link in links]))
+    for session in g.db.scalars(select(AvaliacaoSessao).where(AvaliacaoSessao.fk_avaliacao.in_(assessment_ids),AvaliacaoSessao.finalizada_em.is_(None)).with_for_update()):
+        close_session(session,'trilha_excluida')
     g.db.commit()
     return jsonify(message='Trilha apagada.')
 
@@ -1229,6 +1248,13 @@ def assessment_start(class_id, assignment_id):
     if not assessment:
         _fail(404, 'O professor ainda não configurou a avaliação desta trilha.')
     _require_assessment_window(assessment)
+    g.db.refresh(assessment,with_for_update=True)
+    previous=g.db.scalar(select(AvaliacaoSessao).where(AvaliacaoSessao.fk_avaliacao==assessment.id,AvaliacaoSessao.fk_usuario==g.user.id_usuario,AvaliacaoSessao.janela_versao==assessment.janela_versao).with_for_update())
+    if previous:
+        if not previous.finalizada_em:
+            from .assessment_reports import close_session
+            close_session(previous,'saida');g.db.commit()
+        _fail(409,'Sua tentativa desta avaliação já foi iniciada ou encerrada. Consulte seu resultado na turma.')
     learning = progress_detail(g.db, g.user.id_usuario, link)
     if not learning['total'] or learning['percent'] != 100:
         _fail(409, 'Pratique cada termo da trilha pelo menos uma vez antes de iniciar a avaliação.')
@@ -1289,6 +1315,7 @@ def assessment_answer(session_id):
     if not any(option['id'] == choice for option in question.opcoes):
         _fail(400, 'A alternativa não pertence a esta questão.')
     question.respondida = True
+    question.resposta_dada = choice
     question.correta = secrets.compare_digest(choice, question.resposta_esperada)
     session.corretas += int(question.correta)
     g.db.flush()
@@ -1322,10 +1349,37 @@ def assessment_finish(session_id):
         session.pontuacao = round(100 * session.corretas / session.total) if session.total else 0
         session.aprovada = session.pontuacao >= session.nota_minima
         session.finalizada_em = utcnow()
+        session.encerramento_motivo='concluida'
     g.db.commit()
-    return jsonify(session_id=session.id, score=session.pontuacao, correct=session.corretas,
-                   total=session.total, pass_score=session.nota_minima, passed=session.aprovada,
-                   finished_at=aware(session.finalizada_em).isoformat())
+    from .assessment_reports import session_result
+    return jsonify(**session_result(session))
+
+
+@api.post('/assessment/sessions/<session_id>/abandon')
+@_student
+def assessment_abandon(session_id):
+    from .assessment_reports import close_session,session_result
+    session=g.db.scalar(select(AvaliacaoSessao).where(AvaliacaoSessao.id==session_id,AvaliacaoSessao.fk_usuario==g.user.id_usuario).with_for_update())
+    if not session:_fail(404,'Avaliação não encontrada.')
+    reason='prazo' if _body().get('reason')=='prazo' else 'saida'
+    close_session(session,reason)
+    g.db.commit()
+    return jsonify(**session_result(session))
+
+
+@api.get('/assessment/sessions/<session_id>')
+@_require_user
+def assessment_review(session_id):
+    from .assessment_reports import session_result
+    session=g.db.get(AvaliacaoSessao,session_id)
+    if not session:_fail(404,'Avaliação não encontrada.')
+    assessment=g.db.get(Avaliacao,session.fk_avaliacao)
+    link=assignment(g.db,g.user,assessment.fk_turma_trilha)
+    teacher=g.db.get(Turma,link.fk_turma).fk_professor==g.user.id_usuario
+    if not teacher and session.fk_usuario!=g.user.id_usuario:_fail(404,'Avaliação não encontrada.')
+    if not session.finalizada_em:_fail(409,'O resultado fica disponível após o encerramento.')
+    return jsonify(**session_result(session))
+
 
 
 @api.post('/terms')

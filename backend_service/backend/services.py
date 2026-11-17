@@ -40,7 +40,7 @@ def owned_class(db, uid, turma_id):
 
 
 def owned_trail(db, uid, trail_id):
-    row = db.scalar(select(Trilha).where(Trilha.id_trilha == trail_id, Trilha.fk_professor == uid))
+    row = db.scalar(select(Trilha).where(Trilha.id_trilha == trail_id, Trilha.fk_professor == uid, Trilha.excluida_em.is_(None)))
     if not row:
         abort(404)
     return row
@@ -91,7 +91,7 @@ def trail_views(db, trails):
 def class_views(db, classes):
     ids = [c.id_turma for c in classes]
     students = db.scalars(select(Matricula).where(Matricula.fk_turma.in_(ids))).all() if ids else []
-    trails = db.scalars(select(TurmaTrilha).where(TurmaTrilha.fk_turma.in_(ids),TurmaTrilha.desvinculada_em.is_(None))).all() if ids else []
+    trails = db.scalars(select(TurmaTrilha).join(Trilha,Trilha.id_trilha==TurmaTrilha.fk_trilha).where(TurmaTrilha.fk_turma.in_(ids),TurmaTrilha.desvinculada_em.is_(None),Trilha.arquivada_em.is_(None),Trilha.excluida_em.is_(None))).all() if ids else []
     return [dict(id=c.id_turma, name=c.nome, code=c.codigo, revision=c.revisao, archived_at=aware(c.arquivada_em).isoformat() if c.arquivada_em else None, enrollment_open=c.matriculas_abertas, created_at=aware(c.criado_em).astimezone(TZ).strftime('%d/%m/%Y') if c.criado_em else '', alunos=[m.fk_usuario for m in students if m.fk_turma == c.id_turma], trilhas=[t.fk_trilha for t in trails if t.fk_turma == c.id_turma]) for c in classes]
 
 

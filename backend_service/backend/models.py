@@ -106,6 +106,7 @@ class Trilha(Base):
     descricao = Column(Text, nullable=False, default='')
     area = Column(String(100), nullable=False, default='')
     arquivada_em = Column(DateTime(timezone=True))
+    excluida_em = Column(DateTime(timezone=True))
     revisao = Column(Integer, nullable=False, default=1)
 
 
@@ -303,6 +304,7 @@ class AvaliacaoSessao(Base):
     aprovada = Column(Boolean, nullable=False, default=False)
     criada_em = Column(DateTime(timezone=True), nullable=False, default=utcnow)
     finalizada_em = Column(DateTime(timezone=True))
+    encerramento_motivo = Column(String(32))
     janela_versao = Column(Integer, nullable=False, default=1)
     __table_args__ = (Index('ix_lise_assessment_user_date', 'fk_usuario', 'finalizada_em'),)
 
@@ -317,6 +319,7 @@ class AvaliacaoQuestao(Base):
     prompt = Column(Text, nullable=False)
     opcoes = Column(JSON, nullable=False)
     resposta_esperada = Column(String(80), nullable=False)
+    resposta_dada = Column(String(80))
     respondida = Column(Boolean, nullable=False, default=False)
     correta = Column(Boolean)
     __table_args__ = (UniqueConstraint('fk_sessao', 'posicao'),)

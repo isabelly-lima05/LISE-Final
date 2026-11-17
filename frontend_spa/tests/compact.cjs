@@ -7,8 +7,8 @@ window.HTMLElement.prototype.getBoundingClientRect=function(){return this.matche
 const ctx={window,document,MutationObserver:window.MutationObserver,getComputedStyle:()=>({columnGap:'20px'}),clearTimeout,setTimeout};
 vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../compact.js'),'utf8'),ctx);
 const cards=n=>Array.from({length:n},(_,i)=>`<article data-term="${i+1}">Palavra ${i+1}</article>`).join('');
-const markup=n=>`<main class="content"><div class="specimen-grid">${cards(n)}</div></main>`;
-const state={view:'explore',user:{email:'teste@example.invalid'}};
+const markup=n=>`<main class="content"><div class="class-grid">${cards(n)}</div></main>`;
+const state={view:'classes',user:{email:'teste@example.invalid'}};
 root.innerHTML=markup(15);window.LiseCompact.mount(root,state);
 const visible=()=>[...root.querySelectorAll('article')].filter(n=>!n.hidden).map(n=>Number(n.dataset.term));
 assert.deepEqual(visible(),[1,2,3,4,5,6]);let seen=[...visible()];
@@ -20,5 +20,6 @@ root.innerHTML=`<main class="content"><div class="section-heading">Início</div>
 window.LiseCompact.mount(root,{view:'dashboard',user:state.user});const nav=root.querySelector('.compact-section-nav');assert.equal(nav.children.length,3);
 nav.children[1].click();assert.ok(root.querySelector('.discovery-sheet').hidden);assert.equal(root.querySelectorAll('.dashboard-section')[0].hidden,false);assert.equal(root.querySelectorAll('.dashboard-section')[1].hidden,true);
 assert.equal(nav.children[1].getAttribute('aria-pressed'),'true');
+root.innerHTML='<main class="content"><div class="specimen-grid">'+cards(35)+'</div><div class="games-grid">'+cards(8)+'</div></main>';window.LiseCompact.mount(root,{view:'explore',user:state.user});assert.equal(root.querySelectorAll('[hidden]').length,0);assert.equal(root.querySelector('.compact-pagination'),null,'Explorador and games are not paginated');
 const p=window.LiseCompact.plan(30,200,300,250,1);assert.equal(p.size,1);assert.equal(p.pages,30,'Small screens keep every record accessible');
 console.log('PASS: pagination, all records reachable, state restoration, filters, dashboard sections and tiny-screen fallback.');

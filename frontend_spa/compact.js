@@ -36,7 +36,7 @@
   anchor.after(nav);el._lisePager=nav;show();
  }
  function lists(root,s){
-  const selected='.specimen-grid,.class-grid,.trail-list,.collection-grid,.games-grid,.word-path,.student-table tbody,.collection-notes,.planning-panel ul,.crud-sessions,.request-history';
+  const selected='.class-grid,.trail-list,.collection-grid,.word-path,.student-table tbody,.collection-notes,.planning-panel ul,.crud-sessions,.request-history';
   root.querySelectorAll(selected).forEach((el,i)=>paginate(el,keyFor(s)+':list:'+i));
  }
  function deck(main,s){
@@ -59,7 +59,7 @@
   groups=groups.map(([name,nodes])=>[name,nodes.filter(Boolean)]).filter(([,nodes])=>nodes.length);
   if(groups.length<2||host.querySelector(':scope > .compact-section-nav'))return;
   const nav=document.createElement('nav');nav.className='compact-section-nav';nav.setAttribute('aria-label','Seções desta página');
-  const buttons=groups.map(([title])=>{const b=document.createElement('button');b.type='button';b.textContent=title;nav.append(b);return b;});
+  const buttons=groups.map(([title])=>{const b=document.createElement('button');b.type='button';b.textContent=title;if(title==='Excluir conta')b.classList.add('compact-danger');nav.append(b);return b;});
   const key=keyFor(s)+':deck';let selected=sections.get(key)||0;if(selected>=groups.length)selected=0;
   function choose(index){selected=index;sections.set(key,index);groups.forEach(([,nodes],i)=>{nodes.forEach(n=>n.hidden=i!==index);buttons[i].setAttribute('aria-pressed',String(i===index));});
    main.querySelectorAll('.teacher-columns,.home-columns').forEach(wrap=>{wrap.classList.add('compact-columns');wrap.hidden=elements(wrap).every(n=>n.hidden);});

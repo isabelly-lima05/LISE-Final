@@ -40,8 +40,8 @@
     }
 
     function exploreResults() {
-      const terms=C.filteredTerms(state),shown=terms;
-      return `<p class="result-count" id="explore-count" role="status">${terms.length} ${terms.length===1?'palavra encontrada':'palavras encontradas'}${terms.length>shown.length?` · mostrando ${shown.length}`:''}</p>${shown.length?`<div class="specimen-grid">${shown.map(t=>termCard(t,{study:state.exploreMode==='study',revealed:state.studyRevealed.has(t.id)})).join('')}</div>`:empty('Nenhuma palavra por aqui','Experimente outra busca ou remova um dos filtros.')}`;
+      const terms=C.filteredTerms(state),shown=terms.slice(0,state.exploreShown);
+      return `<p class="result-count" id="explore-count" role="status">${terms.length} ${terms.length===1?'palavra encontrada':'palavras encontradas'}${terms.length>shown.length?` · mostrando ${shown.length}`:''}</p>${shown.length?`<div class="specimen-grid">${shown.map(t=>termCard(t,{study:state.exploreMode==='study',revealed:state.studyRevealed.has(t.id)})).join('')}</div>`:empty('Nenhuma palavra por aqui','Experimente outra busca ou remova um dos filtros.')}${terms.length>shown.length?`<div class="load-more">${button('Carregar mais 15 palavras','explore-more','btn-soft')}</div>`:''}`;
     }
 
     function explore() {
@@ -82,7 +82,7 @@
     function classDetail() {
       const d=state.classDetail;if(!d)return ctx.loadingCard();
       const teacher=d.role==='Professor';
-      const tabs=teacher?[['overview','Visão geral'],['students','Alunos'],['trails','Trilhas'],['results','Avaliações']]:[['trails','Trilhas'],['rank','Ranking semanal']];
+      const tabs=teacher?[['overview','Visão geral'],['students','Alunos'],['trails','Trilhas'],['results','Avaliações']]:[['trails','Trilhas'],['assessments','Avaliações'],['rank','Ranking semanal']];
       let body='';
       if(state.classTab==='overview'){
         const noAccess=(d.students||[]).filter(s=>!s.last_access).length,noDeadline=(d.trails||[]).filter(t=>!t.due_date&&!t.assessment?.closes_at).length;
@@ -90,7 +90,8 @@
       }
       if(state.classTab==='students')body=students(d.students||[]);
       if(state.classTab==='trails')body=ctx.renderClassTrails(d,teacher);
-      if(state.classTab==='results')body=ctx.renderAssessmentResults(d.assessment_results||[]);
+      if(state.classTab==='results')body=window.LiseAssessmentUI?.teacher(d)||ctx.renderAssessmentResults(d.assessment_results||[]);
+      if(state.classTab==='assessments')body=window.LiseAssessmentUI?.student(d)||'';
       if(state.classTab==='rank')body=ctx.renderRank(d);
       return `${breadcrumb([{label:'Turmas',action:'navigate',attrs:'data-view="classes"'},{label:d.name}])}${heading(teacher?'Caderno da turma':'Sua turma',d.name,teacher?'Organize a prática e acompanhe os caminhos de aprendizagem.':'Explore as trilhas e pratique com sua turma.',teacher?codeChip(d.code):'')}
         <div class="tabs" role="tablist" aria-label="Seções da turma">${tabs.map(([id,label])=>`<button id="class-tab-${id}" class="tab ${state.classTab===id?'active':''}" role="tab" aria-selected="${state.classTab===id}" aria-controls="class-tabpanel" tabindex="${state.classTab===id?0:-1}" type="button" data-action="class-tab" data-tab="${id}">${label}</button>`).join('')}</div><section id="class-tabpanel" role="tabpanel" aria-labelledby="class-tab-${state.classTab}">${body}</section>`;
@@ -165,7 +166,7 @@
           ${register?`<fieldset class="access-roles"><legend>Como você quer usar a LISE?</legend><label><input type="radio" name="role" value="ALUNO" checked><span>${icon('sprout')}<strong>Sou aluno</strong></span></label><label><input type="radio" name="role" value="PROFESSOR"><span>${icon('notebook-pen')}<strong>Sou professor</strong></span></label></fieldset><label class="access-consent"><input type="checkbox" name="accept_terms" required><span>Li e aceito os <a href="/#termos-de-uso" target="_blank" rel="noopener">Termos de Uso</a> e a <a href="/#privacidade" target="_blank" rel="noopener">Política de Privacidade</a>.</span></label>`:!recovery?`<div class="access-options"><label><input name="remember" type="checkbox"><span>Manter conectado</span></label><button type="button" data-action="auth-mode" data-mode="recovery">Esqueci minha senha</button></div>`:''}
           <button class="access-submit" type="submit"><span>${register?'Criar minha conta':recovery?'Enviar instruções':'Entrar na minha conta'}</span>${icon('arrow-right')}</button>
         </form><p class="access-switch">${register||recovery?'Já tem uma conta?':'Ainda não tem conta?'} <button type="button" data-action="auth-mode" data-mode="${register||recovery?'login':'register'}">${register||recovery?'Entrar':'Criar conta'}</button></p></div>
-        <footer class="access-footer">${legalLinks()}<span>Aprender começa por uma raiz.</span></footer></div>
+        <footer class="access-footer"><a class="access-landing-link" href="${esc(window.LISE_CONFIG?.LANDING_PAGE_URL||'/sobre.html')}">${icon('arrow-up-right')} Conheça a LISE</a>${legalLinks()}<span>Aprender começa por uma raiz.</span></footer></div>
         <aside class="access-story" aria-label="Sobre a LISE"><div class="access-story-top"><span class="access-index">CADERNO DE DESCOBERTAS</span><span class="access-story-mark" aria-hidden="true">${icon('asterisk')}</span></div><div class="access-story-art" aria-hidden="true"><span class="access-orbit access-orbit-one"></span><span class="access-orbit access-orbit-two"></span><span class="access-art-core">${icon('dna')}</span><span class="access-art-label">Tudo começa com uma conexão.</span></div><div class="access-story-copy"><span class="access-story-line" aria-hidden="true"></span><p>Cada palavra.<br><em>Uma descoberta.</em></p><span>Observe as partes. Conecte os sentidos.<br>Descubra a Biologia.</span></div><div class="access-story-bottom"><span class="access-story-steps"><span>01 · Observar</span><span>02 · Conectar</span><span>03 · Descobrir</span></span>${icon('leaf')}</div></aside>
       </section></main>`;
     }

@@ -22,12 +22,12 @@
   }
 
   function renderTermSelection() {
-    const areas = state.trailAreas || [];
+    const areas = [...(state.trailAreas || [])];if(!areas.some(a=>a.name==='Geral'))areas.push({name:'Geral'});
     state.termTab='existing';
     return `<div class="tabs" role="group" aria-label="Origem dos termos"><button class="tab active" type="button" data-action="term-tab" data-tab="existing">Termos existentes</button><button class="tab" type="button" data-action="term-tab" data-tab="mine">Meus termos</button><button class="tab" type="button" data-action="term-tab" data-tab="create">Criar novo termo</button></div>
       <div data-role="inline-term" hidden><div class="field"><label for="inline-name">Nome do termo</label><input id="inline-name" data-role="inline-name" maxlength="200"></div><div class="field"><label for="inline-definition">Definição</label><textarea id="inline-definition" data-role="inline-definition" maxlength="5000"></textarea></div><button class="btn btn-soft" type="button" data-action="inline-create">Criar e selecionar</button><p class="small muted">O termo será salvo em Meus termos e selecionado aqui. Salve a trilha ou coleção para concluir a inclusão.</p></div>
-      <div class="toolbar"><input type="search" data-role="term-search" placeholder="Pesquise um termo ou definição para começar" autocomplete="off"><select data-role="term-area"><option value="">Todas as áreas</option>${areas.map(a=>`<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('')}</select><span class="muted small"><b data-role="selected-count">${state.selectedTermIds.size}</b> selecionado(s)</span></div>
-      <div class="checklist" data-role="term-results">${state.catalogTerms.length ? renderTermChoices() : '<p class="muted small term-search-hint">Digite no campo de pesquisa para exibir termos.</p>'}</div>
+      <div class="toolbar"><input type="search" data-role="term-search" placeholder="Filtre por nome ou definição (opcional)" autocomplete="off"><select data-role="term-area"><option value="">Todas as áreas</option>${areas.map(a=>`<option value="${esc(a.name)}">${esc(a.name)}</option>`).join('')}</select><span class="muted small"><b data-role="selected-count">${state.selectedTermIds.size}</b> selecionado(s)</span></div>
+      <div class="checklist" data-role="term-results">${state.catalogTerms.length ? renderTermChoices() : '<p class="muted small term-search-hint">Carregando os termos disponíveis…</p>'}</div>
       <aside class="selection-tray"><h3>Termos selecionados</h3><p class="small muted">Arraste para ordenar ou use as setas.</p><div class="selected-term-list" data-role="selected-term-list" aria-live="polite">${renderSelectedTerms()}</div></aside>
       <div class="term-selection-inputs" data-role="selected-term-inputs">${[...state.selectedTermIds].map(id=>`<input type="hidden" name="term_ids" value="${id}">`).join('')}</div>`;
   }
@@ -95,19 +95,17 @@
     const q=session.questions[state.assessmentIndex];
     if (!q) return loadingCard('Preparando avaliação…');
     const progress=Math.round(state.assessmentIndex/session.total*100);
-    return `<section class="card question"> <div class="eyebrow">BioQuiz final · Questão ${state.assessmentIndex+1} de ${session.total}</div><p class="muted small">Prazo final: ${fmtBrazilDate(session.closes_at)} (horário de Brasília)</p><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div><h1 class="question-title">${esc(q.prompt)}</h1>${state.assessmentAnswer?`<div class="feedback ${state.assessmentAnswer.correct?'good':'bad'}"><strong>${state.assessmentAnswer.correct?'Resposta correta':'Resposta incorreta'}</strong><p>Resposta: ${esc(state.assessmentAnswer.answer)}</p></div><div class="card-actions">${button(state.assessmentIndex+1<session.total?'Próxima questão':'Finalizar BioQuiz','assessment-next','btn-primary')}</div>`:`<form data-form="assessment-answer"><div class="option-list">${q.options.map(o=>`<label class="option"><input type="radio" name="answer" value="${esc(o.id)}" required><span>${esc(o.label)}</span></label>`).join('')}</div><button class="btn btn-primary" type="submit">Responder</button></form>`}</section>`;
+    return `<section class="card question"><button class="btn btn-danger btn-small" type="button" data-action="retry-exam-close" data-exam-retry hidden>Registrar encerramento</button> <div class="eyebrow">Avaliação da turma · Questão ${state.assessmentIndex+1} de ${session.total}</div><p class="exam-exit-warning">Sair desta avaliação ou ocultar a aba encerra sua tentativa. Questões sem resposta contam como erro.</p><p class="muted small">Prazo final: ${fmtBrazilDate(session.closes_at)} (horário de Brasília)</p><div class="progress-track"><div class="progress-fill" style="width:${progress}%"></div></div><h1 class="question-title">${esc(q.prompt)}</h1>${state.assessmentAnswer?`<div class="feedback ${state.assessmentAnswer.correct?'good':'bad'}"><strong>${state.assessmentAnswer.correct?'Resposta correta':'Resposta incorreta'}</strong><p>Resposta: ${esc(state.assessmentAnswer.answer)}</p></div><div class="card-actions">${button(state.assessmentIndex+1<session.total?'Próxima questão':'Finalizar BioQuiz','assessment-next','btn-primary')}</div>`:`<form data-form="assessment-answer"><div class="option-list">${q.options.map(o=>`<label class="option"><input type="radio" name="answer" value="${esc(o.id)}" required><span>${esc(o.label)}</span></label>`).join('')}</div><button class="btn btn-primary" type="submit">Responder</button></form>`}</section>`;
   }
 
   function renderAssessmentResult() {
-    const r=state.assessmentResult;
-    if (!r) return loadingCard();
-    return `<section class="card question" style="text-align:center"><div class="eyebrow">Avaliação concluída</div><h1 class="page-title">${r.score}%</h1><p>Você acertou ${r.correct} de ${r.total} questões. Nota mínima: ${r.pass_score}%.</p><p class="chip ${r.passed?'gold':''}">${r.passed?'Avaliação aprovada':'Tente novamente depois de revisar a trilha'}</p><div class="card-actions" style="justify-content:center">${button('Voltar à turma','open-class','btn-primary',`data-id="${state.classId}"`)}</div></section>`;
+    return window.LiseAssessmentUI?.result(state.assessmentResult,state.classId)||loadingCard();
   }
 
   function renderRank(d) {
     const rows = d.weekly_leaderboard || [];
     const formatDay = value => value ? new Intl.DateTimeFormat('pt-BR', {day:'2-digit',month:'2-digit',timeZone:'UTC'}).format(new Date(`${value}T12:00:00Z`)) : '';
-    return `<div class="card"><div class="card-top"><div><h2>Ranking semanal de XP</h2><p class="muted small">XP conquistado em atividades realizadas nesta turma entre segunda-feira e domingo.</p></div><span class="chip gold">${formatDay(d.week_start)} a ${formatDay(d.week_end)}</span></div>${rankTable(rows)}</div>`;
+    return `<div class="card"><div class="card-top"><div><h2>Ranking semanal de XP</h2><p class="muted small">XP conquistado na semana pelos alunos matriculados, incluindo treinos e atividades de outras áreas. Todos os alunos aparecem, mesmo com zero XP.</p></div><span class="chip gold">${formatDay(d.week_start)} a ${formatDay(d.week_end)}</span></div>${rankTable(rows)}</div>`;
   }
 
   function rankTable(rows) {
@@ -131,7 +129,7 @@
       const quizLabel=!t.assessment?.opens_at ? 'BioQuiz sem horário' :
         t.assessment.window_state==='agendado' ? `Abre ${fmtBrazilDate(t.assessment.opens_at)}` :
         t.assessment.window_state==='encerrado' ? 'Prazo do BioQuiz encerrado' :
-        t.assessment.can_start ? (t.assessment.passed?'Refazer BioQuiz':'Fazer BioQuiz') : 'Pratique todos os termos primeiro';
+        t.assessment.can_start ? 'Fazer BioQuiz' : t.assessment.attempts ? 'Resultado na aba Avaliações' : 'Pratique todos os termos primeiro';
       const assessmentAction=teacher ? button(t.assessment?.opens_at?(new Date(t.assessment.opens_at)<=new Date()?'Ver avaliação':'Editar agendamento'):'Configurar avaliação','configure-assessment','btn-soft btn-small',`data-assignment="${t.assignment_id}" data-trail="${t.id}" data-name="${esc(t.name)}" data-class="${d.id}"`) : t.assessment ? button(quizLabel,'start-assessment',t.assessment.can_start?'btn-primary btn-small':'btn-plain btn-small',`data-assignment="${t.assignment_id}" data-class="${d.id}" ${t.assessment.can_start?'':'disabled'}`) : '<span class="muted small">Aguardando avaliação do professor</span>';
       const quizSchedule=t.assessment ? (t.assessment.opens_at && t.assessment.closes_at ?
         `<p class="muted small">BioQuiz: ${fmtBrazilDate(t.assessment.opens_at)} até ${fmtBrazilDate(t.assessment.closes_at)}. O prazo da trilha termina junto.</p>` :

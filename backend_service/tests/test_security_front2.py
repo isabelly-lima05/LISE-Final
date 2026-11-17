@@ -39,15 +39,16 @@ def test_cross_teacher_ids_cannot_read_change_or_delete_owned_objects(app):
         assert c.open('/api/v1'+path,method=method,json=body,headers=headers).status_code==404,(method,path)
 
 
-def test_assigned_trail_deletion_and_history_unassignment_are_blocked(app):
-    c=app.test_client();h=login(c,'professor@lise.demo')
-    assert c.delete('/api/v1/trails/1',headers=h).status_code==409
-    student=login(c)
+def test_assigned_trail_deletion_hides_assignments_but_preserves_history(app):
+    c=app.test_client();h=login(c,'professor@lise.demo');student=login(c)
     started=c.post('/api/v1/games/sessions',headers=student,json={'game':'decifrador','source_type':'trail','source_id':1})
     assert started.status_code==201
     assert c.delete('/api/v1/classes/1/trails/1',headers=h).status_code==409
+    assert c.delete('/api/v1/trails/1',headers=h).status_code==200
+    assert c.get('/api/v1/classes/1',headers=student).json['trails']==[]
+    assert c.get('/api/v1/classes/1',headers=h).json['trails']==[]
     with Session(app.extensions['engine']) as db:
-        assert db.get(TurmaTrilha,1)
+        assert db.get(TurmaTrilha,1).desvinculada_em
         assert db.get(GameSession,started.json['session_id']).fk_turma_trilha==1
 
 

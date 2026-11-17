@@ -18,7 +18,7 @@
     catalogSearchSequence: 0, termSelectionTarget: null, existingTermIds: new Set(),
     sidebarCollapsed: localStorage.getItem('lise_sidebar_collapsed') !== 'false',
     account: null, legal: null, legalVersion: '', accountTab:'perfil', collectionsLoaded:false,
-    exploreMode:'browse', exploreType:'', exploreShown:12, studyRevealed:new Set(),
+    exploreMode:'browse', exploreType:'', exploreShown:15, studyRevealed:new Set(),
     discovery:null, discoveryError:'', studentSort:'name', studentSortDir:'asc', showRanking:false
   };
 
@@ -75,10 +75,11 @@
 
   // Share only concurrent reads, never persist personalized API responses.
   const pendingReads = new Map();
+  let mutationGeneration=0;
   function api(path, options = {}) {
     const method = options.method || 'GET';
     if (method !== 'GET') {
-      pendingReads.clear();
+      mutationGeneration++;pendingReads.clear();
       return requestApi(path, options);
     }
     const key = `${state.token}:${path}`;
@@ -97,6 +98,8 @@
     if (options.body !== undefined) headers['Content-Type'] = 'application/json';
     if(options.idempotencyKey)headers['Idempotency-Key']=options.idempotencyKey;
     if (state.token) headers.Authorization = `Bearer ${state.token}`;
+    const closePending=(options.method||'GET')!=='GET'?window.LiseInteractions?.notify('Processando sua ação…','info',{duration:60000}):null;
+    try {
     let response;
     try {
       response = await fetch(`${API_BASE}/api/v1${path}`, {
@@ -107,7 +110,7 @@
       throw new Error('Não consegui acessar o backend. Confira o endereço da API e a configuração de CORS.');
     }
     const data = await response.json().catch(() => ({}));
-    if((options.method||'GET')==='GET'&&!path.startsWith('/legal/')&&requestToken!==state.token)throw new Error('Sua sessão mudou. Abra a página novamente.');
+    if(!path.startsWith('/legal/')&&!path.startsWith('/auth/')&&requestToken!==state.token)throw new Error('Sua sessão mudou. Abra a página novamente.');
     if (!response.ok) {
       if (response.status === 401 && state.token) {
         localStorage.removeItem('lise_access_token');forgetSession();renderAuth();
@@ -115,7 +118,9 @@
       if (data.code === 'terms_required' && state.user) await loadAccount('privacidade');
       const error=new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.'); error.status=response.status; error.code=data.code; throw error;
     }
+    if((options.method||'GET')!=='GET'&&data.message)window.LiseInteractions?.notify(data.message,'success');
     return data;
+    } finally {if(typeof closePending==='function')closePending();}
   }
 
   const celebrated = new Set();
@@ -309,11 +314,12 @@
     history.replaceState(history.state,'',location.pathname+lastRouteHash);return false;
   }
   window.addEventListener('popstate', async event => {
+    if(window.LiseExamGuard?.active()){await window.LiseExamGuard.leave();return;}
     if(!await mayRestoreRoute())return;
     if(legalRoute()){await loadLegal(legalRoute(),false);lastRouteHash=location.hash;return;}
     if(!state.token||!state.user){renderAuth();return;}
     restoringRoute=true;
-    try {const saved=routeSnapshots.get(event.state?.id);if(saved){Object.assign(state,structuredClone(saved));state.loading=false;state.loadError='';render();}else await restoreLocation();}
+    try {const saved=routeSnapshots.get(event.state?.id);if(saved&&!['class','trails','trail','assessment','assessment-result','dashboard'].includes(saved.view)){Object.assign(state,structuredClone(saved));state.loading=false;state.loadError='';render();}else await restoreLocation();}
     catch(error){toast(error.message,'error');}finally{restoringRoute=false;lastRouteHash=location.hash;}
   });
   window.addEventListener('hashchange',async()=>{
@@ -418,7 +424,7 @@
   async function startAssessment(classId, assignmentId) {
     state.classId=Number(classId); state.assessmentAnswer=null; state.assessmentResult=null;
     const d=await api(`/classes/${classId}/trails/${assignmentId}/assessment/sessions`,{method:'POST',body:{}});
-    state.assessmentSession=d; state.assessmentIndex=0; state.view='assessment'; render();
+    state.assessmentSession=d; state.assessmentIndex=0; state.view='assessment';render();window.LiseExamGuard?.start({id:d.session_id,classId:Number(classId),closesAt:d.closes_at});
   }
   async function loadSources() {
     state.sources = await api('/sources');
@@ -536,10 +542,12 @@
     if(state.view==='trail-create'&&['navigate','go-dashboard','open-account','open-profile','logout','open-legal'].includes(buttonEl.dataset.action)){if(window.LiseInteractions&&!await window.LiseInteractions.mayLeave(buttonEl))return;window.LiseInteractions?.clearDirty();}
     if(!['open-menu','close-menu'].includes(buttonEl.dataset.action))navigation.close();
     const action = buttonEl.dataset.action;
+    if(state.view==='assessment'&&!['assessment-next','open-menu','close-menu','toggle-sidebar','back-to-top','skip-content','retry-exam-close'].includes(action)){await window.LiseExamGuard?.leave();return;}
     if(action==='back-to-top'){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main-content')?.focus({preventScroll:true});return;}
     if(buttonEl.dataset.pending==='1' || buttonEl.disabled) return;
     buttonEl.dataset.pending='1'; buttonEl.setAttribute('aria-busy','true');
     try {
+      if(action==='retry-exam-close'){await window.LiseExamGuard?.leave();return;}
       if(action==='skip-content')app.querySelector('main')?.focus();
       else if(action==='skip-auth')document.getElementById('auth-title')?.focus();
       else if (action === 'open-menu') navigation.open(buttonEl);
@@ -552,10 +560,10 @@
       else if(action==='close-dialog')buttonEl.closest('dialog')?.close();
       else if(action==='account-tab')await loadAccount(buttonEl.dataset.tab);
       else if(action==='sort-students'){state.studentSortDir=state.studentSort===buttonEl.dataset.sort&&state.studentSortDir==='asc'?'desc':'asc';state.studentSort=buttonEl.dataset.sort;render();}
-      else if(action==='explore-mode'){state.exploreMode=buttonEl.dataset.mode;state.exploreShown=12;render();}
-      else if(action==='explore-more'){state.exploreShown+=12;refreshExplore();document.querySelectorAll('.specimen-card')[state.exploreShown-12]?.querySelector('button')?.focus();}
+      else if(action==='explore-mode'){state.exploreMode=buttonEl.dataset.mode;state.exploreShown=15;render();}
+      else if(action==='explore-more'){state.exploreShown+=15;refreshExplore();document.querySelectorAll('.specimen-card')[state.exploreShown-15]?.querySelector('button')?.focus();}
       else if(action==='reveal-study'){state.studyRevealed.add(Number(buttonEl.dataset.id));refreshExplore();document.querySelector(`[data-term="${buttonEl.dataset.id}"] [data-action="open-term"]`)?.focus();}
-      else if(action==='explore-clear'){state.exploreSearch='';state.exploreMine=false;state.exploreArea='';state.exploreType='';state.exploreKind='terms';state.sort='asc';state.exploreShown=12;render();document.querySelector('#explore-search')?.focus();}
+      else if(action==='explore-clear'){state.exploreSearch='';state.exploreMine=false;state.exploreArea='';state.exploreType='';state.exploreKind='terms';state.sort='asc';state.exploreShown=15;render();document.querySelector('#explore-search')?.focus();}
       else if(action==='retry-discovery')await loadDashboard();
       else if (action === 'open-legal') await loadLegal(buttonEl.dataset.document);
       else if (action === 'legal-back') {
@@ -652,17 +660,10 @@
         item.favorite=!item.favorite; render();
       }
       else if (action === 'delete-trail') {
-        if (!await window.LiseInteractions.confirm('Excluir trilha','Excluir esta trilha definitivamente? Os termos do catálogo continuam disponíveis. Se houver vínculo com turmas, você poderá arquivá-la.',buttonEl))return;
+        if (!await window.LiseInteractions.confirm('Excluir trilha','Excluir esta trilha definitivamente? Os termos do catálogo continuam disponíveis. A trilha sairá de todas as turmas. O histórico de avaliações será preservado.',buttonEl))return;
         const id=buttonEl.dataset.id;
-        try { await api(`/trails/${id}`,{method:'DELETE'}); }
-        catch(error) {
-          if(error.status!==409)throw error;
-          if(!await window.LiseInteractions.confirm('Esta trilha tem vínculos',error.message+' Você deseja arquivar a trilha para retirá-la da lista ativa e preservar o histórico?',buttonEl))return;
-          const detail=await api(`/trails/${id}`);
-          await api(`/trails/${id}/archive`,{method:'POST',body:{revision:detail.trail.revision}});
-          state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));render();toast('Trilha arquivada. O histórico foi preservado.');return;
-        }
-        state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));render();toast('Trilha apagada.');
+        await api(`/trails/${id}`,{method:'DELETE'});
+        state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));render();toast('Trilha excluída de todas as turmas.');
       }
       else if (action === 'delete-collection') {
         if (!await window.LiseInteractions.confirm('Excluir coleção','Esta ação exclui o caderno pessoal. Os termos do catálogo serão preservados.',buttonEl))return;
@@ -679,6 +680,7 @@
         state.practiceSource={type:'favorites',name:'Seus favoritos'}; state.practiceGame=''; state.view='choose-game'; render();
       }
       else if (action === 'class-tab') { state.classTab=buttonEl.dataset.tab; render(); }
+      else if(action==='review-assessment'){state.assessmentResult=await api(`/assessment/sessions/${buttonEl.dataset.id}`);state.view='assessment-result';render();}
       else if (action === 'configure-assessment') configureAssessment(buttonEl);
       else if (action === 'start-assessment') await startAssessment(buttonEl.dataset.class,buttonEl.dataset.assignment);
       else if (action === 'unassign-trail') {
@@ -725,7 +727,7 @@
           state.assessmentIndex++; state.assessmentAnswer=null; render();
         } else {
           state.assessmentResult=await api(`/assessment/sessions/${state.assessmentSession.session_id}/finish`,{method:'POST',body:{}});
-          state.view='assessment-result'; render();
+          window.LiseExamGuard?.clear();state.view='assessment-result'; render();
         }
       }
       else if (action === 'again-game') { state.view='game-config'; state.result=null; render(); }
@@ -842,6 +844,7 @@
     if (!form) return;
     event.preventDefault();
     const kind=form.dataset.form, data=new FormData(form);
+    if(kind==='assessment-answer'&&window.LiseExamGuard?.closing()){toast('A tentativa já foi bloqueada. Registre o encerramento.','error');return;}
     form.dataset.operationKey ||= crypto.randomUUID();
     if(kind==='explore-filter'){updateExploreFromForm(form);return;}
     if(form.dataset.pending==='1') return;
@@ -850,7 +853,7 @@
       if (kind === 'login') {
         const d=await api('/auth/login',{method:'POST',body:{email:data.get('email'),password:data.get('password'),remember:data.has('remember')}});
         routeSnapshots.clear(); history.replaceState({},'',location.pathname);
-        state.token=d.access_token; state.user=d.user;state.explore=null;state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();localStorage.setItem('lise_access_token',state.token); await loadDashboard(); toast(`Olá, ${state.user.name.split(' ')[0]}!`);
+        state.token=d.access_token; state.user=d.user;state.explore=null;state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();localStorage.setItem('lise_access_token',state.token); if(await window.LiseExamGuard?.recover())return;await loadDashboard(); toast(`Olá, ${state.user.name.split(' ')[0]}!`);
       } else if (kind === 'register') {
         const version = await ensureLegalVersion();
         const d=await api('/auth/register',{method:'POST',body:{name:data.get('name'),email:data.get('email'),password:data.get('password'),role:data.get('role'),accept_terms:data.has('accept_terms'),legal_version:version}}); toast(d.message); state.authMode='login'; renderAuth();
@@ -927,6 +930,7 @@
     const target=event.target;
     if(target.name==='mode' && state.view==='game-config') { state.configMode=target.value; render(); }
     if (target.matches('[data-role="term-area"]')) searchCatalogTerms();
+    if(target.name==='area'&&target.closest('[data-form=trail-create]')){const filter=document.querySelector('[data-role="term-area"]');if(filter){filter.value=target.value;searchCatalogTerms();}}
     if (target.matches('[data-role="term-checkbox"]')) {
       const id=Number(target.value);
       if (target.checked) {
@@ -959,11 +963,6 @@
     clearTimeout(state.catalogSearchTimer);
     const sequence=++state.catalogSearchSequence;
     const query=search.value.trim();
-    if (!query && state.termTab !== 'mine') {
-      state.catalogTerms=[];
-      results.innerHTML='<p class="muted small term-search-hint">Digite no campo de pesquisa para exibir termos.</p>';
-      return;
-    }
     results.innerHTML='<div class="catalog-loading" role="status"><span class="skeleton skeleton-line"></span><p class="small muted">Pesquisando termos…</p></div>';
     state.catalogSearchTimer=setTimeout(async()=>{
       try {
@@ -977,7 +976,7 @@
           results.innerHTML=`<p class="muted small">${esc(error.message)}</p>`;
         }
       }
-    },250);
+    },query?180:0);
   }
 
   function updateSelectedCount() {
@@ -1039,6 +1038,7 @@
   function afterRender(focusBefore) {
     navigation.mount();
     window.LiseInteractions?.mount(app,state.view);window.LiseCrud?.mount(app);window.LiseCompact?.mount(app,state);
+    if(app.querySelector('.term-selection-form')&&!state.catalogTerms.length){const mainArea=app.querySelector('[data-form=trail-create] [name=area]'),filter=app.querySelector('[data-role="term-area"]');if(mainArea?.value&&filter)filter.value=mainArea.value;searchCatalogTerms();}
     if(state.view==='trail-create'&&state.trailDraft){const f=app.querySelector('[data-form=trail-create]');for(const [name,value] of state.trailDraft.values){const el=f?.elements.namedItem(name);if(el&&'value' in el&&el.type!=='checkbox')el.value=value;}f?.querySelector(`[data-step="${state.trailDraft.step}"]`)?.click();}
     let fieldIndex=0;
     for(const label of app.querySelectorAll('.field>label:not([for])')){
@@ -1070,7 +1070,7 @@
   function openDialog(dialog,trigger){if(!dialog)return;dialog._trigger=trigger;dialog.showModal();dialog.querySelector('button,input,select')?.focus();}
   function updateExploreFromForm(form){
     const data=new FormData(form);state.exploreSearch=data.get('search')||'';state.exploreArea=data.get('area')||'';state.exploreType=data.get('type')||'';
-    state.exploreMine=data.has('mine');state.exploreKind=data.has('favorite')?'favorites':'terms';state.sort=data.get('sort')||'asc';state.exploreShown=12;refreshExplore();
+    state.exploreMine=data.has('mine');state.exploreKind=data.has('favorite')?'favorites':'terms';state.sort=data.get('sort')||'asc';state.exploreShown=15;refreshExplore();
   }
   function refreshExplore(){
     const results=app.querySelector('#explore-results');if(!results)return;
@@ -1082,16 +1082,18 @@
     rememberRoute();restoringRoute=wasRestoring;
   }
   async function restoreLocation(){
+    if(state.view==='assessment'&&window.LiseExamGuard?.active()){await window.LiseExamGuard.leave();return;}
+    if(await window.LiseExamGuard?.recover())return;
     const [path,query='']=location.hash.slice(1).split('?'),[route,id,extra]=path.split('/'),params=new URLSearchParams(query);
     if(route==='profile') {history.replaceState(null,'',location.pathname+'#conta/perfil');lastRouteHash=location.hash;return loadAccount('perfil');}
     if(route==='conta')return loadAccount(id||'perfil');
     if(route==='explore'){
       state.exploreMode=params.get('mode')==='study'?'study':'browse';state.exploreSearch=params.get('search')||'';state.exploreArea=params.get('area')||'';state.exploreType=params.get('type')||'';
-      state.exploreMine=params.get('mine')==='1';state.exploreKind=params.get('favorite')==='1'?'favorites':'terms';state.sort=params.get('sort')==='desc'?'desc':'asc';state.exploreShown=12;
+      state.exploreMine=params.get('mine')==='1';state.exploreKind=params.get('favorite')==='1'?'favorites':'terms';state.sort=params.get('sort')==='desc'?'desc':'asc';state.exploreShown=15;
       return loadExplore(state.exploreKind);
     }
     if(['classes','collections','games','trails'].includes(route))return navigate(route);
-    if(route==='class'&&/^\d+$/.test(id)){await loadClass(id);const available=state.user.role==='Professor'?['overview','students','trails','results']:['trails','rank'];if(available.includes(params.get('tab'))){state.classTab=params.get('tab');render();}return;}
+    if(route==='class'&&/^\d+$/.test(id)){await loadClass(id);const available=state.user.role==='Professor'?['overview','students','trails','results']:['trails','assessments','rank'];if(available.includes(params.get('tab'))){state.classTab=params.get('tab');render();}return;}
     if(route==='collection'&&/^\d+$/.test(id))return loadCollection(id);
     if(route==='trail'&&/^\d+$/.test(id))return loadTrail(id,/^\d+$/.test(extra)?extra:undefined);
     if(route==='detail'&&/^\d+$/.test(extra)){if(id==='term')return openTerm(extra,'explore');if(id==='radical')return openRadical(extra,'explore');}
@@ -1111,6 +1113,8 @@
     reload:async()=>{const view=state.view,tab=state.classTab;if(view==='class'){await loadClass(state.classId);state.classTab=tab;render();}else if(view==='account')await loadAccount();else if(view==='collections')await loadCollections();else if(view==='collection')await loadCollection(state.collection.id);else if(view==='explore')await loadExplore();else if(view==='trail')await loadTrail(state.collection.id,state.collection.assignment_id);else{state.dashboard=await api('/dashboard'+(state.showArchived?'?archived=1':''));state.view=view;render();}}
   });
 
+  window.LiseLiveClass?.configure({api,state:()=>state,generation:()=>mutationGeneration,render});
+  window.LiseExamGuard?.configure({api,getToken:()=>state.token,getUser:()=>state.user,base:API_BASE,onResult:result=>{if(result.class_id)state.classId=result.class_id;state.assessmentResult=result;state.view='assessment-result';render();}});
   app.addEventListener('click',event=>{const row=event.target.closest('[data-student-row]');if(row&&!event.target.closest('button,a,input,label,select'))loadStudentDetail(row.dataset.studentRow).catch(e=>toast(e.message,'error'));});
   app.addEventListener('keydown',event=>{const row=event.target.closest('[data-student-row]');if(row&&event.target===row&&['Enter',' '].includes(event.key)){event.preventDefault();loadStudentDetail(row.dataset.studentRow).catch(e=>toast(e.message,'error'));}});
 

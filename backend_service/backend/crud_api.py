@@ -242,7 +242,7 @@ def assignment_archive(class_id,ident):
 @_teacher
 def assignments_archived(class_id):
     owned_class(g.db,g.user.id_usuario,class_id)
-    rows=g.db.execute(select(TurmaTrilha,Trilha).join(Trilha).where(TurmaTrilha.fk_turma==class_id,TurmaTrilha.desvinculada_em.is_not(None))).all()
+    rows=g.db.execute(select(TurmaTrilha,Trilha).join(Trilha).where(TurmaTrilha.fk_turma==class_id,TurmaTrilha.desvinculada_em.is_not(None),Trilha.excluida_em.is_(None))).all()
     return jsonify(assignments=[dict(id=l.id,name=t.nome,revision=l.revisao) for l,t in rows])
 
 
