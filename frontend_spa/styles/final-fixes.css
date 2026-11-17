@@ -33,6 +33,21 @@
 @media(max-width:280px){.app-layout .memory-session .memory-grid{grid-template-columns:1fr}}
 .assessment-list{display:grid;gap:16px;grid-template-columns:repeat(2,minmax(0,1fr))}
 .assessment-analysis{margin:18px 0;padding:26px}
+.assessment-create{margin-bottom:26px;background:var(--surface-soft)}
+.assessment-create h3{margin:8px 0}
+.assessment-create>p{max-width:70ch}
+.assessment-create .card-actions{margin-top:14px}
+.assessment-summary{display:flex;align-items:center;gap:14px;list-style:none}
+.assessment-summary::-webkit-details-marker{display:none}
+.assessment-summary-copy{display:grid;gap:5px;min-width:0;flex:1}
+.assessment-summary-copy strong{overflow-wrap:anywhere}
+.assessment-summary-copy small{color:var(--muted);font-size:13px;font-weight:400}
+.assessment-summary>svg{width:20px;height:20px;flex:none;transition:transform .18s}
+.assessment-analysis[open]>.assessment-summary>svg{transform:rotate(180deg)}
+.assessment-analysis-content{margin-top:18px}
+.assessment-analysis-content>details{border-top:1px solid var(--line);padding:16px 0;margin-top:10px}
+.assessment-analysis-content>details>summary{cursor:pointer;font-weight:600;color:var(--ink)}
+.assessment-analysis-content .assessment-stats{margin-top:20px}
 .assessment-stats{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:20px 0}
 .assessment-stats>div{border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);padding:14px}
 .assessment-stats dt{font-size:12px;color:var(--muted)}
@@ -49,7 +64,7 @@
 .review-question{border-left:4px solid var(--red)}
 .review-question.review-correct{border-left-color:var(--green)}
 .exam-exit-warning{padding:12px 15px;background:var(--red-wash);color:var(--red);border:1px solid var(--line);border-radius:10px;font-size:13px;line-height:1.6}
-@media(max-width:760px){.assessment-list{grid-template-columns:1fr}.assessment-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-row{grid-template-columns:minmax(0,1fr) 30px}.chart-row>span{grid-column:1/-1}.assessment-analysis{padding:20px}}
+@media(max-width:760px){.assessment-list{grid-template-columns:1fr}.assessment-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.chart-row{grid-template-columns:minmax(0,1fr) 30px}.chart-row>span{grid-column:1/-1}.assessment-analysis{padding:20px}.assessment-summary{align-items:flex-start;gap:10px}.assessment-summary .chip{flex:none}.assessment-summary-copy small{line-height:1.5}}
 /* A solid forest green replaces the previous image as requested. */
 .access-story{background:#153e30!important;color:#f7f5e8}
 .access-story::before{border-color:#e7e9cb24}
@@ -65,3 +80,8 @@
 .access-art-label{color:#dce8c8;background:#224b37;border-color:#d4e2bd33}
 .access-landing-link{display:inline-flex;align-items:center;gap:6px;color:var(--access-brand);font-weight:600;font-size:12px;margin-bottom:3px}
 .access-landing-link svg{width:15px;height:15px}
+.app-layout .specimen-card .favorite-toggle{width:42px;min-height:42px;color:var(--green);transition:background .18s,border-color .18s,color .18s,transform .18s}
+.app-layout .specimen-card .favorite-toggle svg{width:21px;height:21px;stroke-width:2}
+.app-layout .specimen-card .favorite-toggle:hover,.app-layout .specimen-card .favorite-toggle.is-favorite{color:var(--red);border-color:var(--red);background:var(--red-wash)}
+.app-layout .specimen-card .favorite-toggle.is-favorite svg{fill:currentColor}
+.app-layout .specimen-card .favorite-toggle:focus-visible{outline:3px solid var(--red);outline-offset:3px}

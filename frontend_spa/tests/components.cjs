@@ -15,7 +15,11 @@ assert.doesNotMatch(C.anatomy(auto),/class="word-segment"/,'Não deve perder o a
 assert.match(C.anatomy(auto),/Prefixo/);
 assert.match(C.anatomy(personal),/ainda não disponível/);
 assert.doesNotMatch(C.termCard(personal),/<script>/);
-assert.match(C.termCard(bio),/Nº 012/);
+assert.doesNotMatch(C.termCard(bio),/catalog-id|Nº 012/);
+assert.doesNotMatch(C.termCard(auto),/catalog-id|Nº 020/);
+assert.match(C.termCard(bio),/data-lucide="heart"/);
+assert.match(C.termCard(bio),/favorite-toggle is-favorite[^"]*"[^>]*aria-pressed="true"/);
+assert.match(C.termCard(auto),/favorite-toggle"[^>]*aria-pressed="false"/);
 assert.doesNotMatch(C.termCard(bio,{study:true}),/Ciência da vida|anatomy-parts/);
 assert.match(C.termCard(bio,{study:true,revealed:true}),/Ciência da vida/);
 assert.match(C.anatomy({name:'ABC',radical_list:[{text:'abc',meaning:'Exemplo',type:'DESCONHECIDO'}]}),/data-tone="neutral"/);

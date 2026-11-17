@@ -12,7 +12,7 @@
     sources: null, practiceSource: null, practiceGame: '', trailCatalog: null, trailAreas: [],
     gameSession: null, gameFeedback: null, gameIndex: 0, decipherSlots: [], decipherSelectedLetter: null, memorySelected: [], memoryPairs: [],
     memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, result: null, busy: false,
-    studentDetail: null, assessmentTarget: null, assessmentSession: null, assessmentIndex: 0,
+    studentDetail: null, assessmentTarget: null, assessmentReturnTab: 'trails', assessmentSession: null, assessmentIndex: 0,
     assessmentAnswer: null, assessmentResult: null,
     profilePasswordEdit: false, selectedTermIds: new Set(), selectedTermInfo: new Map(), catalogTerms: [], catalogSearchTimer: null,
     catalogSearchSequence: 0, termSelectionTarget: null, existingTermIds: new Set(),
@@ -417,6 +417,7 @@
   }
   function configureAssessment(buttonEl) {
     const trail=(state.classDetail?.trails || []).find(item=>Number(item.assignment_id)===Number(buttonEl.dataset.assignment));
+    state.assessmentReturnTab=state.classTab||'trails';
     state.assessmentTarget={class_id:Number(buttonEl.dataset.class), assignment_id:Number(buttonEl.dataset.assignment),
       trail_name:buttonEl.dataset.name || trail?.name || 'Trilha', assessment:trail?.assessment || null};
     state.view='assessment-config'; render();
@@ -899,7 +900,7 @@
       } else if (kind === 'assessment-config') {
         const target=state.assessmentTarget;
         await api(`/classes/${target.class_id}/trails/${target.assignment_id}/assessment`,{method:'POST',body:{title:data.get('title'),question_count:Number(data.get('question_count')),pass_score:Number(data.get('pass_score')),content:data.get('content'),mode:data.get('mode'),opens_at:data.get('opens_at'),closes_at:data.get('closes_at'),revision:target.assessment?.revision}});
-        await loadClass(target.class_id); state.classTab='trails'; render(); toast('BioQuiz agendado.');
+        await loadClass(target.class_id); state.classTab=state.assessmentReturnTab||'trails'; render(); toast('BioQuiz agendado.');
       } else if (kind === 'teacher-term') {
         await api('/terms',{method:'POST',idempotencyKey:form.dataset.operationKey,body:{context:'trail',name:data.get('name'),definition:data.get('definition'),class_ids:data.getAll('class_ids').map(Number),trail_ids:data.getAll('trail_ids').map(Number)}}); await loadDashboard(); toast('Termo personalizado salvo.');
       } else if (kind === 'student-term') {
