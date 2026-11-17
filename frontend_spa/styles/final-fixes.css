@@ -85,3 +85,38 @@
 .app-layout .specimen-card .favorite-toggle:hover,.app-layout .specimen-card .favorite-toggle.is-favorite{color:var(--red);border-color:var(--red);background:var(--red-wash)}
 .app-layout .specimen-card .favorite-toggle.is-favorite svg{fill:currentColor}
 .app-layout .specimen-card .favorite-toggle:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+:root{--dur-fast:160ms;--dur-base:260ms;--dur-slow:460ms;--dur-flip:520ms;--ease-out:cubic-bezier(.16,1,.3,1);--ease-in-out:cubic-bezier(.76,0,.24,1);--fast:var(--dur-fast);--base:var(--dur-base);--reveal:620ms}
+html{scroll-behavior:smooth}
+.btn,.icon-button,.code-chip{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.app-layout .class-card,.app-layout .specimen-card,.app-layout .trail-card{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.app-layout .specimen-card .favorite-toggle{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.app-layout .back-to-top{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+#toast{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.app-dialog,.side-drawer{animation-duration:var(--dur-slow);animation-timing-function:var(--ease-out)}
+.app-dialog::backdrop,.side-drawer::backdrop{animation-duration:var(--dur-base);animation-timing-function:var(--ease-out)}
+.tabs+.card,.tabs+[role=tabpanel]{animation-duration:var(--dur-base);animation-timing-function:var(--ease-out)}
+.access-changing .access-story,.access-changing .access-form-side,.access-changing .access-content{animation-duration:620ms;animation-timing-function:var(--ease-in-out)}
+.auth-changing .auth-aside{animation-timing-function:var(--ease-in-out)}
+.auth-card{animation-duration:var(--reveal);animation-timing-function:var(--ease-out)}
+.access-submit{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.auth-submit::before{transition-timing-function:var(--ease-out)}
+.appearance-switch,.appearance-thumb,.access-submit svg{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+.boot-cell{animation-duration:3.2s;animation-timing-function:var(--ease-in-out)}
+.skeleton{animation-duration:1.6s;animation-timing-function:ease-in-out}
+.confetti i{animation-duration:1.5s;animation-timing-function:var(--ease-out)}
+.icon-button[aria-pressed=true],.selected-term-chip{animation-duration:260ms;animation-timing-function:var(--ease-out)}
+.memory-card-inner,.app-layout .memory-session .memory-card-inner{transition-duration:var(--dur-flip);transition-timing-function:var(--ease-in-out)}
+.memory-card.matched{animation-duration:500ms;animation-timing-function:var(--ease-out)}
+.memory-card.mismatch{animation-duration:440ms;animation-timing-function:var(--ease-out)}
+.memory-xp{animation-duration:760ms;animation-timing-function:var(--ease-out)}
+.study-revealed .anatomy-parts>*,.study-revealed .specimen-definition{animation-duration:360ms;animation-timing-function:var(--ease-out)}
+.study-revealed .anatomy-parts>:nth-child(2){animation-delay:80ms}
+.study-revealed .anatomy-parts>:nth-child(3){animation-delay:160ms}
+.assessment-summary>svg{transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}
+@keyframes cell-breathe{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.055) rotate(6deg)}}
+@keyframes ui-dialog-in{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes ui-pop{0%{transform:scale(.94);opacity:.85}58%{transform:scale(1.04);opacity:1}100%{transform:scale(1)}}
+@keyframes ui-match{0%,100%{transform:scale(1)}45%{transform:scale(1.045)}72%{transform:scale(.99)}}
+@keyframes ui-shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-3px)}60%{transform:translateX(2px)}82%{transform:translateX(-1px)}}
+@keyframes ui-float{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-28px)}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}}
