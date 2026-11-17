@@ -30,15 +30,13 @@
 
   function termCard(term, {study=false, revealed=false, extra='', numbered=false, status=''}={}) {
     const isHidden = study && !revealed;
-    const favButton = `<button class="favorite-toggle${term.favorite?' is-favorite':''}" type="button" data-action="toggle-favorite" data-type="term" data-id="${esc(term.id)}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}" title="${term.favorite?'Salvo nos favoritos':'Adicionar aos favoritos'}">${icon('heart')}<span>${term.favorite?'Favorito':'Favoritar'}</span></button>`;
-    const titleMarkup = numbered && !isHidden
-      ? `<h3 class="sr-only">${esc(term.name)}</h3>${anatomy(term,{meanings:false})}`
-      : `<h3 class="word-name">${esc(term.name)}</h3>`;
-    return `<article class="specimen-card ${numbered?'path-card':''} ${study&&revealed?'study-revealed':''}" data-term="${esc(term.id)}"><div class="specimen-meta"><div class="specimen-tags"><span class="specimen-area">${esc(term.area || 'Biologia')}</span>${term.created_by_me?'<span class="specimen-origin">Seu termo</span>':''}</div>${favButton}</div>
-      <div class="specimen-title">${titleMarkup}</div>
-      ${isHidden?'<p class="study-prompt">O que esta palavra significa na Biologia?</p>':`<p class="specimen-definition">${esc(term.definition)}</p>`}
+    return `<article class="specimen-card ${numbered?'path-card':''} ${study&&revealed?'study-revealed':''}" data-term="${esc(term.id)}"><div class="specimen-meta"><span>${esc(term.area || 'Biologia')}</span></div>
+      <div class="specimen-title"><h3 class="${isHidden?'':'sr-only'}">${esc(term.name)}</h3>${isHidden?'':anatomy(term,{meanings:false})}</div>
+      ${isHidden?'<p class="study-prompt">O que esta palavra conta sobre a Biologia?</p>':`<p class="specimen-definition">${esc(term.definition)}</p>`}
       ${status?`<p class="practice-mark">${icon(status==='Praticado'?'circle-check':'circle')}${esc(status)}</p>`:''}
-      <div class="card-actions">${isHidden?button('Revelar significado','reveal-study','btn-primary btn-small',`data-id="${term.id}"`):button('Investigar palavra '+icon('arrow-right'),'open-term','btn-soft btn-small',`data-id="${term.id}"`)}${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${extra}</div></article>`;
+      <div class="card-actions">${isHidden?button('Revelar significado','reveal-study','btn-primary btn-small',`data-id="${term.id}"`):button('Investigar palavra '+icon('arrow-right'),'open-term','btn-text btn-small',`data-id="${term.id}"`)}
+      ${button(icon('heart'),'toggle-favorite',`icon-button favorite-toggle${term.favorite?' is-favorite':''}`,`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
+      ${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
   }
 
   function statsStrip(items) {
