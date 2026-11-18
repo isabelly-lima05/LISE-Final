@@ -85,3 +85,195 @@
 .app-layout .specimen-card .favorite-toggle:hover,.app-layout .specimen-card .favorite-toggle.is-favorite{color:var(--red);border-color:var(--red);background:var(--red-wash)}
 .app-layout .specimen-card .favorite-toggle.is-favorite svg{fill:currentColor}
 .app-layout .specimen-card .favorite-toggle:focus-visible{outline:3px solid var(--red);outline-offset:3px}
+/* Sidebar: superfícies coerentes e expansão contínua sem reconstruir o layout. */
+.app-layout{--sidebar-control-size:52px;--sidebar-motion:300ms cubic-bezier(.77,0,.175,1);transition:grid-template-columns var(--sidebar-motion)}
+.app-layout .nav-button,.app-layout .brand-toggle,.app-layout .logout-button{min-height:var(--sidebar-control-size);transition:background-color 180ms cubic-bezier(.23,1,.32,1),color 180ms cubic-bezier(.23,1,.32,1),border-color 180ms cubic-bezier(.23,1,.32,1)}
+.app-layout .nav-button>svg,.app-layout .brand-toggle>svg{flex:none;transform:scale(1);transition:transform var(--sidebar-motion)}
+.app-layout .logout-button{width:100%}
+.app-layout .side-account{transition:border-color 180ms cubic-bezier(.23,1,.32,1),box-shadow 180ms cubic-bezier(.23,1,.32,1)}
+.sidebar-collapsed .sidebar .nav-button,.sidebar-collapsed .sidebar .brand-toggle,.sidebar-collapsed .sidebar .logout-button{width:var(--sidebar-control-size);min-width:var(--sidebar-control-size);height:var(--sidebar-control-size);min-height:var(--sidebar-control-size);margin-inline:auto;padding:0!important;gap:0;justify-content:center}
+.sidebar-collapsed .sidebar .nav-button>svg,.sidebar-collapsed .sidebar .brand-toggle>svg{transform:scale(.92)}
+[data-theme=dark] .sidebar-collapsed .sidebar .side-label{background:#0c1c14;color:var(--ink);border:1px solid var(--line);box-shadow:0 12px 30px #0006}
+@media(prefers-reduced-motion:reduce){.app-layout,.app-layout .nav-button,.app-layout .brand-toggle,.app-layout .logout-button,.app-layout .nav-button>svg,.app-layout .brand-toggle>svg,.app-layout .side-account{transition:none!important}}
+
+/* Motion system: quick feedback, calm state changes and trigger-anchored menus. */
+:root{--dur-fast:150ms;--dur-base:200ms;--dur-slow:300ms;--dur-exit:160ms;--dur-dialog-exit:240ms;--ease-out:cubic-bezier(.23,1,.32,1);--ease-in:cubic-bezier(.4,0,1,1);--ease-in-out:cubic-bezier(.77,0,.175,1)}
+.btn,.icon-button,.code-chip,.nav-button,.appearance-switch,button{transition-duration:var(--dur-fast);transition-timing-function:var(--ease-in-out)}
+button:active:not(:disabled),.btn:active:not(:disabled),.icon-button:active:not(:disabled),.code-chip:active:not(:disabled),summary:active{transform:scale(.97)}
+.class-card,.specimen-card,.trail-card,.collection-cover{transition-timing-function:var(--ease-in-out);animation-timing-function:var(--ease-in-out)}
+.memory-card-inner{transition-duration:300ms;transition-timing-function:var(--ease-in-out)}
+.app-dialog,.side-drawer{animation-duration:var(--dur-slow);animation-timing-function:var(--ease-in-out)}
+.tabs+.card,.tabs+[role=tabpanel]{animation-duration:var(--dur-base);animation-timing-function:var(--ease-in-out)}
+.trail-menu[open]>div,.collection-menu[open]>.collection-menu-content,.management-menu[open]>.management-options{transform-origin:top right;animation:ui-popover-in var(--dur-base) var(--ease-out) both}
+.switch-row input,.switch-row input::after{transition-duration:var(--dur-base);transition-timing-function:var(--ease-in-out)}
+.switch-row input:active::after{transform:scaleX(1.12) scaleY(.89)}
+.switch-row input:checked:active::after{transform:translateX(16px) scaleX(1.12) scaleY(.89)}
+.appearance-switch.is-moving-on .appearance-thumb{animation:ui-knob-on 250ms var(--ease-in-out) both}
+.appearance-switch.is-moving-off .appearance-thumb{animation:ui-knob-off 250ms var(--ease-in-out) both}
+.ui-confirm-pulse,.created-class .success-mark{animation:ui-confirm-pulse 340ms var(--ease-out)}
+.access-changing.access-register .access-story,.access-changing.access-register .access-form-side,.access-changing:not(.access-register) .access-story,.access-changing:not(.access-register) .access-form-side{animation-duration:300ms;animation-timing-function:var(--ease-in-out)}
+::view-transition-old(root){animation:ui-state-old var(--dur-exit) var(--ease-in) both;mix-blend-mode:normal}
+::view-transition-new(root){animation:ui-state-new var(--dur-base) var(--ease-out) both;mix-blend-mode:normal}
+@keyframes ui-popover-in{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+@keyframes ui-knob-on{0%{transform:translateX(0)}50%{transform:translateX(15px) scaleX(1.12) scaleY(.89)}100%{transform:translateX(30px)}}
+@keyframes ui-knob-off{0%{transform:translateX(30px)}50%{transform:translateX(15px) scaleX(1.12) scaleY(.89)}100%{transform:translateX(0)}}
+@keyframes ui-confirm-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.045)}}
+@keyframes ui-state-old{from{opacity:1}to{opacity:0}}
+@keyframes ui-state-new{from{opacity:0}to{opacity:1}}
+@media(max-width:600px){.management-menu[open]>.management-options{transform-origin:top left}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none}.trail-menu[open]>div,.collection-menu[open]>.collection-menu-content,.management-menu[open]>.management-options,.appearance-switch .appearance-thumb,.ui-confirm-pulse,.created-class .success-mark{animation:none!important}}
+
+/* Palavras: cada segmento revela seu sentido sem depender apenas da cor. */
+.word-segment{position:relative;display:inline-block;border-radius:5px;cursor:help;transition:background-color var(--dur-fast) var(--ease-in-out),text-decoration-color var(--dur-fast) var(--ease-in-out)}
+.word-segment:hover,.word-segment:focus-visible{background:var(--part-wash);text-decoration-color:currentColor;outline:none}
+.word-segment::after{content:attr(data-part-label) "\A" attr(data-meaning);position:absolute;left:50%;bottom:calc(100% + 12px);z-index:80;width:max-content;max-width:min(250px,80vw);padding:10px 12px;border:1px solid color-mix(in srgb,currentColor 24%,var(--line));border-radius:10px;background:var(--paper);color:var(--ink);box-shadow:var(--shadow);font:500 12px/1.45 "Instrument Sans",Arial,sans-serif;letter-spacing:0;text-align:left;white-space:pre-wrap;opacity:0;pointer-events:none;transform:translate(-50%,4px) scale(.95);transform-origin:bottom center;transition:opacity 144ms var(--ease-in),transform 144ms var(--ease-in)}
+.word-segment:hover::after,.word-segment:focus-visible::after{opacity:1;transform:translate(-50%,0) scale(1);animation:word-meaning-in 180ms var(--ease-out) both}
+@keyframes word-meaning-in{from{opacity:0;transform:translate(-50%,4px) scale(.95)}to{opacity:1;transform:translate(-50%,0) scale(1)}}
+.anatomy-part{transition:transform var(--dur-base) var(--ease-in-out),border-color var(--dur-base) var(--ease-in-out),box-shadow var(--dur-base) var(--ease-in-out)}
+.anatomy-part:hover{transform:translateY(-2px);border-color:currentColor;box-shadow:0 8px 18px #142e1d0c}
+
+/* Praticar: uma família de ilustrações botânicas com o mesmo traço. */
+.app-layout .activity-sheet{overflow:hidden;isolation:isolate;min-height:315px;transition:border-color var(--dur-base) var(--ease-in-out),box-shadow var(--dur-base) var(--ease-in-out),transform var(--dur-base) var(--ease-in-out)}
+.app-layout .activity-sheet:hover{transform:translateY(-2px);border-color:var(--green);box-shadow:var(--shadow)}
+.app-layout .game-illustration{width:142px;height:122px;padding:8px;color:var(--green);filter:drop-shadow(0 9px 18px #142e1d10);transition:transform var(--dur-base) var(--ease-in-out)}
+.app-layout .activity-sheet:hover .game-illustration{transform:translateY(-3px)}
+.app-layout .game-illustration .illustration-wash{fill:var(--surface-soft)}
+.app-layout .game-illustration .game-sprig{color:var(--muted);opacity:.65;stroke-width:1.4}
+.app-layout .activity-sheet[data-game=bioquiz] .game-illustration{color:var(--green)}
+.app-layout .activity-sheet[data-game=familia_palavras] .game-illustration{color:var(--root)}
+.app-layout .activity-sheet[data-game=memoria] .game-illustration{color:var(--suffix)}
+.app-layout .activity-sheet[data-game=decifrador] .game-illustration{color:var(--prefix)}
+
+/* Estudar: a revelação ocupa a área já reservada pelo cartão. */
+.app-layout .specimen-card.study-card{height:430px;min-height:430px;overflow:hidden}
+.app-layout .study-card .specimen-title{min-height:74px}
+.app-layout .study-card .study-prompt,.app-layout .study-card .specimen-definition{min-height:112px}
+.app-layout .study-card .specimen-definition{display:-webkit-box;-webkit-line-clamp:5;line-clamp:5;-webkit-box-orient:vertical;overflow:hidden}
+.app-layout .study-card .card-actions{margin-top:auto}
+
+/* Modais e fluxos de criação com mais respiro. */
+.interaction-dialog{width:min(780px,calc(100vw - 40px));padding:38px 40px;border-radius:22px}
+.interaction-dialog .dialog-heading{margin-bottom:26px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+.interaction-dialog .dialog-heading h2{font-size:clamp(28px,3vw,36px)}
+.interaction-dialog .dialog-lead{max-width:62ch;margin:0 0 24px;color:var(--muted);line-height:1.7}
+.interaction-dialog form{gap:22px}
+.interaction-dialog .field{gap:9px}
+.interaction-dialog .card-actions{margin-top:30px;padding-top:18px;border-top:1px solid var(--line)}
+.app-dialog:not(.interaction-dialog){width:min(680px,calc(100vw - 40px));padding:36px;border-radius:20px}
+.creation-flow{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;padding:0;margin:0 0 28px}
+.creation-flow li{display:flex;align-items:center;gap:10px;min-width:0;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft)}
+.creation-flow li b{display:grid;place-items:center;flex:none;width:28px;height:28px;border-radius:50%;background:var(--paper);color:var(--muted);font-size:12px}
+.creation-flow li span{display:grid;gap:2px;min-width:0}.creation-flow li strong{font-size:12px}.creation-flow li small{font-size:10px;color:var(--muted);line-height:1.35}
+.creation-flow li.is-current{border-color:var(--green);background:var(--root-wash)}.creation-flow li.is-current b{background:var(--green);color:var(--on-accent)}
+
+/* Painel do professor: blocos inferiores deixam de competir entre si. */
+.teacher-layout .teacher-metrics{margin:30px 0 24px}
+.teacher-layout .teacher-columns{gap:38px;margin:18px 0 42px}
+.teacher-layout .teacher-columns>.dashboard-section{display:grid;align-content:start;gap:20px;min-width:0;padding:28px;border:1px solid var(--line);border-radius:22px;background:var(--surface-soft)}
+.teacher-layout .teacher-columns>.dashboard-section>.split-heading{margin:0}
+.teacher-layout .teacher-columns .class-grid,.teacher-layout .teacher-columns .trail-list{gap:18px}
+.teacher-layout .planning-panel{margin-top:36px;padding:32px}
+
+/* Trilha: etapas e ações não encostam mais no rodapé. */
+.app-layout [data-form=trail-create]{padding:32px!important;margin-bottom:72px;border-radius:22px}
+.app-layout [data-form=trail-create] .trail-stepper{margin-bottom:30px;padding:6px;border:1px solid var(--line);border-radius:14px;background:var(--surface-soft)}
+.app-layout [data-form=trail-create] .trail-stepper li{flex:1}
+.app-layout [data-form=trail-create] .trail-stepper button{width:100%;border:0;border-radius:10px;text-align:left}
+.app-layout [data-form=trail-create] [data-step-panel]{min-height:320px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--paper)}
+.app-layout [data-form=trail-create] .trail-actions,.app-layout:not(.sidebar-collapsed) [data-form=trail-create] .trail-actions,.app-layout.sidebar-collapsed [data-form=trail-create] .trail-actions{position:sticky!important;left:auto!important;right:auto!important;bottom:16px;margin:40px 0 0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--paper);box-shadow:0 12px 35px #142e1d16}
+
+/* Paginação explícita do Explorador. */
+.explore-pagination{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:18px;margin:30px 0 10px;padding:18px 20px;border:1px solid var(--line);border-radius:15px;background:var(--surface-soft);font-size:13px;color:var(--muted)}
+.explore-pagination-top{display:flex;justify-content:flex-end;flex-wrap:wrap;margin:0 0 18px;padding:0;border:0;border-radius:0;background:transparent}
+.explore-pagination-top>span{min-width:max-content}.explore-pagination-top .pagination-buttons{order:2}.explore-pagination-top>span{order:3}
+.explore-pagination>label{display:flex;align-items:center;gap:8px}.explore-pagination select{width:auto;min-height:40px;padding-block:7px;background-color:var(--paper)}
+.explore-pagination>span{text-align:right}.pagination-buttons{display:flex;justify-content:center;gap:6px}.pagination-button{min-width:42px;min-height:42px;padding:8px 11px}
+
+/* O fundo ativo dos controles segmentados desliza entre as metades. */
+.app-layout .segmented{position:relative;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));isolation:isolate}
+.app-layout .segmented::before{content:"";position:absolute;z-index:0;inset-block:4px;inset-inline-start:4px;width:calc(50% - 4px);border-radius:9px;background:var(--green);box-shadow:0 2px 6px #223b2914;transform:translateX(0);transition:transform var(--dur-base) var(--ease-in-out)}
+.app-layout .segmented:has(>[data-mode="study"].is-selected)::before{transform:translateX(100%)}
+.app-layout .segmented .btn{position:relative;z-index:1;min-width:0;background:transparent!important;transition:color var(--dur-base) var(--ease-in-out),transform var(--dur-fast) var(--ease-in-out)}
+.app-layout .segmented .is-selected{color:white}
+[data-theme=dark] .app-layout .segmented::before{background:var(--paper);border:1px solid var(--line)}
+[data-theme=dark] .app-layout .segmented .is-selected{color:var(--green)}
+.pagination-button.is-current{background:var(--green);border-color:var(--green);color:var(--on-accent)}
+@media(max-width:760px){.interaction-dialog,.app-dialog:not(.interaction-dialog){width:calc(100vw - 20px);padding:22px}.creation-flow{grid-template-columns:1fr}.teacher-layout .teacher-columns{gap:24px}.teacher-layout .teacher-columns>.dashboard-section{padding:20px}.app-layout [data-form=trail-create]{padding:20px!important}.app-layout [data-form=trail-create] [data-step-panel]{padding:20px;min-height:0}.explore-pagination{grid-template-columns:1fr;justify-items:stretch}.explore-pagination-top{display:grid;justify-content:stretch}.explore-pagination>span{text-align:left}.pagination-buttons{justify-content:flex-start;overflow-x:auto}.app-layout .specimen-card.study-card{height:400px;min-height:400px}}
+@media(prefers-reduced-motion:reduce){.word-segment::after,.word-segment:hover::after,.word-segment:focus-visible::after{animation:none;transition:none}.anatomy-part,.activity-sheet,.game-illustration{transition:none!important}}
+
+/* Direção, erro e transições de altura conforme as práticas de motion adotadas. */
+.ui-error-shake{animation:ui-error-shake 240ms var(--ease-in-out)}
+@keyframes ui-error-shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}55%{transform:translateX(3px)}80%{transform:translateX(-1px)}}
+.step-transition{view-transition-name:none}
+::view-transition-group(trail-step){animation-duration:var(--dur-base);animation-timing-function:var(--ease-in-out)}
+[data-step-direction=forward]::view-transition-old(trail-step){animation:step-exit-forward var(--dur-exit) var(--ease-in) both}
+[data-step-direction=forward]::view-transition-new(trail-step){animation:step-enter-forward var(--dur-base) var(--ease-out) both}
+[data-step-direction=back]::view-transition-old(trail-step){animation:step-exit-back var(--dur-exit) var(--ease-in) both}
+[data-step-direction=back]::view-transition-new(trail-step){animation:step-enter-back var(--dur-base) var(--ease-out) both}
+@keyframes step-exit-forward{to{opacity:0;transform:translateX(-18px)}}@keyframes step-enter-forward{from{opacity:0;transform:translateX(22px)}}
+@keyframes step-exit-back{to{opacity:0;transform:translateX(18px)}}@keyframes step-enter-back{from{opacity:0;transform:translateX(-22px)}}
+@supports(interpolate-size:allow-keywords){:root{interpolate-size:allow-keywords}.planning-more::details-content,.optional-share::details-content,.assessment-analysis::details-content{block-size:0;overflow:clip;transition:block-size var(--dur-exit) var(--ease-in),content-visibility var(--dur-exit) allow-discrete}.planning-more[open]::details-content,.optional-share[open]::details-content,.assessment-analysis[open]::details-content{block-size:auto;transition-duration:var(--dur-base);transition-timing-function:var(--ease-out)}}
+input[type=range]::-webkit-slider-thumb:active{transform:scaleX(1.12) scaleY(.89)}
+
+/* Acabamento tipográfico do produto. */
+.page-title,.section-heading h1,.word-display{text-wrap:balance;font-size:clamp(2rem,3.6vw,4rem);text-box-trim:trim-both;text-box-edge:cap alphabetic}
+.tab,.segmented .btn,.pagination-button{font-weight:600}
+a,.btn-text,.trail-title{text-underline-offset:.22em;text-decoration-thickness:.08em}
+sup{margin-inline:.08em;line-height:0;font-size:.72em}
+.eyebrow,.catalog-id,.workspace-role,.hero-signature,abbr{font-variant-caps:all-small-caps;letter-spacing:.09em}
+q{quotes:"“" "”" "‘" "’"}q::before{content:open-quote}q::after{content:close-quote}
+.middle-truncate{display:inline-grid;grid-template-columns:auto min-content auto;align-items:center;min-width:0;max-width:100%}.middle-truncate>span:first-child,.middle-truncate>span:last-child{overflow:hidden}.middle-truncate>span:first-child{text-overflow:clip}.middle-truncate>span:last-child{text-align:right}
+.app-layout :is(p,li,.specimen-definition,.discovery-definition,.field-note){hyphens:auto;-webkit-hyphens:auto;overflow-wrap:anywhere}
+.specimen-card h3,.class-card h3 .stretched-link,.activity-sheet h2,.trail-title{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+@media(prefers-reduced-motion:reduce){.ui-error-shake,[data-step-direction]::view-transition-old(trail-step),[data-step-direction]::view-transition-new(trail-step){animation:none!important}}
+
+/* Tipografia escolhida: display, leitura e identificação técnica. */
+:is(.page-title,.section-heading h1,h1,h2,h3,.word-name,.word-display,.anatomy-part strong,.stat-strip dd,.assessment-score,.stat-card strong,.brand-word,.access-logo,.access-content h1,.access-story-copy p,.auth-brand,.empty strong,.decipher-letter,.decipher-slot,.learning-panel .grid strong,.memory-back>span,.not-found .error-code){font-family:var(--font-display)!important}
+:is(body,button,input,textarea,select,.search-field input,.anatomy-part small,.anatomy-missing,.field-note,.field-note small,.discovery-definition,.specimen-definition,.definition-section>p,.word-segment::after,.memory-reader-copy,.memory-footer-note){font-family:var(--font-body)!important}
+:is(.catalog-id,.code-chip,.class-code,code,kbd,samp,.rank,.memory-back>small,.hero-signature){font-family:var(--font-mono)!important;font-variant-numeric:tabular-nums}
+
+/* Cards do Explorador: altura previsível e textos contidos. */
+.app-layout .specimen-grid{grid-auto-rows:430px;align-items:stretch}
+.app-layout .specimen-card{height:430px;min-height:430px;overflow:hidden}
+.app-layout .specimen-card .specimen-meta>span:first-child,.app-layout .specimen-card .word-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-layout .specimen-card .anatomy-parts{max-height:82px;overflow:hidden;align-content:start}
+.app-layout .specimen-card .specimen-definition{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:4;line-clamp:4;overflow:hidden;margin-bottom:14px}
+.app-layout .specimen-card .card-actions{margin-top:auto;flex-wrap:nowrap}
+.app-layout .specimen-card .card-actions>[data-action=open-term]{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app-layout .specimen-card .favorite-toggle{width:48px;min-width:48px;min-height:48px;padding:11px}
+.app-layout .specimen-card .favorite-toggle svg{width:24px;height:24px}
+.detail-favorite{width:52px;min-width:52px;min-height:52px;color:var(--green)}.detail-favorite svg{width:25px;height:25px}.detail-favorite:hover,.detail-favorite.is-favorite{color:var(--red);border-color:var(--red);background:var(--red-wash)}.detail-favorite.is-favorite svg{fill:currentColor}
+@media(max-width:760px){.app-layout .specimen-grid{grid-auto-rows:400px}.app-layout .specimen-card{height:400px;min-height:400px}}
+
+/* O áudio é uma ação visual compacta; o nome completo permanece no aria-label. */
+.pronounce-button{width:44px;min-width:44px;min-height:44px;padding:9px;border-radius:50%;margin:0}
+.pronounce-button svg{width:20px;height:20px}
+.specimen-card>.pronounce-button{margin:0}
+
+/* Login e cadastro cabem no viewport sem rolagem interna ou externa. */
+html:has(.access-stage),body:has(.access-stage),body:has(.access-stage)>#app{height:100%;overflow:hidden}
+.access-stage{height:100svh;min-height:0;padding:clamp(8px,2.4vh,28px)}
+.access-panel{height:min(824px,calc(100svh - clamp(16px,4.8vh,56px)));min-height:0}
+.access-form-side{overflow:hidden}
+@media(max-height:850px){.access-form-side{padding-block:18px 14px}.access-header{margin-bottom:8px}.access-content{padding-block:6px}.access-kicker{margin-bottom:10px}.access-content h1{font-size:clamp(30px,3vw,39px);margin-bottom:10px}.access-lead{margin-bottom:16px}.access-form{gap:13px}.access-field input:not([type=checkbox]):not([type=radio]){min-height:46px;padding-block:10px}.access-switch{margin-top:13px}.access-footer{padding-top:9px;gap:7px}.access-register .access-content{padding-block:2px}.access-register .access-content h1{font-size:34px}.access-register .access-lead{margin-bottom:10px}.access-register .access-form{gap:8px}.access-register .access-roles label>span{min-height:40px;padding-block:8px}.access-register .access-switch{margin-top:7px}}
+@media(max-width:760px){.access-stage{padding:10px}.access-panel{height:calc(100svh - 20px);min-height:0}.access-form-side{padding:18px 24px 16px}.access-content{padding-block:8px}.access-header{margin-bottom:8px}.access-footer{padding-top:10px;gap:8px}.access-register .access-form{gap:8px}.access-register .access-content h1{font-size:clamp(27px,9vw,35px)}.access-register .access-lead{margin-bottom:10px}.access-register .access-field input:not([type=checkbox]):not([type=radio]){min-height:42px;padding-block:9px}.access-register .access-roles label>span{min-height:40px;padding-block:8px}.access-register .access-switch{margin-top:8px}}
+@media(max-height:650px){.access-story-art,.access-footer{display:none}.access-content h1{font-size:30px}.access-kicker{margin-bottom:8px}.access-form{gap:9px}.access-field input:not([type=checkbox]):not([type=radio]){min-height:40px;padding-block:8px}.access-story-copy{padding:10px 0}.access-story-copy p{font-size:32px}}
+
+/* Cores funcionais no escuro: jogos, ranking e faces da memória. */
+[data-theme=dark] .activity-sheet[data-game=bioquiz] .game-illustration{color:#8fd3ff}
+[data-theme=dark] .activity-sheet[data-game=familia_palavras] .game-illustration{color:#b9e68f}
+[data-theme=dark] .activity-sheet[data-game=memoria] .game-illustration{color:#efb1ff}
+[data-theme=dark] .activity-sheet[data-game=decifrador] .game-illustration{color:#ffd28c}
+[data-theme=dark] .activity-sheet .illustration-wash{fill:#263b31}
+.rank-table tbody tr.is-me{background:var(--surface-soft)}
+.rank-person{display:flex;align-items:center;gap:10px;min-width:0}.rank-person .avatar-art{width:38px;height:38px;flex:none}.rank-person-name{min-width:0}.rank-person-name>span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+[data-theme=dark] .rank-table,.rank-table :is(tbody,tr,td){background:transparent;color:var(--ink)}
+[data-theme=dark] .rank-table tbody tr.is-me{background:var(--surface-soft)}
+.memory-card-kind{position:absolute;top:12px;left:12px;padding:5px 8px;border-radius:999px;font:600 9px/1 var(--font-mono);letter-spacing:.06em;text-transform:uppercase}
+.memory-front[data-memory-kind=term],.memory-front[data-memory-kind=element]{background:var(--root-wash);border-color:color-mix(in srgb,var(--root) 45%,var(--line));color:var(--root)}
+.memory-front[data-memory-kind=definition],.memory-front[data-memory-kind=meaning]{background:var(--suffix-wash);border-color:color-mix(in srgb,var(--suffix) 45%,var(--line));color:var(--suffix)}
+.memory-front[data-memory-kind=term] .memory-card-kind,.memory-front[data-memory-kind=element] .memory-card-kind{background:color-mix(in srgb,var(--root) 16%,var(--paper));color:var(--root)}
+.memory-front[data-memory-kind=definition] .memory-card-kind,.memory-front[data-memory-kind=meaning] .memory-card-kind{background:color-mix(in srgb,var(--suffix) 16%,var(--paper));color:var(--suffix)}
+.app-layout .memory-session .memory-card-text{font-size:clamp(13px,1.15vw,17px)!important;line-height:1.55!important;padding-inline:4px}
+[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=term],[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=element]{background:#243c2c!important;color:#c5e8c4!important;border-color:#6f9b72!important}
+[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=definition],[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=meaning]{background:#3b2940!important;color:#f0c9f4!important;border-color:#966d9c!important}

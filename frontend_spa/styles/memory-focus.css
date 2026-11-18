@@ -7,7 +7,7 @@
 .memory-heading{min-width:0;}
 .memory-title-row{display:flex;align-items:center;justify-content:space-between;gap:18px;}
 .app-layout .memory-heading .eyebrow{margin:0 0 5px;font-size:9px;letter-spacing:.14em;color:var(--paint-fg-738568);}
-.app-layout .memory-heading h1{font:500 34px/1.1 "Source Serif 4",Georgia,serif;letter-spacing:-.03em;margin:0;color:var(--paint-fg-35533c);}
+.app-layout .memory-heading h1{font:500 34px/1.1 "Bricolage Grotesque","Arial Narrow",sans-serif;letter-spacing:-.03em;margin:0;color:var(--paint-fg-35533c);}
 .memory-head-actions{display:flex;align-items:center;gap:14px;flex:none;}
 .memory-pair-count{display:flex;align-items:center;gap:6px;border:1px solid var(--paint-line-dce6d2);border-radius:11px;padding:9px 12px;background:var(--paint-bg-f0f5e7);color:var(--paint-fg-5d754e);font-size:11px;}
 .memory-pair-count svg{width:16px;height:16px;color:var(--paint-fg-8fa37a);}
@@ -22,13 +22,13 @@
 .app-layout .memory-session .memory-grid{display:grid;grid-template-columns:repeat(var(--mem-cols-wide),minmax(0,1fr));grid-template-rows:repeat(var(--mem-rows-wide),minmax(0,1fr));gap:13px;align-items:stretch;margin:0;min-width:0;min-height:0;height:100%;perspective:1200px;}
 .memory-tile{position:relative;min-width:0;min-height:0;display:grid;}
 .app-layout .memory-session .memory-card{position:relative;display:block;align-self:stretch;min-width:0;min-height:0;width:100%;height:100%;padding:0;line-height:1.5;border:0;border-radius:16px;background:transparent;box-shadow:none;perspective:900px;}
-.app-layout .memory-session .memory-card-inner{position:absolute;display:block;inset:0;min-height:0;width:100%;height:100%;transform-style:preserve-3d;transition:transform .38s cubic-bezier(.4,0,.2,1);}
+.app-layout .memory-session .memory-card-inner{position:absolute;display:block;inset:0;min-height:0;width:100%;height:100%;transform-style:preserve-3d;transition:transform 300ms var(--ease-in-out);}
 .app-layout .memory-session .memory-back,.app-layout .memory-session .memory-front{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;min-height:0;height:100%;padding:16px 12px;border-radius:15px;overflow:hidden;border:1px solid var(--paint-line-cfddc1);backface-visibility:hidden;box-shadow:0 3px 9px #365b3b05;}
 .app-layout .memory-session .memory-back{background:radial-gradient(ellipse at 25% 15%,var(--paint-bg-fbfdf4),var(--paint-bg-edf3e2) 75%);color:var(--paint-fg-79976b);gap:10px;}
 .memory-back::before{content:"";position:absolute;inset:9px;border:1px solid var(--paint-line-dce6ce);border-radius:9px;pointer-events:none;}
 .app-layout .memory-session .memory-back>svg{width:clamp(24px,3vw,40px);height:clamp(24px,3vw,40px);stroke-width:1.2;}
-.app-layout .memory-session .memory-back>span{font:500 15px "Source Serif 4",Georgia,serif;letter-spacing:.15em;color:var(--paint-fg-698759);}
-.memory-back>small{position:absolute;bottom:13px;right:14px;font:10px ui-monospace,monospace;color:var(--paint-fg-9aaf88);}
+.app-layout .memory-session .memory-back>span{font:500 15px "Bricolage Grotesque","Arial Narrow",sans-serif;letter-spacing:.15em;color:var(--paint-fg-698759);}
+.memory-back>small{position:absolute;bottom:13px;right:14px;font:10px "IBM Plex Mono",Consolas,monospace;color:var(--paint-fg-9aaf88);}
 .app-layout .memory-session .memory-front{padding:18px 12px 43px;background:var(--paint-bg-fffefa);transform:rotateY(180deg);color:var(--paint-fg-3e5b3c);}
 .memory-card-text{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:5;line-clamp:5;overflow:hidden;max-width:100%;font-size:clamp(12px,1.05vw,15px);line-height:1.6;overflow-wrap:anywhere;text-wrap:pretty;}
 .app-layout .memory-session .memory-card.selected .memory-card-inner,.app-layout .memory-session .memory-card.matched .memory-card-inner{transform:rotateY(180deg);}
@@ -45,14 +45,14 @@
 .memory-game-stats svg{width:14px;height:14px;color:var(--paint-fg-96aa83);}
 .memory-game-stats strong{font-weight:600;color:var(--paint-fg-637f50);}
 .memory-game-stats time{font-variant-numeric:tabular-nums;min-width:35px;color:var(--paint-fg-637f50);}
-.memory-footer-note{font-family:"Source Serif 4",Georgia,serif;font-size:14px;font-style:italic;color:var(--paint-fg-94a77f);}
+.memory-footer-note{font-family:"Bricolage Grotesque","Arial Narrow",sans-serif;font-size:14px;font-style:italic;color:var(--paint-fg-94a77f);}
 .memory-save-status{width:100%;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--paint-fg-6c7e5b);}
 .memory-save-status p{margin:0;flex:1;font-size:11px;}
 .memory-reading-dialog{width:min(580px,calc(100vw - 36px));border:1px solid var(--paint-line-ccdcc0);border-radius:21px;padding:27px;background:linear-gradient(145deg,var(--paint-bg-fffefa),var(--paint-bg-f6faef));box-shadow:0 24px 80px #263e2833;}
 .memory-reading-dialog .dialog-heading{margin-bottom:22px;}
 .memory-reading-dialog h2{font-size:29px;font-weight:500;color:var(--paint-fg-48633d);letter-spacing:-.025em;}
 .memory-reading-dialog .eyebrow{font-size:10px;color:var(--paint-fg-849b6e);letter-spacing:.14em;}
-.memory-reader-copy{font:400 23px/1.7 "Source Serif 4",Georgia,serif;color:var(--paint-fg-4c6542);overflow-wrap:anywhere;white-space:pre-wrap;margin:16px 0 24px;}
+.memory-reader-copy{font:400 23px/1.7 "Bricolage Grotesque","Arial Narrow",sans-serif;color:var(--paint-fg-4c6542);overflow-wrap:anywhere;white-space:pre-wrap;margin:16px 0 24px;}
 .memory-reader-hint{font-size:12px;color:var(--paint-fg-7f936c);border-top:1px solid var(--paint-line-e0e9d4);padding-top:17px;margin:0;}
 @media(max-width:1200px){.app-layout .memory-session .memory-grid{grid-template-columns:repeat(var(--mem-cols-mid),minmax(0,1fr));grid-template-rows:repeat(var(--mem-rows-mid),minmax(0,1fr));}.memory-instruction>span{display:none;}.app-layout.memory-focus .content{padding:16px 21px;}.app-layout.memory-focus .question.memory-session{padding:20px;gap:13px;}}
 @media(max-width:1023px){.memory-focus .sidebar-launcher{top:22px;height:42px;width:31px;transform:none;border-radius:0 9px 9px 0;}.app-layout.memory-focus .content{padding:15px 19px;}.app-layout .memory-session .memory-grid{gap:11px;}}

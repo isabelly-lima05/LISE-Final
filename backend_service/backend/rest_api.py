@@ -860,11 +860,11 @@ def _class_metrics(class_row, daily_day):
     accumulate(select(Partida.fk_usuario,func.sum(Partida.xp)).where(Partida.fk_usuario.in_(student_ids),Partida.respondida.is_(True),Partida.respondida_em>=week_start_utc,Partida.respondida_em<week_end_utc).group_by(Partida.fk_usuario),points_week)
     links=[link for link in links if link.desvinculada_em is None and not g.db.get(Trilha,link.fk_trilha).arquivada_em]
     by_id = {u.id_usuario: u for u, _m in students}
-    total_rank = [dict(user_id=str(ident), name=by_id[ident].nome, xp=points_all[ident], is_me=ident == uid)
+    total_rank = [dict(user_id=str(ident), name=by_id[ident].nome, avatar=by_id[ident].avatar or 'placeholder', xp=points_all[ident], is_me=ident == uid)
                   for ident in student_ids]
-    daily_rank = [dict(user_id=str(ident), name=by_id[ident].nome, xp=points_today[ident], is_me=ident == uid)
+    daily_rank = [dict(user_id=str(ident), name=by_id[ident].nome, avatar=by_id[ident].avatar or 'placeholder', xp=points_today[ident], is_me=ident == uid)
                   for ident in student_ids]
-    weekly_rank = [dict(user_id=str(ident), name=by_id[ident].nome, xp=points_week[ident], is_me=ident == uid)
+    weekly_rank = [dict(user_id=str(ident), name=by_id[ident].nome, avatar=by_id[ident].avatar or 'placeholder', xp=points_week[ident], is_me=ident == uid)
                    for ident in student_ids]
     total_rank.sort(key=lambda x: (-x['xp'], x['name'].casefold()))
     daily_rank.sort(key=lambda x: (-x['xp'], x['name'].casefold()))
@@ -1929,7 +1929,8 @@ def _make_questions(game, views, source_id=None, count=10, mode='termo_definicao
         cards, expected, coverage_map = [], [], {}
         for pair_index, (left, right, ident) in enumerate(pairs):
             a, b = secrets.token_urlsafe(10), secrets.token_urlsafe(10)
-            cards.extend([dict(id=a, text=left), dict(id=b, text=right)])
+            left_kind, right_kind = (('term', 'definition') if mode == 'termo_definicao' else ('element', 'meaning'))
+            cards.extend([dict(id=a, text=left, kind=left_kind), dict(id=b, text=right, kind=right_kind)])
             expected.append(sorted([a, b]))
             related_ids = ([ident] if mode == 'termo_definicao' else
                            list(dict.fromkeys(unique[memory_radical_ids[pair_index]]['term_ids'])))

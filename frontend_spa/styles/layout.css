@@ -2,7 +2,7 @@
 .app-layout.sidebar-collapsed { grid-template-columns:72px minmax(0,1fr); }
 .sidebar { position:sticky; top:0; height:100dvh; background:var(--paint-bg-f0f2e9); border-right:1px solid var(--line); display:flex; flex-direction:column; gap:2rem; padding:1.4rem .7rem .7rem; z-index:30; }
 .sidebar-brand-row { display:grid; gap:1.5rem; }
-.brand { display:flex; align-items:center; gap:.7rem; color:var(--green-dark); font:600 24px "Source Serif 4",Georgia,serif; }
+.brand { display:flex; align-items:center; gap:.7rem; color:var(--green-dark); font:600 24px "Bricolage Grotesque","Arial Narrow",sans-serif; }
 .brand>svg { width:28px; height:28px; }
 .sidebar .brand { min-height:44px; padding:0 .6rem; }
 .nav-list { display:grid; gap:.5rem; }
@@ -16,7 +16,7 @@
 .side-account .side-label small { font-size:14px; }
 .sidebar-collapsed .sidebar { padding-inline:.5rem; }
 .sidebar-collapsed .sidebar .nav-button,.sidebar-collapsed .sidebar .brand { justify-content:center; padding-inline:0; }
-.sidebar-collapsed .sidebar .side-label { position:absolute; left:calc(100% + 16px); top:50%; transform:translateY(-50%); padding:.6rem .8rem; border-radius:6px; background:var(--green-dark); color:white; white-space:nowrap; opacity:0; visibility:hidden; pointer-events:none; font:500 14px "Inter",sans-serif; box-shadow:var(--shadow); }
+.sidebar-collapsed .sidebar .side-label { position:absolute; left:calc(100% + 16px); top:50%; transform:translateY(-50%); padding:.6rem .8rem; border-radius:6px; background:var(--green-dark); color:white; white-space:nowrap; opacity:0; visibility:hidden; pointer-events:none; font:500 14px "Instrument Sans",Arial,sans-serif; box-shadow:var(--shadow); }
 .sidebar-collapsed .sidebar .nav-button:is(:hover,:focus-visible)>.side-label,.sidebar-collapsed .sidebar .brand:is(:hover,:focus-visible)>.side-label { opacity:1; visibility:visible; }
 .sidebar-launcher { display:none; }
 .side-drawer { margin:0; width:min(300px,calc(100vw - 40px)); height:100dvh; max-height:100dvh; border:0; border-right:1px solid var(--line); padding:1.25rem; background:var(--cream); color:var(--ink); }
@@ -31,7 +31,7 @@ dialog::backdrop { background:var(--paint-bg-20352666); backdrop-filter:blur(3px
 .section-heading>div:first-child { min-width:0; }
 .section-heading p:not(.eyebrow) { color:var(--muted); max-width:640px; margin-bottom:0; }
 .page-title { font-size:40px; line-height:1.15; margin:0; letter-spacing:-.025em; }
-.eyebrow { display:block; font:600 14px/1.5 "Inter",sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
+.eyebrow { display:block; font:600 14px/1.5 "Instrument Sans",Arial,sans-serif; letter-spacing:.14em; text-transform:uppercase; color:var(--muted); margin:0 0 10px; }
 .split-heading { display:flex; align-items:center; justify-content:space-between; gap:1rem; margin:28px 0 16px; }
 .split-heading h2 { margin:0; }
 .split-heading p { margin-bottom:0; }
