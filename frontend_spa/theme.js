@@ -5,6 +5,13 @@
  let preference='system';
  try{const saved=localStorage.getItem('lise_theme');if(['light','dark','system'].includes(saved))preference=saved;}catch(_){}
  const isDark=()=>preference==='dark'||(preference==='system'&&!!media?.matches);
+ const setFavicon=()=>{
+  if(!document.head||typeof document.createElement!=='function')return;
+  if(document.querySelector('link[rel="icon"]'))return;
+  const icon=document.createElement('link');
+  icon.rel='icon';icon.type='image/svg+xml';icon.href='/assets/favicon.svg';
+  document.head.append(icon);
+ };
  const art=(name)=>name==='sun'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="3.5"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M20.5 14A8.5 8.5 0 0 1 10 3.5 8.5 8.5 0 1 0 20.5 14Z"/></svg>';
  function sync(){
   const dark=isDark();
@@ -23,5 +30,5 @@
  });
  window.addEventListener('storage',e=>{if(e.key!=='lise_theme')return;preference=['light','dark'].includes(e.newValue)?e.newValue:'system';sync();});
  media?.addEventListener?.('change',()=>{if(preference==='system')sync();});
- sync();
+ setFavicon();sync();
 })();

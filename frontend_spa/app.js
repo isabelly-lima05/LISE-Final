@@ -382,18 +382,24 @@
     rememberRoute();
   }
 
+  let dashboardLoadSequence = 0;
   async function loadDashboard() {
+    const sequence=++dashboardLoadSequence;
     state.view='dashboard'; state.dashboard=null;state.discovery=null;state.discoveryError='';setLoading();
     state.dashboard=await api('/dashboard');
+    if(sequence!==dashboardLoadSequence||state.view!=='dashboard')return;
+    state.loading=false;render();
     if(state.user.role==='Aluno') {
-      const results=await Promise.allSettled([api('/collections'),api('/explore?kind=terms')]);
-      state.collections=results[0].status==='fulfilled'?results[0].value.collections:state.dashboard.collections||[];
-      state.collectionsLoaded=results[0].status==='fulfilled';
-      if(results[1].status==='fulfilled') {
-        state.explore=results[1].value;state.discovery=window.LiseComponents.dayTerm(state.explore.terms);
-      } else state.discoveryError=results[1].reason.message;
+      void Promise.allSettled([api('/collections'),api('/explore?kind=terms')]).then(results=>{
+        if(sequence!==dashboardLoadSequence||state.view!=='dashboard')return;
+        state.collections=results[0].status==='fulfilled'?results[0].value.collections:state.dashboard.collections||[];
+        state.collectionsLoaded=results[0].status==='fulfilled';
+        if(results[1].status==='fulfilled') {
+          state.explore=results[1].value;state.discovery=window.LiseComponents.dayTerm(state.explore.terms);
+        } else state.discoveryError=results[1].reason.message;
+        render();
+      });
     }
-    render();
   }
   async function loadCollections() {
     const d = await api('/collections'); state.collections = d.collections;state.collectionsLoaded=true;state.view = 'collections'; render();
@@ -515,9 +521,9 @@
 
   async function navigate(view) {
     if (view === 'dashboard') return loadDashboard();
-    if (view === 'classes') { state.showArchived=false;state.view='classes'; setLoading('Carregando turmas…'); state.dashboard=await api('/dashboard'); return render(); }
+    if (view === 'classes') { state.showArchived=false;state.view='classes'; if(!state.dashboard){setLoading('Carregando turmas…');state.dashboard=await api('/dashboard');} return render(); }
     if (view === 'explore') return loadExplore('terms');
-    if (view === 'trails') { state.showArchived=false;state.view='trails';setLoading('Consultando trilhas…');state.dashboard=await api('/dashboard');return render(); }
+    if (view === 'trails') { state.showArchived=false;state.view='trails';if(!state.dashboard){setLoading('Consultando trilhas…');state.dashboard=await api('/dashboard');}return render(); }
     if (view === 'favorites') return loadExplore('favorites');
     if (view === 'collections') return loadCollections();
     if (view === 'games') { state.practiceGame=''; state.practiceSource=null; state.view='games'; return render(); }

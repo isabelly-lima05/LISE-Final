@@ -20,12 +20,24 @@
   }else out.push([prefix||'Valor',text(value)]);
   return out;
  }
- let fontPromise;
+ let fontPromise,jsPdfPromise;
+ function loadJsPdf(){
+  if(window.jspdf?.jsPDF)return Promise.resolve(window.jspdf.jsPDF);
+  if(jsPdfPromise)return jsPdfPromise;
+  if(typeof document==='undefined'||!document.head)throw new Error('O gerador de PDF não está disponível neste navegador.');
+  jsPdfPromise=new Promise((resolve,reject)=>{
+   const script=document.createElement('script');script.src='/assets/vendor/jspdf.umd.min.js?v=4.2.1';script.async=true;
+   script.onload=()=>window.jspdf?.jsPDF?resolve(window.jspdf.jsPDF):reject(new Error('O gerador de PDF não carregou.'));
+   script.onerror=()=>reject(new Error('Não foi possível carregar o gerador de PDF. Tente novamente.'));
+   document.head.append(script);
+  }).catch(error=>{jsPdfPromise=null;throw error;});
+  return jsPdfPromise;
+ }
  const base64=bytes=>{let str='';for(let i=0;i<bytes.length;i+=8192)str+=String.fromCharCode(...bytes.subarray(i,i+8192));return btoa(str);};
  function fonts(){if(!fontPromise)fontPromise=Promise.all(['DejaVuSans.ttf','DejaVuSans-Bold.ttf'].map(async name=>{const response=await fetch('/assets/pdf-fonts/'+name);if(!response.ok)throw new Error('Não foi possível carregar as fontes do relatório. Tente novamente.');return base64(new Uint8Array(await response.arrayBuffer()));})).catch(e=>{fontPromise=null;throw e;});return fontPromise;}
  async function build(data,options={}){
   if(!data||typeof data!=='object'||Array.isArray(data)||!data.conta||typeof data.conta!=='object'||Array.isArray(data.conta))throw new Error('Não foi possível obter os dados da conta para o relatório.');
-  const PDF=window.jspdf?.jsPDF;if(!PDF)throw new Error('O gerador de PDF não carregou. Atualize a página e tente novamente.');
+  const PDF=await loadJsPdf();
   const fontData=options.fontData||await fonts();
   const doc=new PDF({unit:'mm',format:'a4',compress:true,putOnlyUsedFonts:true});
   doc.addFileToVFS('LISE-Regular.ttf',fontData[0]);doc.addFont('LISE-Regular.ttf','LISE','normal');doc.addFileToVFS('LISE-Bold.ttf',fontData[1]);doc.addFont('LISE-Bold.ttf','LISE','bold');
