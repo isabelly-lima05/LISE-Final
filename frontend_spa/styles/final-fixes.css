@@ -313,3 +313,19 @@ dialog.app-dialog :is(h1,h2,h3,label,strong,p,small){color:inherit}dialog.app-di
 
 @media(max-width:760px){.skeleton-page-grid{grid-template-columns:1fr}.skeleton-page-grid .skeleton-page-card:nth-child(n+3){display:none}.skeleton-page-heading .skeleton-title{height:38px}.loading-layout{min-height:420px}}
 @media(prefers-reduced-motion:reduce){.favorite-toggle.is-favorite,.detail-favorite.is-favorite{animation:none}.skeleton,.skeleton-card-title{animation:none}}
+
+/* Cards do Explorador: até três componentes completos, sem recorte vertical. */
+.app-layout .specimen-card .anatomy-parts{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));max-height:none;overflow:visible;align-items:stretch;margin-top:14px}
+.app-layout .specimen-card .anatomy-part{align-content:start;padding:7px 9px}.app-layout .specimen-card .anatomy-part strong{font-size:15px}.app-layout .specimen-card .anatomy-part small{font-size:12px;line-height:1.25}
+.app-layout .specimen-card .anatomy-more{min-height:58px}
+
+/* A chamada visual da turma também é um controle explícito. */
+.app-layout button.class-open{position:relative;z-index:3;width:100%;border:0;border-top:1px solid var(--paint-line-edf0e5);background:transparent;padding:13px 0 0;cursor:pointer;font-family:inherit;text-align:right}
+.app-layout button.class-open:hover,.app-layout button.class-open:focus-visible{color:var(--green-dark)}
+
+/* Relações principais substituem um segundo grid pesado na ficha da palavra. */
+.related-connections{margin-top:42px}.connection-map{display:grid;grid-template-columns:minmax(160px,.55fr) minmax(0,1.8fr);gap:34px;align-items:stretch}.connection-origin{position:relative;display:grid;place-items:center;min-height:180px;padding:24px;border:1px solid var(--green);border-radius:50%;background:var(--root-wash);color:var(--green-dark);text-align:center}.connection-origin span{font:600 clamp(22px,2.3vw,34px)/1.15 var(--font-display);overflow-wrap:anywhere}.connection-origin::after{content:"";position:absolute;left:100%;top:50%;width:35px;height:1px;background:var(--line)}
+.connection-branches{display:grid;gap:12px}.connection-node{position:relative;min-width:0;padding:18px 20px;border:1px solid var(--line);border-radius:15px;background:var(--paper);transition:transform 180ms var(--ease-out),border-color 180ms var(--ease-out),box-shadow 180ms var(--ease-out)}.connection-node::before{content:"";position:absolute;right:100%;top:50%;width:34px;height:1px;background:var(--line)}.connection-node:hover{transform:translateX(3px);border-color:var(--green);box-shadow:var(--shadow-soft)}.connection-node h3{font-size:22px;margin:5px 0}.connection-node p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;margin:0;color:var(--muted);font-size:13px}.connection-node .btn{margin-top:8px}.connection-shared{font:600 10px var(--font-mono);color:var(--green);text-transform:uppercase;letter-spacing:.06em}
+
+@media(max-width:760px){.connection-map{grid-template-columns:1fr;gap:22px}.connection-origin{min-height:0;border-radius:16px}.connection-origin::after{left:50%;top:100%;width:1px;height:23px}.connection-node::before{display:none}.connection-node:hover{transform:none}}
+@media(prefers-reduced-motion:reduce){.connection-node{transition:none}.connection-node:hover{transform:none}}

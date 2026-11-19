@@ -1516,10 +1516,19 @@ def explore_term(term_id):
     radical_ids = [r['radical_id'] for r in view['radical_list']]
     related = []
     if radical_ids:
-        terms = g.db.scalars(visible_terms(g.user.id_usuario).join(TermoRadical, TermoRadical.fk_termo == Termo.id_termo)
-                             .where(TermoRadical.fk_radical.in_(radical_ids), TermoRadical.status_validacao == 'APROVADO',
-                                    Termo.id_termo != term_id)
-                             .distinct().order_by(Termo.palavra_completa).limit(30)).all()
+        visible_ids = visible_terms(g.user.id_usuario).with_only_columns(Termo.id_termo)
+        ranking = (select(TermoRadical.fk_termo.label('term_id'),
+                          func.count(func.distinct(TermoRadical.fk_radical)).label('shared_count'))
+                   .where(TermoRadical.fk_radical.in_(radical_ids),
+                          TermoRadical.status_validacao == 'APROVADO',
+                          TermoRadical.fk_termo.in_(visible_ids),
+                          TermoRadical.fk_termo != term_id)
+                   .group_by(TermoRadical.fk_termo)
+                   .order_by(func.count(func.distinct(TermoRadical.fk_radical)).desc())
+                   .limit(3).subquery())
+        terms = g.db.scalars(visible_terms(g.user.id_usuario)
+                             .join(ranking, ranking.c.term_id == Termo.id_termo)
+                             .order_by(ranking.c.shared_count.desc(), Termo.palavra_completa)).all()
         related = _term_data(terms, g.user.id_usuario)
     return jsonify(term=view, similar_terms=related)
 
