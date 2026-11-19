@@ -277,3 +277,39 @@ html:has(.access-stage),body:has(.access-stage),body:has(.access-stage)>#app{hei
 .app-layout .memory-session .memory-card-text{font-size:clamp(13px,1.15vw,17px)!important;line-height:1.55!important;padding-inline:4px}
 [data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=term],[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=element]{background:#243c2c!important;color:#c5e8c4!important;border-color:#6f9b72!important}
 [data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=definition],[data-theme=dark] .app-layout .memory-session .memory-front[data-memory-kind=meaning]{background:#3b2940!important;color:#f0c9f4!important;border-color:#966d9c!important}
+
+/* Resposta percebida: renderização adiada fora da tela e favoritos imediatos. */
+.app-layout :is(.specimen-card,.collection-cover,.trail-list>article){content-visibility:auto;contain-intrinsic-size:auto 430px}
+.favorite-toggle,.detail-favorite{transition:color 150ms var(--ease-out),background-color 150ms var(--ease-out),border-color 150ms var(--ease-out),transform 150ms var(--ease-out)}
+.favorite-toggle.is-favorite,.detail-favorite.is-favorite{animation:favorite-confirm 300ms var(--ease-out)}
+@keyframes favorite-confirm{0%,100%{transform:scale(1)}45%{transform:scale(1.12)}}
+
+/* Esqueletos preservam a geometria da tela que será aberta. */
+.loading-layout{display:grid;gap:24px;min-height:520px;align-content:start}.loading-layout>small{color:var(--muted)}
+.skeleton-page-heading{display:grid;gap:12px;max-width:720px}.skeleton-kicker{width:120px;height:10px}.skeleton-page-heading .skeleton-title{width:min(480px,72%);height:48px}.skeleton-page-hero{display:grid;gap:14px;min-height:190px;padding:28px;border:1px solid var(--line);border-radius:18px;background:var(--paper)}
+.skeleton-card-title{display:block;width:52%;height:24px;border-radius:7px;background:linear-gradient(90deg,var(--paint-bg-e8ecdf),var(--paint-bg-f6f7ef),var(--paint-bg-e8ecdf));background-size:200% 100%;animation:shimmer 1.3s linear infinite}
+.skeleton-page-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}.skeleton-page-card{display:grid;gap:13px;min-height:185px;padding:22px;border:1px solid var(--line);border-radius:16px;background:var(--paper)}
+.loading-account .skeleton-page-hero{min-height:280px}.loading-detail .skeleton-page-hero,.loading-class .skeleton-page-hero{min-height:340px}
+
+/* Palavras compostas e muitos elementos permanecem dentro do card. */
+.app-layout .specimen-card .specimen-title{min-height:2.5em}
+.app-layout .specimen-card .specimen-title .word-name{display:-webkit-box;white-space:normal;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden;overflow-wrap:break-word;word-break:normal;font-size:clamp(24px,2.15vw,30px);line-height:1.18}
+.app-layout .word-name{max-width:100%;overflow-wrap:break-word;word-break:normal;hyphens:auto}
+.app-layout .anatomy-part{min-width:0;max-width:100%;overflow-wrap:anywhere}.anatomy-more{display:grid;place-items:center;min-width:42px;padding:7px;border:1px dashed var(--line);border-radius:8px;color:var(--muted);font:600 12px var(--font-mono)}
+
+/* Dialogs: uma única superfície semântica também no tema escuro. */
+dialog.app-dialog{color:var(--ink);background:var(--paper);border-color:var(--line);box-shadow:0 24px 80px #07130d38;animation-duration:220ms;animation-timing-function:cubic-bezier(.23,1,.32,1);transform-origin:center}
+dialog.app-dialog::backdrop{background:#10221999;backdrop-filter:none}
+dialog.app-dialog :is(h1,h2,h3,label,strong,p,small){color:inherit}dialog.app-dialog .muted,dialog.app-dialog small{color:var(--muted)}
+[data-theme=dark] dialog.app-dialog{color:var(--ink);background:#1c2b24;border-color:#4a6655;color-scheme:dark}
+[data-theme=dark] dialog.app-dialog :is(input,select,textarea){color:var(--ink);background:#121d19;border-color:#4a6655}
+[data-theme=dark] dialog.app-dialog :is(.card-actions,.dialog-heading){border-color:#4a6655}
+[data-theme=dark] dialog.app-dialog::backdrop{background:#020905c9}
+
+/* O painel de acesso ganha profundidade botânica sem baixar uma imagem extra. */
+.access-story{background:radial-gradient(circle at 72% 24%,#dcefc855 0 12%,transparent 13%),radial-gradient(ellipse at 18% 78%,#234c31 0 18%,transparent 19%),linear-gradient(145deg,#dcebc8 0%,#a9c892 48%,#3f714a 100%)}
+.access-story::after{content:"";position:absolute;width:280px;height:420px;right:-130px;bottom:-170px;border:1px solid #eff7dc80;border-radius:70% 0 70% 0;transform:rotate(-25deg);box-shadow:-55px -35px 0 -1px #eff7dc2b,-110px -70px 0 -1px #eff7dc1f;pointer-events:none}
+.access-art-core{background:#f2f7e5d9;box-shadow:0 18px 55px #173a2447}.access-orbit{border-color:#f5f9e58a}.access-story-copy{padding:18px;border-radius:16px;background:#eef6df9c;backdrop-filter:blur(3px)}
+
+@media(max-width:760px){.skeleton-page-grid{grid-template-columns:1fr}.skeleton-page-grid .skeleton-page-card:nth-child(n+3){display:none}.skeleton-page-heading .skeleton-title{height:38px}.loading-layout{min-height:420px}}
+@media(prefers-reduced-motion:reduce){.favorite-toggle.is-favorite,.detail-favorite.is-favorite{animation:none}.skeleton,.skeleton-card-title{animation:none}}
