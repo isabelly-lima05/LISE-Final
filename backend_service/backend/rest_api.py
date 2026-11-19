@@ -386,6 +386,19 @@ def _class_list_data(rows):
     return items
 
 
+def _daily_discovery(uid):
+    """Retorna uma palavra estável por dia sem carregar o catálogo inteiro."""
+    query = visible_terms(uid)
+    total = g.db.scalar(select(func.count()).select_from(query.subquery())) or 0
+    if not total:
+        return None
+    day = utcnow().astimezone(TZ).date().isoformat()
+    digest = hashlib.sha256(f'{uid}:{day}'.encode()).digest()
+    offset = int.from_bytes(digest[:8], 'big') % total
+    term = g.db.scalar(query.order_by(Termo.id_termo).offset(offset).limit(1))
+    return term_views(g.db, [term])[0] if term else None
+
+
 @api.get('/dashboard')
 @_require_user
 def dashboard():
@@ -400,7 +413,8 @@ def dashboard():
     rows = g.db.scalars(select(Partida).where(Partida.fk_usuario == uid, Partida.respondida.is_(True))).all()
     collections = g.db.scalars(select(Colecao).where(Colecao.fk_usuario == uid).order_by(Colecao.criada_em.desc())).all()
     return jsonify(role='Aluno', classes=_class_list_data(classes), stats=stats(rows),
-                   collections=[dict(id=c.id, name=c.nome) for c in collections])
+                   collections=[dict(id=c.id, name=c.nome) for c in collections],
+                   discovery=_daily_discovery(uid))
 
 
 @api.get('/classes')

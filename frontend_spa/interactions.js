@@ -33,7 +33,7 @@
   el.innerHTML=`<div class="dialog-heading"><h2 id="${id}">${esc(title)}</h2><button type="button" class="icon-button" data-ui="dismiss-dialog" aria-label="Fechar">${icon('x')}</button></div>${body}`;
   document.body.append(el);icons();
   const nativeClose=el.close.bind(el);let closing=false;
-  el.close=value=>{if(closing)return;if(reduced()){nativeClose(value);return;}closing=true;const exit=motion(el,[{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(6px) scale(.98)'}],{duration:240,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});Promise.resolve(exit?.finished).catch(()=>{}).then(()=>nativeClose(value));};
+  el.close=value=>{if(closing)return;if(reduced()){nativeClose(value);return;}closing=true;const exit=motion(el,[{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(6px) scale(.98)'}],{duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});Promise.resolve(exit?.finished).catch(()=>{}).then(()=>nativeClose(value));};
   el.addEventListener('cancel',event=>{event.preventDefault();el.close();});
   el.addEventListener('click',e=>{if(e.target===el)el.close();});
   el.addEventListener('close',()=>{el.remove();if(trigger?.isConnected)trigger.focus({preventScroll:true});},{once:true});

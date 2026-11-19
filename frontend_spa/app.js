@@ -138,7 +138,9 @@
 
   function loadingCard(message = 'Carregando…') {
     state.loading = true;
-    return `<section class="card loading-card" role="status" aria-live="polite"><span class="skeleton skeleton-title"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line short"></span><small>${esc(message)}</small></section>`;
+    const view=esc(state.view||'page');
+    const cards=Array.from({length:['dashboard','explore','classes','trails'].includes(state.view)?3:2},()=>'<span class="skeleton-page-card"><i class="skeleton skeleton-kicker"></i><i class="skeleton skeleton-card-title"></i><i class="skeleton skeleton-line"></i><i class="skeleton skeleton-line short"></i></span>').join('');
+    return `<section class="loading-layout loading-${view}" data-loading-view="${view}" role="status" aria-live="polite"><header class="skeleton-page-heading"><span class="skeleton skeleton-kicker"></span><span class="skeleton skeleton-title"></span><span class="skeleton skeleton-line short"></span></header><div class="skeleton-page-hero"><span class="skeleton skeleton-card-title"></span><span class="skeleton skeleton-line"></span><span class="skeleton skeleton-line short"></span></div><div class="skeleton-page-grid">${cards}</div><small>${esc(message)}</small></section>`;
   }
 
   function setLoading(message = 'Carregando…') {
@@ -194,8 +196,10 @@
 
   async function loadAccount(tab=state.accountTab || 'perfil',overlap=false) {
     state.accountTab=['perfil','seguranca','privacidade'].includes(tab)?tab:'perfil';
-    state.account=await api('/account'); state.legalVersion=state.account.legal_version;
-    state.view='account'; state.loading=false; state.loadError=''; overlap?renderOverlapping():render();
+    state.view='account'; state.loading=false; state.loadError='';
+    if(state.accountTab!=='privacidade'||state.account){overlap?renderOverlapping():render();return;}
+    render();state.account=await api('/account'); state.legalVersion=state.account.legal_version;
+    if(state.view==='account'&&state.accountTab==='privacidade')render();
   }
 
   function renderAccount() { return screens.account(); }
@@ -388,15 +392,18 @@
     state.view='dashboard'; state.dashboard=null;state.discovery=null;state.discoveryError='';setLoading();
     state.dashboard=await api('/dashboard');
     if(sequence!==dashboardLoadSequence||state.view!=='dashboard')return;
+    state.discovery=state.dashboard.discovery||null;
     state.loading=false;render();
     if(state.user.role==='Aluno') {
-      void Promise.allSettled([api('/collections'),api('/explore?kind=terms')]).then(results=>{
+      const optional=[api('/collections')];
+      if(!state.discovery)optional.push(api('/explore?kind=terms'));
+      void Promise.allSettled(optional).then(results=>{
         if(sequence!==dashboardLoadSequence||state.view!=='dashboard')return;
         state.collections=results[0].status==='fulfilled'?results[0].value.collections:state.dashboard.collections||[];
         state.collectionsLoaded=results[0].status==='fulfilled';
-        if(results[1].status==='fulfilled') {
+        if(results[1]?.status==='fulfilled') {
           state.explore=results[1].value;state.discovery=window.LiseComponents.dayTerm(state.explore.terms);
-        } else state.discoveryError=results[1].reason.message;
+        } else if(results[1]?.status==='rejected')state.discoveryError=results[1].reason.message;
         render();
       });
     }
@@ -549,6 +556,19 @@
     state.result = result; state.view='result'; render();
   }
 
+  function setFavoriteState(type,id,value) {
+    const update=item=>{if(item&&Number(item.id)===Number(id))item.favorite=value;};
+    if(type==='term'){
+      update(state.detail?.term);update(state.discovery);update(state.dashboard?.discovery);
+      for(const item of state.explore?.terms||[])update(item);
+      for(const item of state.collection?.terms||[])update(item);
+      for(const item of state.collection?.term_items||[])update(item);
+    }else{
+      update(state.detail?.radical);
+      for(const item of state.explore?.radicals||[])update(item);
+    }
+  }
+
   async function handleClick(event) {
     const buttonEl = event.target.closest('[data-action]');
     if (!buttonEl) return;
@@ -676,22 +696,24 @@
       else if (action === 'detail-back') { state.view=state.detailBack; render(); }
       else if (action === 'toggle-sort') { state.sort=state.sort==='asc'?'desc':'asc'; render(); }
       else if (action === 'toggle-favorite') {
-        const type=buttonEl.dataset.type, id=buttonEl.dataset.id;
-        if (buttonEl.dataset.favorite === 'true') await api(`/favorites/${type}/${id}`,{method:'DELETE'});
-        else await api('/favorites',{method:'POST',body:{type,id:Number(id)}});
-        if (state.view==='detail') state.detail=state.detailType==='term'?await api(`/explore/terms/${id}`):await api(`/explore/radicals/${id}`);
-        else if (state.view==='explore') state.explore=await api('/explore?kind=terms');
-        else if (state.view==='trail' && state.collection) state.collection=(await api(`/trails/${state.collection.id}?assignment_id=${state.collection.assignment_id}`)).trail;
-        render(); toast('Favoritos atualizados.');
+        const type=buttonEl.dataset.type,id=Number(buttonEl.dataset.id),was=buttonEl.dataset.favorite==='true',next=!was;
+        setFavoriteState(type,id,next);render();
+        try{
+          if(was)await api(`/favorites/${type}/${id}`,{method:'DELETE'});
+          else await api('/favorites',{method:'POST',body:{type,id}});
+          toast(next?'Adicionado aos favoritos.':'Removido dos favoritos.');
+        }catch(error){setFavoriteState(type,id,was);render();throw error;}
       }
       else if (action === 'toggle-game-favorite') {
         const type=buttonEl.dataset.type, id=Number(buttonEl.dataset.id);
         const itemList=type==='term'?state.gameFeedback.feedback.favorite_terms:state.gameFeedback.feedback.favorite_radicals;
         const item=itemList.find(x=>x.id===id);
         if (!item) return;
-        if (item.favorite) await api(`/favorites/${type}/${id}`,{method:'DELETE'});
-        else await api('/favorites',{method:'POST',body:{type,id}});
-        item.favorite=!item.favorite; render();
+        const was=!!item.favorite;item.favorite=!was;render();
+        try{
+          if(was)await api(`/favorites/${type}/${id}`,{method:'DELETE'});
+          else await api('/favorites',{method:'POST',body:{type,id}});
+        }catch(error){item.favorite=was;render();throw error;}
       }
       else if (action === 'delete-trail') {
         if (!await window.LiseInteractions.confirm('Excluir trilha','Excluir esta trilha definitivamente? Os termos do catálogo continuam disponíveis. A trilha sairá de todas as turmas. O histórico de avaliações será preservado.',buttonEl))return;
@@ -896,9 +918,11 @@
         state.user.name=result.name; routeSnapshots.clear(); await loadAccount('perfil'); toast(result.message);
       } else if (kind === 'account-terms') {
         const result=await api('/account/terms',{method:'POST',body:{accept_terms:data.has('accept_terms'),legal_version:state.account.legal_version}});
+        state.account=null;
         await loadAccount(); toast(result.message);
       } else if (kind === 'privacy-request') {
         const result=await api('/account/requests',{method:'POST',body:{type:data.get('type'),details:data.get('details'),confirm_delete:data.get('confirm_delete')}});
+        state.account=null;
         await loadAccount(); toast(`${result.message} Protocolo: ${result.request.id}`);
       } else if (kind === 'recovery') {
         const d=await api('/auth/recovery',{method:'POST',body:{email:data.get('email')}}); toast(d.message); state.authMode='login'; renderAuth();
@@ -1107,7 +1131,7 @@
     if(!dialog?.open||dialog.dataset.closing)return;
     if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||!dialog.animate){dialog.close();return;}
     dialog.dataset.closing='true';
-    const exit=dialog.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(6px) scale(.98)'}],{duration:240,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    const exit=dialog.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(6px) scale(.98)'}],{duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
     exit.finished.catch(()=>{}).then(()=>{delete dialog.dataset.closing;dialog.close();});
   }
   function openDialog(dialog,trigger){if(!dialog)return;delete dialog.dataset.closing;dialog._trigger=trigger;dialog.showModal();dialog.querySelector('button,input,select')?.focus();}

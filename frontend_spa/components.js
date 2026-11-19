@@ -7,7 +7,11 @@
   const morphLabel = value => ({PREFIXO:'Prefixo',RADICAL:'Radical',RAIZ:'Raiz',SUFIXO:'Sufixo',ELEMENTO_COMPOSICAO:'Elemento de composição'})[value] || 'Elemento etimológico';
   const tone = value => value === 'PREFIXO' ? 'prefix' : value === 'SUFIXO' ? 'suffix' : ['RADICAL','RAIZ','ELEMENTO_COMPOSICAO'].includes(value) ? 'root' : 'neutral';
   const button = (label, action, cls='btn-primary', extra='') => `<button class="btn ${cls}" type="button" data-action="${action}" ${extra}>${label}</button>`;
-  const empty = (title, detail) => `<div class="empty"><span class="empty-mark">${icon('sprout')}</span><strong>${esc(title)}</strong><p>${esc(detail)}</p></div>`;
+  const empty = (title, detail) => {
+    const text=fold(`${title} ${detail}`);
+    const mark=text.includes('turma')?'users':text.includes('trilha')?'route':text.includes('colec')||text.includes('caderno')?'notebook':text.includes('palavra')||text.includes('termo')?'book-open':text.includes('pedido')?'inbox':'sprout';
+    return `<div class="empty" data-empty-kind="${mark}"><span class="empty-mark">${icon(mark)}</span><strong>${esc(title)}</strong><p>${esc(detail)}</p></div>`;
+  };
   const value = number => Number.isFinite(number) ? number.toLocaleString('pt-BR') : '—';
   const heading = (eyebrow, title, description='', actions='') => `<header class="section-heading"><div><p class="eyebrow">${esc(eyebrow)}</p><h1 class="page-title">${esc(title)}</h1>${description?`<p>${esc(description)}</p>`:''}</div>${actions?`<div class="card-actions">${actions}</div>`:''}</header>`;
   const breadcrumb = items => `<nav class="breadcrumb" aria-label="Caminho">${items.map((item,i)=>`${i?'<span aria-hidden="true">/</span>':''}${item.action?`<button type="button" data-action="${item.action}" ${item.attrs||''}>${esc(item.label)}</button>`:`<span aria-current="page">${esc(item.label)}</span>`}`).join('')}</nav>`;
@@ -30,7 +34,8 @@
       const label=morphLabel(r.type),meaning=String(r.meaning||'').trim();
       return `<span class="word-segment" data-tone="${tone(r.type)}" data-part-label="${esc(label)}" data-meaning="${esc(meaning)}" tabindex="0" aria-label="${esc(text)}: ${esc(meaning)}. ${esc(label)}">${esc(text)}</span>`;
     }).join('') : esc(term.name);
-    return `<div class="word-anatomy"><span class="word-name ${large?'word-display':''}" aria-label="${esc(term.name)}">${word}</span><div class="anatomy-parts" aria-label="Elementos etimológicos validados">${parts.map(r=>`<span class="anatomy-part" data-tone="${tone(r.type)}"><strong>${esc(r.observed_form || r.text)}</strong>${meanings?`<span>${esc(r.meaning)}</span>`:''}<small>${esc(morphLabel(r.type))}</small></span>`).join('')}</div></div>`;
+    const shown=large?parts:parts.slice(0,3),remaining=parts.length-shown.length;
+    return `<div class="word-anatomy"><span class="word-name ${large?'word-display':''}" aria-label="${esc(term.name)}">${word}</span><div class="anatomy-parts" aria-label="Elementos etimológicos validados">${shown.map(r=>`<span class="anatomy-part" data-tone="${tone(r.type)}"><strong>${esc(r.observed_form || r.text)}</strong>${meanings?`<span>${esc(r.meaning)}</span>`:''}<small>${esc(morphLabel(r.type))}</small></span>`).join('')}${remaining?`<span class="anatomy-more" aria-label="Mais ${remaining} elementos etimológicos">+${remaining}</span>`:''}</div></div>`;
   }
 
   function termCard(term, {study=false, revealed=false, extra='', numbered=false, status=''}={}) {
