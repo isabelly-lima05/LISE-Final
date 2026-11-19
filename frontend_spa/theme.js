@@ -16,7 +16,10 @@
  window.LiseTheme={control:()=>`<button type="button" class="appearance-switch" data-theme-toggle role="switch" aria-label="Tema escuro" aria-checked="${isDark()}" title="${isDark()?'Ativar tema claro':'Ativar tema escuro'}"><span class="appearance-sun">${art('sun')}</span><span class="appearance-moon">${art('moon')}</span><span class="appearance-thumb" aria-hidden="true"></span></button>`};
  document.addEventListener('click',e=>{
   const b=e.target.closest?.('[data-theme-toggle]');if(!b)return;
-  preference=isDark()?'light':'dark';try{localStorage.setItem('lise_theme',preference);}catch(_){}sync();
+  const nextDark=!isDark();
+  b.classList?.remove('is-moving-on','is-moving-off');void b.offsetWidth;b.classList?.add(nextDark?'is-moving-on':'is-moving-off');
+  preference=nextDark?'dark':'light';try{localStorage.setItem('lise_theme',preference);}catch(_){}sync();
+  globalThis.setTimeout?.(()=>b.classList?.remove('is-moving-on','is-moving-off'),260);
  });
  window.addEventListener('storage',e=>{if(e.key!=='lise_theme')return;preference=['light','dark'].includes(e.newValue)?e.newValue:'system';sync();});
  media?.addEventListener?.('change',()=>{if(preference==='system')sync();});

@@ -11,7 +11,11 @@
   const value = number => Number.isFinite(number) ? number.toLocaleString('pt-BR') : '—';
   const heading = (eyebrow, title, description='', actions='') => `<header class="section-heading"><div><p class="eyebrow">${esc(eyebrow)}</p><h1 class="page-title">${esc(title)}</h1>${description?`<p>${esc(description)}</p>`:''}</div>${actions?`<div class="card-actions">${actions}</div>`:''}</header>`;
   const breadcrumb = items => `<nav class="breadcrumb" aria-label="Caminho">${items.map((item,i)=>`${i?'<span aria-hidden="true">/</span>':''}${item.action?`<button type="button" data-action="${item.action}" ${item.attrs||''}>${esc(item.label)}</button>`:`<span aria-current="page">${esc(item.label)}</span>`}`).join('')}</nav>`;
-  const codeChip = code => code ? `<button type="button" class="code-chip" data-action="copy-code" data-code="${esc(code)}" aria-label="Copiar código ${esc(code)}"><span>${esc(code)}</span>${icon('copy')}</button>` : '';
+  const codeChip = code => {
+    if(!code)return '';
+    const raw=String(code),visual=raw.length>12?`<span class="middle-truncate" aria-hidden="true"><span>${esc(raw.slice(0,6))}</span><span>…</span><span>${esc(raw.slice(-6))}</span></span><span class="sr-only">${esc(raw)}</span>`:`<span>${esc(raw)}</span>`;
+    return `<button type="button" class="code-chip" data-action="copy-code" data-code="${esc(raw)}" aria-label="Copiar código ${esc(raw)}">${visual}${icon('copy')}</button>`;
+  };
 
   function anatomy(term, {large=false, meanings=true}={}) {
     const parts = (term.radical_list || []).filter(r=>String(r.text||'').trim() && String(r.meaning||'').trim());
@@ -23,20 +27,21 @@
     let offset=0;
     const word = exact ? parts.map((r,i)=>{
       const text=String(term.name).slice(offset,offset+surfaces[i].length); offset+=surfaces[i].length;
-      return `<span class="word-segment" data-tone="${tone(r.type)}">${esc(text)}</span>`;
+      const label=morphLabel(r.type),meaning=String(r.meaning||'').trim();
+      return `<span class="word-segment" data-tone="${tone(r.type)}" data-part-label="${esc(label)}" data-meaning="${esc(meaning)}" tabindex="0" aria-label="${esc(text)}: ${esc(meaning)}. ${esc(label)}">${esc(text)}</span>`;
     }).join('') : esc(term.name);
     return `<div class="word-anatomy"><span class="word-name ${large?'word-display':''}" aria-label="${esc(term.name)}">${word}</span><div class="anatomy-parts" aria-label="Elementos etimológicos validados">${parts.map(r=>`<span class="anatomy-part" data-tone="${tone(r.type)}"><strong>${esc(r.observed_form || r.text)}</strong>${meanings?`<span>${esc(r.meaning)}</span>`:''}<small>${esc(morphLabel(r.type))}</small></span>`).join('')}</div></div>`;
   }
 
   function termCard(term, {study=false, revealed=false, extra='', numbered=false, status=''}={}) {
     const isHidden = study && !revealed;
-    return `<article class="specimen-card ${numbered?'path-card':''} ${study&&revealed?'study-revealed':''}" data-term="${esc(term.id)}"><div class="specimen-meta"><span>${esc(term.area || 'Biologia')}</span></div>
+    return `<article class="specimen-card ${numbered?'path-card':''} ${study?'study-card':''} ${study&&revealed?'study-revealed':''}" data-term="${esc(term.id)}"><div class="specimen-meta"><span>${esc(term.area || 'Biologia')}</span></div>
       <div class="specimen-title"><h3 class="${isHidden?'':'sr-only'}">${esc(term.name)}</h3>${isHidden?'':anatomy(term,{meanings:false})}</div>
       ${isHidden?'<p class="study-prompt">O que esta palavra conta sobre a Biologia?</p>':`<p class="specimen-definition">${esc(term.definition)}</p>`}
       ${status?`<p class="practice-mark">${icon(status==='Praticado'?'circle-check':'circle')}${esc(status)}</p>`:''}
       <div class="card-actions">${isHidden?button('Revelar significado','reveal-study','btn-primary btn-small',`data-id="${term.id}"`):button('Investigar palavra '+icon('arrow-right'),'open-term','btn-text btn-small',`data-id="${term.id}"`)}
-      ${button(icon('heart'),'toggle-favorite',`icon-button favorite-toggle${term.favorite?' is-favorite':''}`,`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
-      ${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
+      ${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${button(icon('heart'),'toggle-favorite',`icon-button favorite-toggle${term.favorite?' is-favorite':''}`,`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
+      ${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
   }
 
   function statsStrip(items) {
@@ -51,12 +56,12 @@
 
   function gameArt(game) {
     const pieces = {
-      bioquiz:'<path d="M40 27h84v70H40z"/><path d="m54 46 5 5 10-12m-15 28 5 5 10-12m12-15h28M81 67h28M54 84h55"/>',
-      familia_palavras:'<path d="M82 48v18M44 85V66h76v19M82 66v19"/><rect x="55" y="22" width="54" height="27" rx="13"/><rect x="20" y="85" width="47" height="26" rx="13"/><rect x="95" y="85" width="47" height="26" rx="13"/><path d="M72 35h20M33 98h20m55 0h20"/>',
-      memoria:'<rect x="30" y="24" width="54" height="77" rx="8" transform="rotate(-10 57 62)"/><rect x="79" y="32" width="54" height="77" rx="8" transform="rotate(10 106 70)"/><path d="M48 55q16-24 23 0-16 24-23 0m44 11 10 10 17-23"/>',
-      decifrador:'<circle cx="72" cy="59" r="29"/><path d="m94 82 27 27M54 59h36m-23-12 10 24"/><path d="M26 102h53m-48 11h36"/>'
+      bioquiz:'<rect x="48" y="27" width="68" height="78" rx="12"/><path d="M67 27v-7h30v7M64 50h36M64 67h23M64 84h31"/><path d="m100 78 6 6 12-15"/>',
+      familia_palavras:'<path d="M82 104V38m0 22c-17 0-29-9-34-24 19-2 31 7 34 24Zm0 18c17 0 29-9 34-24-19-2-31 7-34 24Z"/><circle cx="82" cy="31" r="8"/><circle cx="48" cy="91" r="9"/><circle cx="116" cy="91" r="9"/><path d="M82 78 51 88m31-10 31 10"/>',
+      memoria:'<rect x="35" y="30" width="57" height="72" rx="11" transform="rotate(-7 64 66)"/><rect x="75" y="30" width="57" height="72" rx="11" transform="rotate(7 104 66)"/><path d="M52 62c9-14 20-14 27 0-9 14-20 14-27 0Zm44 5 8 8 13-18"/>',
+      decifrador:'<circle cx="72" cy="60" r="30"/><path d="m94 82 26 26"/><rect x="55" y="49" width="13" height="18" rx="3"/><rect x="74" y="49" width="13" height="18" rx="3"/><path d="M31 106h51M38 116h37"/>'
     };
-    return `<svg class="game-illustration" viewBox="0 0 164 132" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="82" cy="66" r="59" class="illustration-wash" stroke="none"/>${pieces[game]||pieces.bioquiz}</svg>`;
+    return `<svg class="game-illustration" viewBox="0 0 164 132" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path class="illustration-wash" stroke="none" d="M24 28C43 6 106 1 137 26c25 20 18 70-11 91-28 20-87 11-105-18C7 77 8 47 24 28Z"/><path class="game-sprig" d="M26 93c17-3 29-12 36-28M38 86c-8-1-13-5-16-11m26 2c1-8 5-13 12-17"/>${pieces[game]||pieces.bioquiz}</svg>`;
   }
 
   function dayTerm(terms, date=new Date()) {
@@ -75,8 +80,7 @@
       const parts=t.radical_list||[];
       const text=fold([t.name,t.definition,...parts.flatMap(r=>[r.text,r.observed_form,r.meaning])].join(' '));
       return words.every(word=>text.includes(word)) && (!state.exploreArea||t.area===state.exploreArea)
-        && (!state.exploreMine||t.created_by_me) && (state.exploreKind!=='favorites'||t.favorite)
-        && (!state.exploreType||parts.some(r=>r.type===state.exploreType));
+        && (!state.exploreMine||t.created_by_me) && (state.exploreKind!=='favorites'||t.favorite);
     }).sort((a,b)=>(state.sort==='desc'?-1:1)*a.name.localeCompare(b.name,'pt-BR',{sensitivity:'base'}));
   }
   window.LiseComponents={esc,fold,icon,morphLabel,tone,button,empty,value,heading,breadcrumb,codeChip,anatomy,termCard,statsStrip,classCard,gameArt,dayTerm,filteredTerms};

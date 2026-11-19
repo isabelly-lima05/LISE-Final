@@ -4,7 +4,7 @@
 .access-logo{gap:11px;align-items:flex-start}
 .access-logo>svg{margin-top:6px;color:var(--access-brand);width:31px;height:31px}
 .access-logo>span{line-height:1.05}
-.access-logo small{font-family:Inter,Arial,sans-serif;display:block;font-size:9px;font-weight:400;letter-spacing:.03em;color:var(--access-subtle);margin-top:7px}
+.access-logo small{font-family:"Instrument Sans",Arial,sans-serif;display:block;font-size:9px;font-weight:400;letter-spacing:.03em;color:var(--access-subtle);margin-top:7px}
 .access-kicker{display:inline-flex;align-items:center;gap:7px;background:var(--access-soft);color:var(--access-brand);border:1px solid var(--access-border);padding:7px 10px;border-radius:30px;font-size:9px;letter-spacing:.12em;margin-bottom:20px}
 .access-kicker svg{width:13px;height:13px;stroke-width:1.6}
 .access-content h1{font-size:clamp(42px,3.8vw,53px);line-height:1.04;letter-spacing:-.04em}

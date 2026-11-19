@@ -7,17 +7,19 @@
  const pending=new Map();
  const icon=name=>`<i data-lucide="${name}" aria-hidden="true"></i>`;
  const icons=()=>window.lucide?.createIcons({attrs:{'stroke-width':1.7}});
- const motion=(el,frames,opts={})=>!reduced()&&el?.animate?.(frames,{duration:200,easing:'cubic-bezier(.2,.7,.2,1)',...opts});
+ const motion=(el,frames,opts={})=>!reduced()&&el?.animate?.(frames,{duration:200,easing:'cubic-bezier(.77,0,.175,1)',...opts});
+ const pulse=el=>{if(reduced()||!el?.isConnected)return;el.classList.remove('ui-confirm-pulse');void el.offsetWidth;el.classList.add('ui-confirm-pulse');setTimeout(()=>el.classList.remove('ui-confirm-pulse'),360);};
+ const shake=el=>{if(reduced()||!el?.isConnected)return;el.classList.remove('ui-error-shake');void el.offsetWidth;el.classList.add('ui-error-shake');setTimeout(()=>el.classList.remove('ui-error-shake'),280);};
  function notify(message,tone='success',options={}) {
   const root=document.getElementById('toast');if(!root)return;
   root.className='toast-stack';root.removeAttribute('role');root.removeAttribute('aria-live');
   const card=document.createElement('div');card.className='notice';card.dataset.tone=tone;
   card.setAttribute('role',tone==='error'?'alert':'status');
   const text=document.createElement('span');text.textContent=message;card.append(text);
-  let timer;const close=()=>{clearTimeout(timer);card.remove();};
+  let timer,closing=false;const close=()=>{clearTimeout(timer);if(closing||!card.isConnected)return;closing=true;if(reduced()){card.remove();return;}const exit=motion(card,[{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(6px)'}],{duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});Promise.resolve(exit?.finished).catch(()=>{}).then(()=>card.remove());};
   if(options.action){const action=document.createElement('button');action.type='button';action.className='btn btn-text';action.textContent=options.label||'Desfazer';action.onclick=()=>{options.action();close();};card.append(action);}
   const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='icon-button';dismiss.setAttribute('aria-label','Dispensar aviso');dismiss.innerHTML=icon('x');dismiss.onclick=close;card.append(dismiss);
-  root.append(card);icons();motion(card,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}]);
+  root.append(card);icons();const entrance=motion(card,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{easing:'cubic-bezier(.23,1,.32,1)'});if(tone==='success')Promise.resolve(entrance?.finished).catch(()=>{}).then(()=>pulse(card));if(tone==='error')Promise.resolve(entrance?.finished).catch(()=>{}).then(()=>shake(card));
   let remaining=options.duration??4000,started=Date.now();
   const start=()=>{started=Date.now();timer=setTimeout(close,remaining);};
   const pause=()=>{clearTimeout(timer);remaining=Math.max(0,remaining-(Date.now()-started));};
@@ -30,6 +32,9 @@
   const id='interaction-'+crypto.randomUUID();el.setAttribute('aria-labelledby',id);
   el.innerHTML=`<div class="dialog-heading"><h2 id="${id}">${esc(title)}</h2><button type="button" class="icon-button" data-ui="dismiss-dialog" aria-label="Fechar">${icon('x')}</button></div>${body}`;
   document.body.append(el);icons();
+  const nativeClose=el.close.bind(el);let closing=false;
+  el.close=value=>{if(closing)return;if(reduced()){nativeClose(value);return;}closing=true;const exit=motion(el,[{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(6px) scale(.98)'}],{duration:240,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});Promise.resolve(exit?.finished).catch(()=>{}).then(()=>nativeClose(value));};
+  el.addEventListener('cancel',event=>{event.preventDefault();el.close();});
   el.addEventListener('click',e=>{if(e.target===el)el.close();});
   el.addEventListener('close',()=>{el.remove();if(trigger?.isConnected)trigger.focus({preventScroll:true});},{once:true});
   el.addEventListener('keydown',e=>{if(e.key!=='Tab')return;const controls=[...el.querySelectorAll('button:not([disabled]),input,select,textarea,a[href]')].filter(x=>x.getClientRects().length);if(e.shiftKey&&document.activeElement===controls[0]){e.preventDefault();controls.at(-1)?.focus();}else if(!e.shiftKey&&document.activeElement===controls.at(-1)){e.preventDefault();controls[0]?.focus();}});
@@ -42,7 +47,7 @@
   if(!button)return()=>{};
   const html=button.innerHTML,disabled=button.disabled,width=button.getBoundingClientRect().width;
   button.style.minWidth=width+'px';button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML=`<span class="spinner" aria-hidden="true"></span><span>${esc(label)}</span>`;
-  return success=>{button.disabled=disabled;button.removeAttribute('aria-busy');if(success&&button.isConnected){button.innerHTML=icon('check')+' Salvo';icons();setTimeout(()=>{button.innerHTML=html;button.style.minWidth='';},1200);}else{button.innerHTML=html;button.style.minWidth='';}};
+  return success=>{button.disabled=disabled;button.removeAttribute('aria-busy');if(success&&button.isConnected){button.innerHTML=icon('check')+' Salvo';icons();pulse(button);setTimeout(()=>{button.innerHTML=html;button.style.minWidth='';},1200);}else{button.innerHTML=html;button.style.minWidth='';}};
  }
  async function delayedRemoval(key,node,commit) {
   if(pending.has(key))return;
@@ -61,12 +66,12 @@
   const intro=choice?'Escolha outro companheiro ou mantenha o atual.':'Escolha um companheiro para completar seu perfil.';
   const el=dialog('Escolha seu companheiro',`<p class="avatar-dialog-intro">${esc(intro)}</p><div class="avatar-options">${hooks.avatars.map(a=>`<button type="button" class="avatar-option ${a.id===choice?'selected':''}" data-choice="${esc(a.id)}" aria-pressed="${a.id===choice}">${hooks.avatarMarkup(a.id)}<strong>${esc(a.label)}</strong><small>${esc(a.species)}</small></button>`).join('')}</div><div class="card-actions"><button type="button" class="btn btn-outline" data-cancel>Cancelar</button><button type="button" class="btn btn-primary" data-save>Salvar avatar</button></div>`,trigger);
   const save=el.querySelector('[data-save]');save.disabled=!choice;save.title=choice?'':'Escolha um mascote antes de salvar.';
-  el.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{choice=b.dataset.choice;save.disabled=false;save.title='';el.querySelectorAll('[data-choice]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});motion(b,[{transform:'scale(.96)'},{transform:'scale(1.05)'},{transform:'scale(1)'}]);});
+  el.querySelectorAll('[data-choice]').forEach(b=>b.onclick=()=>{choice=b.dataset.choice;save.disabled=false;save.title='';el.querySelectorAll('[data-choice]').forEach(x=>{x.classList.toggle('selected',x===b);x.setAttribute('aria-pressed',String(x===b));});motion(b,[{transform:'scale(.97)'},{transform:'scale(1)'}],{duration:180});});
   el.querySelector('[data-cancel]').onclick=()=>el.close();
   save.onclick=async e=>{if(!choice)return;const restore=busy(e.currentTarget);try{const d=await hooks.api('/auth/profile',{method:'PATCH',body:{avatar:choice}});state.user=d.user;el.close();hooks.render();document.querySelector('[data-ui="avatar"]')?.focus();notify('Avatar atualizado.');}catch(err){notify(err.message,'error');}finally{restore();}};
  }
  function createClass(trigger) {
-  const el=dialog('Criar turma',`<p>Crie o caderno da turma e compartilhe o código com seus alunos.</p><form data-ui-form="new-class"><div class="field"><label for="quick-class-name">Nome da turma</label><input id="quick-class-name" name="name" maxlength="150" required autofocus placeholder="Ex.: 3º ano A"></div><div class="card-actions"><button class="btn btn-outline" type="button" data-cancel>Cancelar</button><button class="btn btn-primary" type="submit">Criar turma</button></div></form>`,trigger);
+  const el=dialog('Criar turma',`<p class="dialog-lead">Prepare o espaço da turma agora; o código para os alunos aparece logo após a criação.</p><ol class="creation-flow" aria-label="Etapas para criar a turma"><li class="is-current"><b>1</b><span><strong>Nomear</strong><small>Identifique a turma</small></span></li><li><b>2</b><span><strong>Gerar código</strong><small>A LISE cria automaticamente</small></span></li><li><b>3</b><span><strong>Compartilhar</strong><small>Envie aos alunos</small></span></li></ol><form data-ui-form="new-class"><div class="field"><label for="quick-class-name">Nome da turma</label><input id="quick-class-name" name="name" maxlength="150" required autofocus placeholder="Ex.: 3º ano A"><small>Use um nome fácil de reconhecer no planejamento.</small></div><div class="card-actions"><button class="btn btn-outline" type="button" data-cancel>Cancelar</button><button class="btn btn-primary" type="submit">Criar e gerar código</button></div></form>`,trigger);
   el.querySelector('[data-cancel]').onclick=()=>el.close();
   el.querySelector('form').onsubmit=async event=>{event.preventDefault();const form=event.currentTarget;if(form.dataset.pending)return;form.dataset.pending='1';const restore=busy(form.querySelector('[type=submit]'),'Criando…');try{const d=await hooks.api('/classes',{method:'POST',body:{name:new FormData(form).get('name')},idempotencyKey:form.dataset.operationKey||(form.dataset.operationKey=crypto.randomUUID())});await hooks.loadDashboard();const c=d.class||d.turma||d;el.querySelector('form').innerHTML=`<div class="created-class"><span class="success-mark">${icon('circle-check')}</span><h3>Turma criada</h3><p>${esc(c.name||'Compartilhe este código com seus alunos.')}</p><button class="code-chip" type="button" data-ui="copy" data-code="${esc(c.code||'')}">${esc(c.code||'')} ${icon('copy')}</button></div><button type="button" class="btn btn-primary" data-ui="dismiss-dialog">Concluir</button>`;icons();notify('Turma criada.');}catch(err){notify(err.message,'error');}finally{delete form.dataset.pending;restore();}};
  }
@@ -83,7 +88,22 @@
   });
  }
  function tabs(root) {
-  root.querySelectorAll('[role=tablist]').forEach(list=>{const active=list.querySelector('[aria-selected=true]');if(!active)return;const key=list.getAttribute('aria-label');const indicator=document.createElement('span');indicator.className='tab-indicator';indicator.setAttribute('aria-hidden','true');list.append(indicator);const update=()=>{indicator.style.width=active.offsetWidth+'px';indicator.style.transform=`translateX(${active.offsetLeft}px)`;};update();const before=previousTabs.get(key);if(before&&!reduced())indicator.animate([{transform:`translateX(${before.left}px) scaleX(${before.width/(active.offsetWidth||1)})`},{transform:indicator.style.transform+' scaleX(1)'}],{duration:200,easing:'cubic-bezier(.2,.7,.2,1)'});previousTabs.set(key,{left:active.offsetLeft,width:active.offsetWidth});});
+  root.querySelectorAll('[role=tablist]').forEach(list=>{const active=list.querySelector('[aria-selected=true]');if(!active)return;const key=list.getAttribute('aria-label');const indicator=document.createElement('span');indicator.className='tab-indicator';indicator.setAttribute('aria-hidden','true');list.append(indicator);const update=()=>{indicator.style.width=active.offsetWidth+'px';indicator.style.transform=`translateX(${active.offsetLeft}px)`;};update();const before=previousTabs.get(key);if(before&&!reduced())indicator.animate([{transform:`translateX(${before.left}px) scaleX(${before.width/(active.offsetWidth||1)})`},{transform:indicator.style.transform+' scaleX(1)'}],{duration:200,easing:'cubic-bezier(.77,0,.175,1)'});previousTabs.set(key,{left:active.offsetLeft,width:active.offsetWidth});});
+ }
+ const popoverPanel=details=>details.querySelector(':scope>.collection-menu-content,:scope>.management-options,:scope>div');
+ function closePopover(details,restoreFocus=false){
+  if(!details?.open||details.dataset.closing)return;
+  const summary=details.querySelector(':scope>summary'),panel=popoverPanel(details);
+  if(reduced()||!panel){details.open=false;if(restoreFocus)summary?.focus();return;}
+  details.dataset.closing='true';
+  const exit=motion(panel,[{opacity:1,transform:'scale(1)'},{opacity:0,transform:'scale(.95)'}],{duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+  Promise.resolve(exit?.finished).catch(()=>{}).then(()=>{delete details.dataset.closing;details.open=false;if(restoreFocus)summary?.focus();});
+ }
+ function popovers(root){
+  root.querySelectorAll('details.trail-menu,details.collection-menu,details.management-menu').forEach(details=>{
+   if(details.dataset.motionReady)return;details.dataset.motionReady='true';
+   details.querySelector(':scope>summary')?.addEventListener('click',event=>{if(!details.open||details.dataset.closing)return;event.preventDefault();closePopover(details);});
+  });
  }
  function scrollspy(root) {
   const legal=root.querySelector('.legal-copy');if(!legal)return;
@@ -111,25 +131,29 @@
   let step=0;const panels=[...form.querySelectorAll('[data-step-panel]')];if(panels.length!==3)return;
   const tabs=form.querySelectorAll('[data-step]'),prev=form.querySelector('[data-ui=step-prev]'),next=form.querySelector('[data-ui=step-next]'),save=form.querySelector('[type=submit]');
   const valid=()=>{if(step===0){for(const x of panels[0].querySelectorAll('input,textarea,select'))if(!x.reportValidity())return false;}if(step===1&&!hooks.state().selectedTermIds.size){notify('Selecione ao menos um termo.','warning');return false;}return true;};
-  const show=n=>{if(n>step&&!valid())return;if(n===2&&!hooks.state().selectedTermIds.size){notify('Selecione ao menos um termo.','warning');return;}step=n;panels.forEach((p,i)=>p.hidden=i!==step);tabs.forEach((t,i)=>{t.setAttribute('aria-current',i===step?'step':'false');t.classList.toggle('active',i===step);});prev.hidden=step===0;next.hidden=step===2;save.hidden=step!==2;save.disabled=!hooks.state().selectedTermIds.size;save.title=save.disabled?'Selecione ao menos um termo':'';form.dataset.currentStep=String(step);motion(panels[step],[{opacity:0},{opacity:1}]);};
+  const commit=n=>{step=n;panels.forEach((p,i)=>p.hidden=i!==step);tabs.forEach((t,i)=>{t.setAttribute('aria-current',i===step?'step':'false');t.classList.toggle('active',i===step);});prev.hidden=step===0;next.hidden=step===2;save.hidden=step!==2;save.disabled=!hooks.state().selectedTermIds.size;save.title=save.disabled?'Selecione ao menos um termo':'';form.dataset.currentStep=String(step);};
+  const show=n=>{if(n>step&&!valid())return;if(n===2&&!hooks.state().selectedTermIds.size){notify('Selecione ao menos um termo.','warning');return;}if(n===step){commit(n);return;}const from=step,direction=n>from?'forward':'back';if(!reduced()&&document.startViewTransition){document.documentElement.dataset.stepDirection=direction;document.documentElement.classList.add('step-transition');panels[from].style.viewTransitionName='trail-step';panels[n].style.viewTransitionName='trail-step';const transition=document.startViewTransition(()=>commit(n));transition.finished.catch(()=>{}).then(()=>{document.documentElement.classList.remove('step-transition');delete document.documentElement.dataset.stepDirection;panels.forEach(panel=>panel.style.removeProperty('view-transition-name'));});}else{commit(n);motion(panels[n],[{opacity:0,transform:`translateX(${direction==='forward'?16:-16}px)`},{opacity:1,transform:'translateX(0)'}]);}};
   prev.onclick=()=>show(Math.max(0,step-1));next.onclick=()=>show(Math.min(2,step+1));tabs.forEach(t=>t.onclick=()=>show(Number(t.dataset.step)));
   form.addEventListener('submit',event=>{if(step!==2){event.preventDefault();event.stopImmediatePropagation();show(step+1);}},true);form.addEventListener('input',()=>dirty=true);form.addEventListener('change',()=>dirty=true);show(0);
  }
  function mount(root=document.getElementById('app'),key='') {
   if(!root)return;observer?.disconnect();
   const memorySession=hooks.state?.().gameSession?.session_id||'';if(memorySession!==lastMemorySession){memoryFaces.clear();lastMemorySession=memorySession;}
-  root.querySelectorAll('.memory-card').forEach(card=>{const face=card.classList.contains('selected')||card.classList.contains('matched'),old=memoryFaces.get(card.dataset.card)||false;memoryFaces.set(card.dataset.card,face);if(face!==old)motion(card.querySelector('.memory-card-inner'),[{transform:old?'rotateY(180deg)':'rotateY(0)'},{transform:face?'rotateY(180deg)':'rotateY(0)'}],{duration:450});});
-  tabs(root);enhancePasswords(root);enhanceDates(root);assessment(root);stepper(root);scrollspy(root);
+  root.querySelectorAll('.memory-card').forEach(card=>{const face=card.classList.contains('selected')||card.classList.contains('matched'),old=memoryFaces.get(card.dataset.card)||false;memoryFaces.set(card.dataset.card,face);if(face!==old)motion(card.querySelector('.memory-card-inner'),[{transform:old?'rotateY(180deg)':'rotateY(0)'},{transform:face?'rotateY(180deg)':'rotateY(0)'}],{duration:300});});
+  tabs(root);popovers(root);enhancePasswords(root);enhanceDates(root);assessment(root);stepper(root);scrollspy(root);
   for(const button of root.querySelectorAll('button.btn-small,.icon-button,.nav-button'))button.style.minHeight='44px';
-  if(key&&key!==lastEntrance&&!key.startsWith('game'))root.querySelectorAll('main>.section-heading,main>.stat-strip,main>.teacher-columns,main>.class-grid,main>.home-columns,main>.specimen-grid').forEach((el,i)=>{if(i<6)motion(el,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:240,delay:i*40});});
+  if(key&&key!==lastEntrance&&!key.startsWith('game')){
+   root.querySelectorAll('main>.section-heading,main>.stat-strip,main>.teacher-columns,main>.home-columns').forEach((el,i)=>{if(i<6)motion(el,[{opacity:0,transform:'translateY(6px)'},{opacity:1,transform:'none'}],{duration:220,delay:i*30});});
+   root.querySelectorAll('.trail-list>article,.class-grid>.class-card,.collection-grid>.collection-cover,.specimen-grid>.specimen-card,.crud-list-item,.student-table tbody tr,.assessment-list>article').forEach((el,i)=>{if(i<16)motion(el,[{opacity:0,transform:'translateY(5px)'},{opacity:1,transform:'none'}],{duration:200,delay:i*30});});
+  }
   root.querySelectorAll('.stat-strip dd,[data-count]').forEach((el,i)=>{const id=hooks.state?.().user?.id+':'+key+':'+i;if(seenStats.has(id)||reduced())return;seenStats.add(id);const value=Number(el.dataset.count??el.textContent.replace(/\./g,''));if(!Number.isFinite(value))return;const start=performance.now();const tick=time=>{if(!el.isConnected)return;const progress=Math.min(1,(time-start)/600);el.textContent=Math.round(value*(1-(1-progress)**3)).toLocaleString('pt-BR')+(el.dataset.countSuffix||'');if(progress<1)requestAnimationFrame(tick);};requestAnimationFrame(tick);});
   progressObserver?.disconnect();
-  progressObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){motion(entry.target,[{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:360});progressObserver.unobserve(entry.target);}},{threshold:.2});
+  progressObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){motion(entry.target,[{clipPath:'inset(0 100% 0 0)'},{clipPath:'inset(0 0 0 0)'}],{duration:300,easing:'cubic-bezier(.23,1,.32,1)'});progressObserver.unobserve(entry.target);}},{threshold:.2});
   root.querySelectorAll('.progress-fill,progress').forEach(el=>progressObserver.observe(el));lastEntrance=key;icons();
  }
  function clearDirty(){dirty=false;}
  async function mayLeave(trigger){if(!dirty)return true;if(!leavePromise)leavePromise=confirmAction('Sair sem salvar','As alterações desta trilha ainda não foram salvas.',trigger,true).finally(()=>leavePromise=null);return leavePromise;}
- window.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.trail-menu[open]').forEach(menu=>{menu.open=false;menu.querySelector('summary')?.focus();});});
+ window.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.trail-menu[open],.collection-menu[open],.management-menu[open]').forEach(menu=>closePopover(menu,true));});
  window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
  document.addEventListener('click',async e=>{const b=e.target.closest('[data-ui]');if(!b)return;const action=b.dataset.ui;if(['step-prev','step-next'].includes(action))return;e.preventDefault();e.stopImmediatePropagation();if(action==='dismiss-dialog')b.closest('dialog')?.close();else if(action==='avatar')chooseAvatar(b);else if(action==='copy'){try{await navigator.clipboard.writeText(b.dataset.code);notify('Código copiado.');}catch(_e){notify('Não foi possível copiar. Selecione o código exibido.','warning');}}},true);
  document.addEventListener('dragstart',e=>{const chip=e.target.closest('[data-selected-id]');if(!chip)return;dragged=chip.dataset.selectedId;e.dataTransfer.setData('text/lise-term',dragged);});

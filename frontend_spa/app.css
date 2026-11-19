@@ -1,20 +1,20 @@
-@import url('/styles/tokens.css?v=20261114-ui12');
+@import url('/styles/tokens.css?v=20261117-type3');
 @import url('/styles/layout.css?v=20261114-ui12');
 @import url('/styles/components.css?v=20261114-ui12');
-@import url('/styles/screens.css?v=20261114-ui12');
-@import url('/styles/activities.css?v=20261114-ui12');
-@import url('/styles/interactions.css?v=20261114-ui12');
+@import url('/styles/screens.css?v=20261117-polish');
+@import url('/styles/activities.css?v=20261117-polish');
+@import url('/styles/interactions.css?v=20261117-polish');
 @import url('/styles/polish.css?v=20261114-ui12');
 @import url('/styles/refinements.css?v=20261114-ui12');
 @import url('/styles/elegance.css?v=20261114-ui12');
-@import url('/styles/memory-focus.css?v=20261114-ui12');
+@import url('/styles/memory-focus.css?v=20261117-polish');
 @import url('/styles/responsive.css?v=20261114-ui12');
 @import url('/styles/palette.css?v=20261114-ui12');
 @import url('/styles/themes.css?v=20261114-ui12');
-@import url('/styles/access.css?v=20261114-ui12');
+@import url('/styles/access.css?v=20261117-polish');
 @import url('/styles/compact.css?v=20261114-ui12');
 @import url('/styles/welcome.css?v=20261114-ui12');
-@import url('/styles/final-fixes.css?v=20261114-ui12');
+@import url('/styles/final-fixes.css?v=20261117-livia');
 /* Ordem única: tokens, estrutura, componentes, telas e atividades. */
 
 
@@ -29,7 +29,7 @@
 
 
 
-.boot-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#f7f5ed;color:#36523d}.boot-screen h1{font:500 48px Georgia,serif;margin:0}.boot-cell{display:block;width:82px;height:82px;border:2px solid #9eaf92;border-radius:48% 52% 58% 42%;background:#e4ecdc;position:relative;animation:cell-breathe 2.5s ease-in-out infinite}.boot-cell:after{content:'';position:absolute;inset:26px;border-radius:50%;background:#69866c}.not-found{max-width:620px;margin:12vh auto;text-align:center;padding:32px}.not-found .error-code{font:80px Georgia,serif;color:#69866c}@keyframes cell-breathe{50%{transform:scale(1.08) rotate(12deg)}}@media(prefers-reduced-motion:reduce){.boot-cell{animation:none}}
+.boot-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:24px;background:#f7f5ed;color:#36523d}.boot-screen h1{font:500 48px "Bricolage Grotesque","Arial Narrow",sans-serif;margin:0}.boot-cell{display:block;width:82px;height:82px;border:2px solid #9eaf92;border-radius:48% 52% 58% 42%;background:#e4ecdc;position:relative;animation:cell-breathe 2.5s ease-in-out infinite}.boot-cell:after{content:'';position:absolute;inset:26px;border-radius:50%;background:#69866c}.not-found{max-width:620px;margin:12vh auto;text-align:center;padding:32px}.not-found .error-code{font:80px "Bricolage Grotesque","Arial Narrow",sans-serif;color:#69866c}@keyframes cell-breathe{50%{transform:scale(1.08) rotate(12deg)}}@media(prefers-reduced-motion:reduce){.boot-cell{animation:none}}
 
 
 

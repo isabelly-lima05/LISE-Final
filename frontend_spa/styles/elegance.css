@@ -69,12 +69,12 @@ body::before{opacity:.012;}
 .teacher-hero-foot{display:flex;justify-content:space-between;align-items:center;gap:20px;padding-top:17px;border-top:1px solid var(--paint-line-bdccb02e);color:var(--paint-fg-b9caab);font-size:10px;letter-spacing:.02em;}
 .teacher-hero-foot>span:first-child{display:flex;align-items:center;gap:8px;}
 .teacher-hero-foot svg{width:14px;height:14px;}
-.hero-signature{font-family:"Source Serif 4",Georgia,serif;letter-spacing:.05em;font-size:13px;white-space:nowrap;}
+.hero-signature{font-family:"Bricolage Grotesque","Arial Narrow",sans-serif;letter-spacing:.05em;font-size:13px;white-space:nowrap;}
 .hero-signature>span{margin:0 7px;opacity:.5;}
 .teacher-layout .teacher-metrics .stat-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:0;padding:0;border:0;}
 .teacher-layout .teacher-metrics .stat-strip>div{position:relative;background:var(--paint-bg-fffefa);padding:19px 20px;border:1px solid var(--paint-line-e0e7d8);border-radius:14px;min-width:0;display:flex;flex-direction:column;gap:11px;box-shadow:none;}
 .teacher-layout .teacher-metrics .stat-strip dt{font-size:12px;margin:0;padding-right:29px;color:var(--paint-fg-687061);font-weight:500;}
-.teacher-layout .teacher-metrics .stat-strip dd{font:500 35px/1 "Source Serif 4",Georgia,serif;letter-spacing:-.025em;color:var(--paint-fg-3e5a3e);margin:0;}
+.teacher-layout .teacher-metrics .stat-strip dd{font:500 35px/1 "Bricolage Grotesque","Arial Narrow",sans-serif;letter-spacing:-.025em;color:var(--paint-fg-3e5a3e);margin:0;}
 .teacher-layout .teacher-metrics .stat-strip>div>svg{position:absolute;right:15px;top:16px;width:27px;height:27px;padding:6px;border-radius:8px;background:var(--paint-bg-eff4e6);color:var(--paint-fg-667358);stroke-width:1.5;}
 .workspace-shortcuts{display:flex;align-items:center;gap:14px 24px;flex-wrap:wrap;padding:17px 0;margin:5px 0 26px;border-bottom:1px solid var(--paint-line-e2e8da);}
 .workspace-shortcuts>span{margin-right:auto;color:var(--paint-fg-687162);font-size:12px;}
@@ -98,14 +98,14 @@ body::before{opacity:.012;}
 .app-layout .class-counts strong{font-size:12px;color:var(--paint-fg-617455);font-weight:600;}
 .app-layout .class-open{border-top:1px solid var(--paint-line-edf0e5);margin-top:21px;padding-top:13px;font-size:12px;color:var(--paint-fg-637356);}
 .app-layout .class-open svg{width:14px;height:14px;}
-.app-layout .code-chip{position:relative;z-index:3;background:var(--paint-bg-f7f9ef);border:1px dashed var(--paint-line-d4e0c4);border-radius:8px;padding:7px 9px;min-height:34px;font:500 11px ui-monospace,monospace;color:var(--paint-fg-637455);}
+.app-layout .code-chip{position:relative;z-index:3;background:var(--paint-bg-f7f9ef);border:1px dashed var(--paint-line-d4e0c4);border-radius:8px;padding:7px 9px;min-height:34px;font:500 11px "IBM Plex Mono",Consolas,monospace;color:var(--paint-fg-637455);}
 .app-layout .code-chip svg{width:12px;height:12px;}
 .app-layout .class-card .crud-actions{padding-top:12px;margin-top:10px;border-top:1px solid var(--paint-line-f0f2e9);gap:15px;}
 .app-layout .class-card .crud-actions .btn{font-size:12px;border:0;background:transparent;padding:3px 0;min-height:32px;color:var(--paint-fg-66715c);}
 .app-layout .class-card .crud-actions .btn:hover{color:var(--paint-fg-47643e);text-decoration:underline;}
 .app-layout .trail-list{display:grid;gap:12px;border:0;}
 .app-layout .trail-list>article{display:grid;grid-template-columns:35px minmax(0,1fr) 30px;align-items:start;gap:14px;padding:20px;border:1px solid var(--paint-line-e2e8da);border-radius:15px;background:var(--paint-bg-fffefa);box-shadow:none;}
-.trail-order{display:grid;place-items:center;width:34px;height:39px;background:var(--paint-bg-f2f5e9);color:var(--paint-fg-68705c);border-radius:9px;font:500 16px "Source Serif 4",Georgia,serif;}
+.trail-order{display:grid;place-items:center;width:34px;height:39px;background:var(--paint-bg-f2f5e9);color:var(--paint-fg-68705c);border-radius:9px;font:500 16px "Bricolage Grotesque","Arial Narrow",sans-serif;}
 .trail-copy{min-width:0;}
 .app-layout .trail-list .eyebrow{font-size:11px;letter-spacing:.1em;margin:0 0 6px;color:var(--paint-fg-6a7062);}
 .app-layout .trail-list h3{font-size:22px;line-height:1.25;margin:0 0 9px;font-weight:500;color:var(--paint-fg-526d48);letter-spacing:-.02em;}
