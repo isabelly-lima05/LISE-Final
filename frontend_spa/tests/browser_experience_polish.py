@@ -60,6 +60,8 @@ def main():
             page.wait_for_timeout(220)
             sun_after = page.locator(".appearance-sun").evaluate("el=>getComputedStyle(el).transform")
             check("Troca de tema transforma os ícones", sun_before != sun_after)
+            toggle.click()
+            page.wait_for_timeout(220)
 
             page.get_by_role("button", name="Explorar", exact=True).click()
             page.locator(".specimen-card").first.wait_for()
@@ -68,6 +70,25 @@ def main():
                 page.locator(".filter-pill").count() == 2
                 and page.locator(".explore-filters > .check-row").count() == 0,
             )
+            page.evaluate("""() => {
+              const button=document.createElement('button');
+              button.id='pagination-contrast-probe';
+              button.className='pagination-button is-current';
+              button.textContent='1';
+              document.querySelector('.explorer-controls').append(button);
+            }""")
+            pager = page.locator("#pagination-contrast-probe")
+            pager_idle = pager.evaluate("el=>getComputedStyle(el).backgroundColor")
+            pager.hover()
+            page.wait_for_timeout(190)
+            pager_hover = pager.evaluate("el=>getComputedStyle(el).backgroundColor")
+            check(
+                "Página selecionada não desaparece no hover claro",
+                pager_idle != pager_hover,
+            )
+            pager.evaluate("el=>el.remove()")
+            toggle.click()
+            page.wait_for_timeout(220)
             page.evaluate("""() => {
               const button=document.createElement('button');
               button.id='pagination-contrast-probe';
@@ -165,10 +186,21 @@ def main():
             teacher = teacher_context.new_page()
             teacher.on("pageerror", lambda error: errors.append(str(error)))
             login(teacher, "professor@lise.demo")
+            create = teacher.get_by_role("button", name="Criar turma", exact=True).first
+            idle_light = create.evaluate("el=>getComputedStyle(el).backgroundColor")
+            surface_light = teacher.locator(".teacher-welcome").evaluate(
+                "el=>getComputedStyle(el).backgroundColor"
+            )
+            create.hover()
+            teacher.wait_for_timeout(190)
+            hovered_light = create.evaluate("el=>getComputedStyle(el).backgroundColor")
+            check(
+                "Criar turma continua visível no hover claro",
+                idle_light != hovered_light and hovered_light != surface_light,
+            )
             if teacher.locator("[data-theme-toggle]").get_attribute("aria-checked") != "true":
                 teacher.locator("[data-theme-toggle]").click()
                 teacher.wait_for_timeout(220)
-            create = teacher.get_by_role("button", name="Criar turma", exact=True).first
             idle = create.evaluate("el=>getComputedStyle(el).backgroundColor")
             surface = teacher.locator(".teacher-welcome").evaluate(
                 "el=>getComputedStyle(el).backgroundColor"

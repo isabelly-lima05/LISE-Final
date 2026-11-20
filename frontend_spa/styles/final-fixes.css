@@ -387,6 +387,8 @@ dialog.app-dialog :is(h1,h2,h3,label,strong,p,small){color:inherit}dialog.app-di
 @media(max-width:600px){.student-greeting .greeting-title-slot{height:76px}}
 
 /* Estados claros no tema escuro: o hover continua parecendo uma ação. */
+.app-layout .teacher-welcome .btn-primary:hover:not(:disabled),.app-layout .teacher-welcome .btn-primary:focus-visible{background:var(--green-dark);border-color:var(--green-dark);color:var(--on-accent);box-shadow:0 6px 18px color-mix(in srgb,var(--green) 22%,transparent)}
+.app-layout .pagination-button.is-current:hover:not(:disabled),.app-layout .pagination-button.is-current:focus-visible{background:var(--green-dark);border-color:var(--green-dark);color:var(--on-accent)}
 [data-theme=dark] .app-layout .btn-primary:not(:disabled){background:#a5d8b5;border-color:#a5d8b5;color:#10251a}
 [data-theme=dark] .app-layout .btn-primary:hover:not(:disabled),[data-theme=dark] .teacher-layout .teacher-welcome .btn-primary:hover:not(:disabled){background:#c9efd3;border-color:#c9efd3;color:#10251a;box-shadow:0 6px 18px #050c0866}
 [data-theme=dark] .app-layout .pagination-button.is-current{background:#a5d8b5;border-color:#a5d8b5;color:#10251a}
