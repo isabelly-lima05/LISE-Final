@@ -19,7 +19,8 @@
     sidebarCollapsed: localStorage.getItem('lise_sidebar_collapsed') !== 'false',
     account: null, legal: null, legalVersion: '', accountTab:'perfil', collectionsLoaded:false,
     exploreMode:'browse', exploreShown:15, explorePage:1, explorePageSize:15, studyRevealed:new Set(),
-    discovery:null, discoveryError:'', studentSort:'name', studentSortDir:'asc', showRanking:false
+    discovery:null, discoveryError:'', studentSort:'name', studentSortDir:'asc', showRanking:false,
+    studentGreeting:null, studentProgressBaseline:null
   };
 
   const AVATARS = window.LISE_AVATARS;
@@ -129,8 +130,8 @@
     if (celebrated.has(key) || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     celebrated.add(key);
     const layer=document.createElement('div'); layer.className='confetti'; layer.setAttribute('aria-hidden','true');
-    for(let i=0;i<36;i++) { const p=document.createElement('i'); p.style.cssText=`left:${Math.random()*100}%;--drift:${Math.random()*140-70}px;background:${['#8daa91','#c5a467','#4a5d4e','#e6c8aa'][i%4]};animation-delay:${Math.random()*.25}s`; layer.append(p); }
-    document.body.append(layer); setTimeout(()=>layer.remove(),3300);
+    for(let i=0;i<18;i++) { const p=document.createElement('i'); p.style.cssText=`left:${Math.random()*100}%;--drift:${Math.random()*140-70}px;background:${['#8daa91','#c5a467','#4a5d4e','#e6c8aa'][i%4]};animation-delay:${Math.random()*.18}s`; layer.append(p); }
+    document.body.append(layer); setTimeout(()=>layer.remove(),1800);
   }
   function toast(message,tone='success') {
     if(window.LiseInteractions)return window.LiseInteractions.notify(message,tone);
@@ -316,6 +317,7 @@
     for(const key of ['dashboard','classDetail','studentDetail','collection','detail','account','explore','discovery','gameSession','gameFeedback','assessmentSession','assessmentResult','sources','practiceSource','result'])state[key]=null;
     state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();state.selectedTermIds.clear();state.selectedTermInfo.clear();
     state.catalogTerms=[];state.exploreSearch='';state.exploreArea='';state.exploreMine=false;state.explorePage=1;state.explorePageSize=15;
+    state.studentGreeting=null;state.studentProgressBaseline=null;
     state.loading=false;state.loadError='';routeSnapshots.clear();pendingReads.clear();celebrated.clear();
   }
   window.addEventListener('storage', event=>{if(event.key==='lise_access_token' && !event.newValue){forgetSession();renderAuth();}});
@@ -393,8 +395,13 @@
     state.view='dashboard'; state.dashboard=null;state.discovery=null;state.discoveryError='';setLoading();
     state.dashboard=await api('/dashboard');
     if(sequence!==dashboardLoadSequence||state.view!=='dashboard')return;
+    const progress=state.dashboard?.stats;
+    const previousProgress=state.studentProgressBaseline;
+    const leveledUp=state.user.role==='Aluno'&&previousProgress&&Number(progress?.nivel)>Number(previousProgress.nivel);
+    if(state.user.role==='Aluno'&&progress)state.studentProgressBaseline={nivel:Number(progress.nivel)||0,streak:Number(progress.streak)||0};
     state.discovery=state.dashboard.discovery||null;
     state.loading=false;render();
+    if(leveledUp)requestAnimationFrame(()=>celebrate(`level:${progress.nivel}`));
     if(state.user.role==='Aluno') {
       const optional=[api('/collections')];
       if(!state.discovery)optional.push(api('/explore?kind=terms'));
@@ -469,11 +476,26 @@
     render();
   }
 
-  async function openTerm(id, from = state.view) {
+  async function openTerm(id, from = state.view, source = null) {
     state.detailBack = from;
-    state.detail = await api(`/explore/terms/${id}`);
+    const detail = await api(`/explore/terms/${id}`);
     if(state.user.role==='Aluno'&&!state.collectionsLoaded){const data=await api('/collections');state.collections=data.collections;state.collectionsLoaded=true;}
-    state.detailType = 'term'; state.view = 'detail'; render();
+    const commit=()=>{
+      state.detail=detail;state.detailType='term';state.view='detail';render();
+      const target=document.querySelector('.term-shared-surface');
+      if(target)target.style.viewTransitionName='term-detail';
+    };
+    const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const origin=source?.isConnected?source:null;
+    if(!reduce&&origin&&typeof document.startViewTransition==='function'){
+      origin.style.viewTransitionName='term-detail';document.documentElement.dataset.termTransition='true';
+      const transition=document.startViewTransition(commit);
+      transition.finished.catch(()=>{}).then(()=>{
+        origin.style.removeProperty('view-transition-name');
+        document.querySelector('.term-shared-surface')?.style.removeProperty('view-transition-name');
+        delete document.documentElement.dataset.termTransition;
+      });
+    }else commit();
   }
   async function openRadical(id, from = state.view) {
     state.detailBack = from;
@@ -692,7 +714,7 @@
       }
       else if (action === 'open-class') await loadClass(buttonEl.dataset.id);
       else if (action === 'open-student') await loadStudentDetail(buttonEl.dataset.id);
-      else if (action === 'open-term') await openTerm(buttonEl.dataset.id);
+      else if (action === 'open-term') await openTerm(buttonEl.dataset.id,state.view,buttonEl.closest('.specimen-card,.discovery-sheet,.connection-node'));
       else if (action === 'open-radical') await openRadical(buttonEl.dataset.id);
       else if (action === 'detail-back') { state.view=state.detailBack; render(); }
       else if (action === 'toggle-sort') { state.sort=state.sort==='asc'?'desc':'asc'; render(); }
@@ -1142,7 +1164,7 @@
   }
   function refreshExplore(){
     const results=app.querySelector('#explore-results');if(!results)return;
-    const previousCards=[...results.querySelectorAll('[data-term]')].map(el=>[el.dataset.term,el.getBoundingClientRect()]);results.innerHTML=screens.exploreResults();for(const el of results.querySelectorAll('[data-term]')){const before=previousCards.find(([id])=>id===el.dataset.term)?.[1],now=el.getBoundingClientRect();window.LiseInteractions?.motion(el,before?[{transform:`translate(${before.x-now.x}px,${before.y-now.y}px)`,opacity:.6},{transform:'none',opacity:1}]:[{opacity:0},{opacity:1}]);}window.lucide?.createIcons({attrs:{'stroke-width':1.7}});window.LiseCompact?.mount(app,state);
+    const previousCards=[...results.querySelectorAll('[data-term]')].map(el=>[el.dataset.term,el.getBoundingClientRect()]);results.innerHTML=screens.exploreResults();for(const [index,el] of [...results.querySelectorAll('[data-term]')].entries()){const before=previousCards.find(([id])=>id===el.dataset.term)?.[1],now=el.getBoundingClientRect();window.LiseInteractions?.motion(el,before?[{transform:`translate(${before.x-now.x}px,${before.y-now.y}px)`,opacity:.72},{transform:'none',opacity:1}]:[{opacity:0,transform:'translateY(10px)'},{opacity:1,transform:'translateY(0)'}],{duration:before?240:220,delay:before?0:Math.min(index,9)*30,easing:before?'cubic-bezier(.65,0,.35,1)':'cubic-bezier(.23,1,.32,1)'});}window.lucide?.createIcons({attrs:{'stroke-width':1.7}});window.LiseCompact?.mount(app,state);
     const wasRestoring=restoringRoute;restoringRoute=false;
     // Filtros substituem a entrada atual, sem criar um histórico por tecla.
     const previous=history.state;if(previous?.lise)history.replaceState({...previous,key:null},'',location.href);
