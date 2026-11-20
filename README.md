@@ -1,85 +1,91 @@
-# LISE — Biologia Por Etimologia
+# LISE — Biologia por etimologia
 
-LISE É Uma Plataforma Educacional Para Explorar A Etimologia De Termos De Biologia, Relacionar Raízes Gregas E Latinas A Conceitos Científicos E Praticar O Conteúdo Com Atividades Interativas. O Projeto Combina Uma Interface Web Estática, Uma API Em Flask E Um Banco PostgreSQL Hospedado No Supabase.
+![Versão](https://img.shields.io/badge/vers%C3%A3o-2.0.0--beta.1-4A5D4E)
+![Status](https://img.shields.io/badge/status-beta-C49A5A)
+![Python](https://img.shields.io/badge/Python-3.12-3776AB?logo=python&logoColor=white)
+![Flask](https://img.shields.io/badge/Flask-3.1-000000?logo=flask&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6%2B-F7DF1E?logo=javascript&logoColor=111111)
+![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3FCF8E?logo=supabase&logoColor=white)
 
-> **Estado Do Projeto:** A Versão Da API Está Identificada Como `2.0.0b1` (`2.0.0-beta.1`). A Demonstração Local Usa Dados Fictícios E Não Substitui Uma Instalação De Produção.
+A LISE é uma plataforma educacional para aprender Biologia a partir da origem e da formação das palavras. Ela relaciona termos científicos a raízes gregas e latinas e transforma essas relações em explorações, trilhas, avaliações e atividades interativas.
 
-## Conteúdo
+> **Estado atual:** versão `2.0.0-beta.1`. A demonstração local usa dados fictícios e não substitui uma instalação de produção.
 
-- [Visão Geral](#visão-geral)
+## Sumário
+
+- [Visão geral](#visão-geral)
 - [Funcionalidades](#funcionalidades)
 - [Arquitetura](#arquitetura)
-- [Estrutura Do Repositório](#estrutura-do-repositório)
-- [Demonstração Local](#demonstração-local)
-- [Execução Em Desenvolvimento](#execução-em-desenvolvimento)
-- [Configuração Do Backend](#configuração-do-backend)
-- [Banco De Dados E Migrações](#banco-de-dados-e-migrações)
+- [Estrutura do repositório](#estrutura-do-repositório)
+- [Demonstração local](#demonstração-local)
+- [Desenvolvimento](#desenvolvimento)
+- [Configuração do backend](#configuração-do-backend)
+- [Banco de dados e migrações](#banco-de-dados-e-migrações)
 - [Testes](#testes)
-- [Publicação Na Vercel](#publicação-na-vercel)
-- [Segurança E Privacidade](#segurança-e-privacidade)
-- [Tecnologias](#tecnologias)
-- [Solução De Problemas](#solução-de-problemas)
+- [Publicação](#publicação)
+- [Segurança e privacidade](#segurança-e-privacidade)
+- [Versionamento](#versionamento)
+- [Solução de problemas](#solução-de-problemas)
 
-## Visão Geral
+## Visão geral
 
-A LISE Foi Pensada Para O Estudo De Biologia Por Meio Da Origem E Da Formação Das Palavras. O Aplicativo Apresenta Termos, Definições E Radicais Etimológicos, E Oferece Atividades Para Ajudar A Fixar Essas Relações.
+A plataforma atende a dois perfis:
 
-Há Dois Perfis Principais:
+- **Aluno:** explora termos, participa de jogos e avaliações, acompanha o próprio progresso e integra turmas e trilhas.
+- **Professor:** organiza turmas, trilhas, conteúdos e avaliações e acompanha a aprendizagem dos estudantes.
 
-- **Aluno:** Explora Conteúdo, Participa De Atividades, Acompanha O Progresso E Pode Integrar Turmas E Trilhas.
-- **Professor:** Organiza Turmas, Trilhas E Conteúdos, Acompanha A Experiência De Aprendizagem E Gerencia Os Recursos Disponíveis Para Suas Turmas.
-
-O Frontend É Uma Aplicação De Página Única (SPA) Feita Com JavaScript E CSS, Sem Etapa De Compilação. O Backend Expõe Uma API JSON, Valida A Sessão E As Permissões E Acessa O Banco De Dados. O Supabase É Usado Para Persistência PostgreSQL E Autenticação.
+O frontend é uma aplicação de página única (SPA) feita em JavaScript e CSS, sem etapa de compilação. O backend expõe uma API JSON em Flask, aplica as regras de autorização e acessa o banco. O Supabase fornece PostgreSQL e autenticação na instalação de produção.
 
 ## Funcionalidades
 
-- **Aprendizagem De Etimologia:** Consulta De Termos Biológicos, Definições, Áreas E Radicais Com Seus Significados E Referências.
-- **Atividades Interativas:** Jogos E Exercícios De Reconhecimento Etimológico, Quiz De Biologia, Família De Palavras E Memória.
-- **Acompanhamento Do Progresso:** Registro De Atividades, Pontuação, XP, Nível, Sequência De Dias De Estudo E Progresso Em Trilhas.
-- **Turmas E Trilhas:** Recursos Para Organização De Estudantes E Conteúdos, Matrícula Por Código E Associação De Trilhas Às Turmas.
-- **Gestão De Conteúdo:** Operações De Criação, Leitura, Edição, Arquivamento E Restauração Com Verificações De Acesso E Revisão.
-- **Conta E Privacidade:** Gerenciamento De Sessões, Solicitação De Exclusão De Conta E Páginas De Privacidade, Termos De Uso E Cookies.
-- **Personalização:** Avatares E Interface Responsiva Com Componentes E Estilos Organizados Por Área.
+- consulta de termos biológicos, definições, áreas e elementos etimológicos;
+- jogos de exploração, quiz de Biologia, família de palavras e memória;
+- registro de progresso, XP, nível, sequência de estudo e conclusão de trilhas;
+- turmas, matrículas por código, trilhas e avaliações com janelas de disponibilidade;
+- criação, edição, arquivamento e restauração de conteúdos com controle de acesso;
+- gerenciamento de sessões, exportação de dados e solicitação de exclusão de conta;
+- interface responsiva, temas, avatares e recursos de acessibilidade.
 
 ## Arquitetura
 
 ```text
 Navegador
-  └── frontend_spa/ (HTML, CSS, JavaScript)
-        └── API HTTPS /api/v1
-              ├── Flask (autorização, validação e regras de negócio)
-              ├── Supabase Auth (identidade e autenticação)
-              └── PostgreSQL Supabase (dados da aplicação)
+  └── frontend_spa/ (HTML, CSS e JavaScript)
+        └── HTTPS /api/v1
+              ├── Flask (API, autorização e regras de negócio)
+              ├── Supabase Auth (identidade)
+              └── PostgreSQL / Supabase (persistência)
 ```
 
-O Frontend E A API Podem Ser Publicados Como Projetos Separados Na Vercel. Em Desenvolvimento, Também É Possível Servir O Frontend Separadamente Ou Usar O Servidor Integrado De Demonstração.
+Frontend e backend podem ser publicados como projetos separados na Vercel. A demonstração local serve a SPA e a API na mesma origem e usa SQLite.
 
-As Sessões Da Aplicação São Mantidas No Banco E Associadas A Um Token Bearer. O Backend Consulta A Sessão E O Usuário Antes De Atender Rotas Protegidas. O Acesso A Dados De Turmas, Trilhas E Conteúdos É Limitado Pelas Regras De Propriedade, Matrícula E Papel Do Usuário.
+As rotas protegidas conferem a sessão, o perfil e o vínculo do usuário com cada turma, trilha ou conteúdo solicitado.
 
-## Estrutura Do Repositório
+## Estrutura do repositório
 
 | Caminho | Responsabilidade |
 | --- | --- |
-| `run_demo.py` | Cria E Executa A Demonstração Integrada Com Banco SQLite Local E Dados Fictícios. |
-| `INICIAR_DEMO.bat` | Atalho Para Windows Que Cria Um Ambiente Virtual, Instala As Dependências E Inicia A Demonstração. |
-| `frontend_spa/` | Aplicação Web Estática, Recursos Visuais, Configuração Da API E Testes De Interface. |
-| `backend_service/app.py` | Fábrica Da Aplicação Flask, Configuração De Banco, Sessões, CORS E Cabeçalhos. |
-| `backend_service/vercel_app.py` | Ponto De Entrada Da Aplicação Backend Para A Vercel. |
-| `backend_service/backend/` | Rotas De API, Modelos, Regras De Acesso, Serviços E Recursos De Conta, CRUD E Privacidade. |
-| `backend_service/tests/` | Testes Da API, Regras De CRUD, Privacidade, Jogos E Segurança. |
-| `backend_service/templates/` | Conteúdo HTML Usado Nas Páginas Legais Servidas Pelo Backend. |
-| `supabase/migrations/` | Migrações SQL Do Banco, Em Ordem Cronológica Pelo Nome Do Arquivo. |
-| `supabase/email_recuperacao.html` | Modelo De E-Mail De Recuperação De Acesso. |
-| `tools/` | Utilitários De Configuração Da API E Exportação De Conteúdo Legal. |
-| `pytest.ini` | Configuração Do Pytest Para Executar Os Testes Do Backend A Partir Da Raiz. |
+| [`run_demo.py`](./run_demo.py) | Inicializa a demonstração integrada com SQLite e dados fictícios. |
+| [`INICIAR_DEMO.bat`](./INICIAR_DEMO.bat) | Prepara o ambiente e inicia a demonstração no Windows. |
+| [`frontend_spa/`](./frontend_spa/) | SPA, estilos, recursos visuais e testes de interface. |
+| [`backend_service/`](./backend_service/) | API Flask, modelos, serviços, regras de acesso e testes. |
+| [`supabase/migrations/`](./supabase/migrations/) | Migrações PostgreSQL em ordem cronológica. |
+| [`tools/`](./tools/) | Utilitários de configuração da API e conteúdo legal. |
+| [`pytest.ini`](./pytest.ini) | Configuração da suíte Python. |
 
-O Frontend É Dividido Em Módulos: `components.js`, `navigation.js`, `activities.js`, `screens.js`, `interactions.js`, `crud.js` E `app.js`. A Folha De Estilos De Entrada É `app.css`, Que Carrega Os Estilos Da Pasta `styles/`.
+Os módulos principais do frontend são `components.js`, `navigation.js`, `activities.js`, `screens.js`, `interactions.js`, `crud.js` e `app.js`. A folha de entrada `app.css` carrega os estilos organizados em `frontend_spa/styles/`.
 
-## Demonstração Local
+## Demonstração local
 
-A Forma Mais Rápida De Conhecer A Aplicação No Windows É Executar `INICIAR_DEMO.bat`. O Script Cria `.venv` Se Necessário, Usa Python 3.12, Instala As Dependências Do Backend E Executa `run_demo.py`.
+### Inicialização rápida no Windows
 
-Também É Possível Iniciar A Demonstração Manualmente:
+Execute:
+
+```powershell
+.\INICIAR_DEMO.bat
+```
+
+Ou prepare o ambiente manualmente:
 
 ```powershell
 py -3.12 -m venv .venv
@@ -87,148 +93,146 @@ py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe run_demo.py
 ```
 
-Depois, Acesse `http://127.0.0.1:5001`.
+Acesse `http://127.0.0.1:5001`.
 
-**Contas Fictícias Da Demonstração:**
-
-| Perfil | E-Mail | Senha |
+| Perfil | E-mail | Senha |
 | --- | --- | --- |
 | Aluno | `aluno@lise.demo` | `LiseDemo123!` |
 | Professor | `professor@lise.demo` | `LiseDemo123!` |
 
-A Demonstração Cria O Banco SQLite `demo_privacidade.db` Na Pasta Raiz E Insere Dados De Exemplo. O Servidor Escuta Apenas Em `127.0.0.1`. As Contas E A Senha São Exclusivas Para Essa Demonstração E Não Devem Ser Reutilizadas Em Um Ambiente Real. O Cadastro E A Autenticação Real Do Supabase Não Estão Disponíveis Nesse Modo.
-
-Para Escolher Outra Porta, Informe O Argumento `--port`, Por Exemplo:
+Para escolher outra porta:
 
 ```powershell
 .\.venv\Scripts\python.exe run_demo.py --port 5002
 ```
 
-## Execução Em Desenvolvimento
+A demonstração escuta somente em `127.0.0.1`, cria `demo_privacidade.db` na raiz e não oferece cadastro ou autenticação real pelo Supabase. Não use as credenciais fictícias nem o banco local em produção.
 
-Para Testar O Frontend E O Backend Separadamente, Configure O Backend E Inicie Cada Servidor Em Um Terminal Diferente.
+## Desenvolvimento
 
-1. **Prepare O Backend:** Instale Python 3.12 E Crie `backend_service\.env` A Partir De `backend_service\.env.example`.
-2. **Instale As Dependências:** Na Raiz Do Projeto, Execute:
+### 1. Backend
 
-   ```powershell
-   .\.venv\Scripts\python.exe -m pip install -r backend_service\requirements-dev.txt
-   ```
+Instale Python 3.12, crie `backend_service/.env` com as variáveis da próxima seção e execute:
 
-3. **Inicie A API:** No Terminal Do Backend, Execute:
+```powershell
+py -3.12 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r backend_service\requirements-dev.txt
+Set-Location backend_service
+..\.venv\Scripts\python.exe app.py
+```
 
-   ```powershell
-   Set-Location backend_service
-   ..\.venv\Scripts\python.exe app.py
-   ```
+A API ficará disponível em `http://127.0.0.1:5000`.
 
-   A API Local Escuta Em `http://127.0.0.1:5000`.
+### 2. Frontend
 
-4. **Configure O Frontend:** Em `frontend_spa\config.js`, Defina `API_BASE_URL` Como `http://127.0.0.1:5000`. O Valor Deve Ser A Origem Da API, Sem O Sufixo `/api/v1` E Sem Barra Final.
-5. **Sirva O Frontend:** Em Outro Terminal, Execute:
+Defina temporariamente `API_BASE_URL` como `http://127.0.0.1:5000` em `frontend_spa/config.js`. Em outro terminal:
 
-   ```powershell
-   Set-Location frontend_spa
-   py -3.12 -m http.server 5500
-   ```
+```powershell
+Set-Location frontend_spa
+py -3.12 -m http.server 5500
+```
 
-6. **Acesse A Interface:** Abra `http://127.0.0.1:5500`.
+Acesse `http://127.0.0.1:5500`. A URL da API deve conter apenas a origem, sem `/api/v1` e sem barra final.
 
-Para A Demonstração Simples, Prefira `run_demo.py`: Ela Serve A SPA E A API Na Mesma Origem, Gera Uma Configuração De Frontend Local E Não Exige Alterar `config.js`.
+Para uma demonstração simples, prefira `run_demo.py`: ele gera a configuração local sem exigir alterações permanentes em `config.js`.
 
-## Configuração Do Backend
+## Configuração do backend
 
-As Variáveis São Lidas De `backend_service\.env` Em Desenvolvimento E Das Configurações De Ambiente Do Provedor Em Produção.
+Em desenvolvimento, as variáveis são lidas de `backend_service/.env`. Na hospedagem, cadastre-as no provedor.
 
-| Variável | Obrigatória | Descrição |
+| Variável | Obrigatoriedade | Finalidade |
 | --- | --- | --- |
-| `SECRET_KEY` | Sim | Chave Aleatória De Pelo Menos 32 Caracteres Para A Aplicação Flask. |
-| `DATABASE_URL` | Sim | URL De Conexão PostgreSQL; A Demonstração Usa SQLite Local. |
-| `SUPABASE_URL` | Sim Fora Da Demonstração | URL Do Projeto Supabase. |
-| `SUPABASE_PUBLISHABLE_KEY` | Sim Fora Da Demonstração | Chave Publicável Usada Pelo Backend Para A Integração De Autenticação. |
-| `SUPABASE_SECRET_KEY` | Para Exclusão De Conta | Chave Administrativa Necessária Para Remover A Identidade Do Supabase Auth; Deve Existir Somente No Backend. |
-| `FRONTEND_URL` | Recomendado | Origem Principal Do Frontend, Usada Em Redirecionamentos. |
-| `FRONTEND_ORIGINS` | Recomendado | Lista Separada Por Vírgulas De Origens Permitidas Para CORS. |
-| `DEMO_MODE` | Não | Use `true` Somente Na Demonstração Local; O Padrão É `false`. |
-| `PROXY_HOPS` | Conforme Hospedagem | Quantidade De Proxies Confiáveis Quando `ProxyFix` For Necessário. |
-| `PRIVACY_CONTROLLER` | Conforme Publicação Legal | Identificação Do Controlador De Dados Nos Documentos De Privacidade. |
-| `PRIVACY_EMAIL` | Conforme Publicação Legal | Contato De Privacidade Exibido Nos Documentos. |
-| `PRIVACY_PUBLICATION_READY` | Conforme Publicação Legal | Indica Se Os Documentos Legais Foram Revisados E Estão Prontos Para Publicação. |
+| `SECRET_KEY` | Sempre | Chave aleatória com pelo menos 32 caracteres. |
+| `DATABASE_URL` | Sempre | Conexão PostgreSQL; a demonstração configura SQLite automaticamente. |
+| `SUPABASE_URL` | Fora da demonstração | URL do projeto Supabase. |
+| `SUPABASE_PUBLISHABLE_KEY` | Fora da demonstração | Chave publicável usada pelo backend na autenticação. |
+| `SUPABASE_SECRET_KEY` | Exclusão de conta | Chave administrativa exclusiva do servidor. |
+| `FRONTEND_URL` | Recomendado | Origem principal do frontend e destino dos redirecionamentos. |
+| `FRONTEND_ORIGINS` | Recomendado | Origens liberadas pelo CORS, separadas por vírgula. |
+| `DEMO_MODE` | Não | Use `true` somente na demonstração local. |
+| `PROXY_HOPS` | Conforme a hospedagem | Número de proxies confiáveis para `ProxyFix`. |
+| `PRIVACY_CONTROLLER` | Publicação legal | Identificação do controlador de dados. |
+| `PRIVACY_EMAIL` | Publicação legal | Contato exibido nos documentos de privacidade. |
+| `PRIVACY_PUBLICATION_READY` | Publicação legal | Indica se os documentos foram revisados para publicação. |
 
-**Importante:** Não Envie O Arquivo `.env` Para O Repositório. Use Segredos Fortes E Exclusivos Em Produção. A URL `DATABASE_URL` Do Supabase Deve Usar O Modo Adequado À Hospedagem; O README Do Backend Recomenda O Transaction Pooler Na Porta `6543` Para A Vercel.
+Nunca versione o arquivo `.env`. Em hospedagens serverless como a Vercel, use a URL do Transaction Pooler do Supabase, normalmente na porta `6543`, de acordo com a configuração do projeto.
 
-## Banco De Dados E Migrações
+## Banco de dados e migrações
 
-O Banco Principal É PostgreSQL No Supabase. As Migrações Em `supabase/migrations/` Estão Nomeadas Com Data E Hora E Devem Ser Aplicadas Em Ordem Cronológica, Uma Única Vez Em Cada Banco. Antes De Aplicar Migrações Em Produção, Revise O SQL, Faça Backup E Confirme O Projeto Supabase De Destino.
+O banco de produção é PostgreSQL. Os arquivos em `supabase/migrations/` são ordenados por data e hora e devem ser aplicados uma única vez, do mais antigo para o mais recente.
 
-As Migrações Cobrem A Integração Inicial Da API, Dados E Atividades, Curadoria Etimológica, Taxonomia, Perfis, Janelas De Avaliação, Privacidade, Gerenciamento CRUD E Avatar Padrão. A Demonstração Local Usa Uma Inicialização SQLite Específica E Não Aplica As Migrações PostgreSQL.
+Antes de alterar um banco real:
 
-O Backend Inclui `check_schema.py` Para Verificar O Esquema Esperado. Execute-o Com O Ambiente Do Backend Configurado E Aponte `DATABASE_URL` Para O Banco Que Deseja Verificar. Não Use A Demonstração Como Banco De Dados De Produção.
+1. confirme o projeto Supabase de destino;
+2. faça backup dos dados;
+3. revise o SQL da migração;
+4. aplique as migrações na ordem;
+5. execute `backend_service/check_schema.py` apontando `DATABASE_URL` para o banco verificado.
+
+A demonstração usa um esquema SQLite próprio e não executa as migrações PostgreSQL.
 
 ## Testes
 
-Os Testes Python Do Backend Podem Ser Executados Na Raiz Do Projeto:
+Depois de instalar `requirements-dev.txt`, execute na raiz:
 
 ```powershell
 .\.venv\Scripts\python.exe -m pytest
 ```
 
-O `pytest.ini` Define `backend_service/tests` Como Diretório De Testes E Adiciona `backend_service` Ao Caminho De Importação. Os Testes Usam Dependências Substituídas E Dados Isolados; Não Devem Exigir Credenciais Reais Do Supabase.
+Os testes do backend usam dados e provedores isolados e não precisam de credenciais reais do Supabase.
 
-Há Também Testes De Frontend Em `frontend_spa/tests/`, Incluindo Arquivos Node (`*.cjs`) E Testes De Navegador (`browser_*.py`). Esses Testes São Ferramentas De Desenvolvimento E Podem Exigir Node.js, Playwright E Navegadores Instalados; O Projeto Não Mantém Um `package.json` Para A Aplicação Estática.
+`frontend_spa/tests/` também contém testes Node (`*.cjs`) e testes de navegador (`browser_*.py`). Eles são ferramentas de desenvolvimento e podem exigir Node.js, `linkedom`, Playwright e navegadores instalados. O frontend estático ainda não mantém um manifesto `package.json`; portanto, essas dependências precisam ser preparadas separadamente antes da execução.
 
-## Publicação Na Vercel
+## Publicação
 
-O Frontend E O Backend São Publicados Como Projetos Separados:
+### Frontend na Vercel
 
-### Frontend
+1. crie um projeto apontando para este repositório;
+2. selecione `frontend_spa` como **Root Directory**;
+3. use o preset **Other**, sem comando de build e com **Output Directory** `.`;
+4. publique o backend e atualize `API_BASE_URL` em `frontend_spa/config.js`;
+5. publique novamente e valide autenticação, navegação e CORS.
 
-1. **Crie Um Projeto Vercel Apontando Para Este Repositório.**
-2. **Defina `frontend_spa` Como Root Directory.**
-3. **Use O Preset `Other`, Sem Comando De Build E Com Output Directory `.`.**
-4. **Confirme As Regras De Navegação SPA E Cabeçalhos Em `frontend_spa\vercel.json`.**
-5. **Depois De Publicar A API, Atualize `API_BASE_URL` Em `frontend_spa\config.js` Com A Origem Do Backend, Sem `/api/v1` E Sem Barra Final, E Publique Novamente.**
+### Backend na Vercel
 
-### Backend
+1. crie outro projeto apontando para o mesmo repositório;
+2. selecione `backend_service` como **Root Directory**;
+3. configure as variáveis de ambiente;
+4. aplique as migrações antes de receber tráfego;
+5. valide `GET /api/v1/healthz`.
 
-1. **Crie Outro Projeto Vercel Para O Mesmo Repositório.**
-2. **Defina `backend_service` Como Root Directory.**
-3. **Configure As Variáveis De Ambiente Da Seção [Configuração Do Backend](#configuração-do-backend).**
-4. **Use `vercel_app:app` Como Entrada WSGI; A Configuração De Função Está Em `backend_service\vercel.json`.**
-5. **Aplique As Migrações Supabase Antes De Direcionar Tráfego Para A API.**
-6. **Verifique A Saúde Da API Em `/api/v1/healthz`.**
+A configuração WSGI usa `vercel_app:app`. Para exclusões de conta que falharem no provedor de identidade, agende a execução de `flask --app app:create_app process-account-deletions`.
 
-O Backend Espera As Origens Do Frontend Em `FRONTEND_ORIGINS` Para Liberar CORS. Configure A URL Pública Do Frontend Em `FRONTEND_URL`. Para Instruções Operacionais Complementares, Consulte [backend_service/README.md](./backend_service/README.md) E O Guia De Implantação Referenciado Nele.
+## Segurança e privacidade
 
-## Segurança E Privacidade
+- tokens de sessão são validados no backend;
+- autorização considera perfil, propriedade e vínculo com os dados;
+- CORS aceita somente as origens configuradas;
+- a chave administrativa do Supabase nunca deve chegar ao frontend;
+- rotas da aplicação recebem cabeçalhos de proteção e respostas sem cache;
+- os documentos legais precisam ser revisados antes de `PRIVACY_PUBLICATION_READY=true`;
+- dados pessoais reais não devem ser inseridos na demonstração.
 
-- **Tokens E Sessões:** A API Recebe O Token De Autenticação E Confere A Sessão No Backend.
-- **Autorização:** Rotas Protegidas Conferem O Perfil, A Propriedade E O Vínculo Com Turmas, Trilhas E Dados Solicitados.
-- **CORS:** As Origens Permitidas São Explicitamente Configuradas; Não Use Uma Lista Aberta Em Produção.
-- **Chaves Administrativas:** `SUPABASE_SECRET_KEY` É Exclusiva Do Servidor E Nunca Deve Ser Incorporada Ao Frontend.
-- **Cabeçalhos:** A API Define Cabeçalhos De Proteção E Respostas Sem Cache Para Rotas Da Aplicação.
-- **Exclusão De Conta:** A Exclusão Do Usuário No Supabase Auth Requer A Chave Administrativa No Backend; Falhas Pendentes Podem Ser Reprocessadas Pelo Comando Flask `process-account-deletions`.
-- **Documentos Legais:** Revise Os Dados Do Controlador, Contato E Conteúdo Legal Antes De Ativar A Publicação Em Um Ambiente Real.
-- **Demonstração:** Contém Contas E Conteúdo Fictícios; Não Insira Dados Pessoais Ou Reais Nesse Modo.
+Esses mecanismos não substituem auditoria de segurança, revisão jurídica ou configuração adequada da infraestrutura.
 
-Este Texto Descreve Os Mecanismos Implementados No Projeto E Não Substitui Uma Auditoria De Segurança, Uma Revisão Jurídica Ou A Configuração Segura Da Infraestrutura.
+## Versionamento
 
-## Tecnologias
+A versão atual do produto é `2.0.0-beta.1`:
 
-- **Frontend:** HTML, CSS E JavaScript Sem Framework De Build.
-- **Backend:** Python 3.12, Flask E SQLAlchemy.
-- **Banco De Dados:** PostgreSQL, Com SQLite Para A Demonstração Local.
-- **Autenticação:** Supabase Auth.
-- **Hospedagem:** Vercel Para Frontend E API; Supabase Para Banco E Serviços De Autenticação.
-- **Testes:** Pytest, Node.js E Ferramentas De Teste De Navegador.
+- `backend_service/backend/__init__.py` é a fonte usada pela API e pelo endpoint `/api/v1/healthz`;
+- `backend_service/pyproject.toml` usa a forma PEP 440 equivalente: `2.0.0b1`;
+- `frontend_spa/VERSION` registra a versão do frontend;
+- os READMEs exibem a mesma versão pública.
 
-As Versões Python Do Backend Estão Fixadas Em `backend_service\requirements.txt`; As Dependências De Desenvolvimento Estão Em `backend_service\requirements-dev.txt`.
+Ao preparar um release, atualize esses pontos no mesmo commit. A versão dos documentos legais (`LEGAL_VERSION`) é independente da versão do aplicativo e só deve mudar quando os termos ou a política forem revisados.
 
-## Solução De Problemas
+## Solução de problemas
 
-- **A Demonstração Não Inicia:** Confirme Que Python 3.12 Está Instalado E Que As Dependências Foram Instaladas Sem Erros.
-- **A API Informa Que Falta `SECRET_KEY` Ou `DATABASE_URL`:** Preencha `backend_service\.env` Para A Execução Separada. `run_demo.py` Configura Esses Valores Para A Demonstração.
-- **O Frontend Não Consegue Acessar A API:** Confira `API_BASE_URL`, `FRONTEND_ORIGINS`, A Porta E A Disponibilidade Da API.
-- **A API Recusa Uma Origem Do Navegador:** Adicione A Origem Exata Do Frontend A `FRONTEND_ORIGINS`, Sem Caminhos.
-- **A API Falha Ao Acessar O Banco:** Verifique `DATABASE_URL`, A Conectividade, As Credenciais E Se Todas As Migrações Foram Aplicadas.
-- **A Exclusão De Conta Não Está Disponível:** Verifique Se `SUPABASE_SECRET_KEY` Está Configurada Somente No Backend E Se A Rotina De Processamento De Exclusões Pendentes Foi Agendada.
+- **A demonstração não inicia:** confirme o Python 3.12 e reinstale `backend_service/requirements.txt`.
+- **A API informa que falta configuração:** revise `SECRET_KEY`, `DATABASE_URL` e as variáveis do Supabase em `backend_service/.env`.
+- **O frontend não alcança a API:** confira `API_BASE_URL`, `FRONTEND_ORIGINS`, a porta e a disponibilidade do backend.
+- **A API recusa a origem:** adicione a origem exata do frontend a `FRONTEND_ORIGINS`, sem caminhos.
+- **O banco falha:** valide conexão, credenciais, SSL e migrações.
+- **A exclusão de conta está indisponível:** configure `SUPABASE_SECRET_KEY` somente no backend e verifique a rotina de reprocessamento.
+
+Mais detalhes específicos estão em [`backend_service/README.md`](./backend_service/README.md) e [`frontend_spa/README.md`](./frontend_spa/README.md).

@@ -18,6 +18,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.security import check_password_hash, generate_password_hash
 from supabase_auth.errors import AuthApiError
 
+from . import __version__
 from .models import *
 from .crud_guards import idempotent, revision, ids as crud_ids
 from .privacy_api import LEGAL_VERSION, current_acceptance, legal_ready
@@ -153,7 +154,7 @@ def _token_session(user, remember=False):
 @api.get('/healthz')
 def healthz():
     g.db.execute(select(1))
-    return jsonify(status='ok', service='lise-api', version='2.0.0-tcc.1', capabilities=['games_availability','memory_match','crud_v2'])
+    return jsonify(status='ok', service='lise-api', version=__version__, capabilities=['games_availability','memory_match','crud_v2'])
 
 
 @api.post('/auth/login')
