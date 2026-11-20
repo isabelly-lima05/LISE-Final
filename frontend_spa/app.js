@@ -11,7 +11,7 @@
     detail: null, detailType: '', detailBack: 'explore', collections: [], collection: null,
     sources: null, practiceSource: null, practiceGame: '', trailCatalog: null, trailAreas: [],
     gameSession: null, gameFeedback: null, gameIndex: 0, decipherSlots: [], decipherSelectedLetter: null, memorySelected: [], memoryPairs: [],
-    memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, result: null, busy: false,
+    memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, memoryPreviewTimer: null, memoryPreview: false, gameAdvanceTimer: null, result: null, busy: false,
     studentDetail: null, assessmentTarget: null, assessmentDetailId: null, assessmentReturnTab: 'trails', assessmentSession: null, assessmentIndex: 0,
     assessmentAnswer: null, assessmentResult: null,
     profilePasswordEdit: false, selectedTermIds: new Set(), selectedTermInfo: new Map(), catalogTerms: [], catalogSearchTimer: null,
@@ -350,7 +350,7 @@
     const focusBefore=captureFocus();
     if (state.view === 'legal' && state.legal) { app.innerHTML = shell(renderLegal());navigation.mount();window.LiseInteractions?.mount(app,'legal');return; }
     if (!state.user) { state.view='auth'; renderAuth(); return; }
-    if (state.view !== 'game') { clearTimeout(state.memoryTimer); state.memoryLocked = false; }
+    if (state.view !== 'game') { clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.memoryPreview=false;state.memoryLocked=false; }
     if (state.loadError) { app.innerHTML = shell(renderLoadError());navigation.mount();return; }
     state.loading = false;
     let content = '';
@@ -464,13 +464,17 @@
     state.sources = await api('/sources');
   }
   async function startPractice(game, source, config = {}) {
+    clearTimeout(state.gameAdvanceTimer);clearTimeout(state.memoryPreviewTimer);
     state.decipherSlots=[]; state.decipherSelectedLetter=null; state.memoryMismatch=false; state.memoryCompleting=false; state.memoryCompletionError='';
     state.practiceGame = game; state.practiceSource = source; state.classId = source.class_id || null; state.view = 'game'; state.gameSession = null; state.gameFeedback = null; render();
     const payload = {game, source_type:source.type, source_id:source.id, area:source.area, class_id:source.class_id, question_count:Number(config.question_count || 10), mode:config.mode || 'termo_definicao'};
     let d;
     try { d = await api('/games/sessions', {method:'POST', body:payload}); }
     catch (error) { state.view='game-config'; render(); throw error; }
-    clearTimeout(state.memoryTimer); state.gameSession = d; state.gameIndex = 0; state.gameFeedback = null; state.memoryPairs = []; state.memoryMatched = new Set(); state.memorySelected = []; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null; state.memoryLocked=false; render();
+    clearTimeout(state.memoryTimer); state.gameSession = d; state.gameIndex = 0; state.gameFeedback = null; state.memoryPairs = []; state.memoryMatched = new Set(); state.memorySelected = []; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null;
+    const cards=d.game==='memoria'?(d.questions?.[0]?.cards||[]):[];
+    state.memoryPreview=cards.length>0;state.memoryLocked=state.memoryPreview;render();
+    if(state.memoryPreview){const sessionId=d.session_id,previewMs=1100;state.memoryPreviewTimer=setTimeout(()=>{if(state.gameSession?.session_id!==sessionId)return;state.memoryPreview=false;state.memoryLocked=false;state.memoryStartedAt=Date.now();render();},previewMs);}
   }
 
   async function chooseGameForSource(game) {
@@ -573,10 +577,11 @@
     else body.answer = data.get('answer');
     const answer = await api(`/games/sessions/${state.gameSession.session_id}/answer`, {method:'POST', body});
     state.gameFeedback = answer; render();
-    if(answer.correct) celebrate(`${state.gameSession.session_id}:${question.id}`);
+    if(answer.correct){celebrate(`${state.gameSession.session_id}:${question.id}`);const sessionId=state.gameSession.session_id,questionId=question.id;clearTimeout(state.gameAdvanceTimer);state.gameAdvanceTimer=setTimeout(()=>{if(state.view==='game'&&state.gameSession?.session_id===sessionId&&state.gameSession.questions[state.gameIndex]?.id===questionId&&state.gameFeedback?.correct)nextQuestion().catch(error=>toast(error.message,'error'));},900);}
   }
 
   async function nextQuestion() {
+    clearTimeout(state.gameAdvanceTimer);
     if (state.gameIndex + 1 < state.gameSession.questions.length) {
       clearTimeout(state.memoryTimer); state.gameIndex++; state.gameFeedback=null; state.decipherSlots=[]; state.decipherSelectedLetter=null; state.memoryPairs=[]; state.memoryMatched=new Set(); state.memorySelected=[]; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null; state.memoryLocked=false; render(); return;
     }
@@ -636,6 +641,7 @@
       else if(action==='explore-more'){state.exploreShown+=15;refreshExplore();document.querySelectorAll('.specimen-card')[state.exploreShown-15]?.querySelector('button')?.focus();}
       else if(action==='explore-page'){state.explorePage=Math.max(1,Number(buttonEl.dataset.page)||1);refreshExplore();document.querySelector('#explore-results')?.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});document.querySelector('.specimen-card button')?.focus({preventScroll:true});}
       else if(action==='reveal-study'){state.studyRevealed.add(Number(buttonEl.dataset.id));refreshExplore();document.querySelector(`[data-term="${buttonEl.dataset.id}"] [data-action="open-term"]`)?.focus();}
+      else if(action==='explore-clear-search'){state.exploreSearch='';state.exploreShown=15;state.explorePage=1;render();document.querySelector('#explore-search')?.focus();}
       else if(action==='explore-clear'){state.exploreSearch='';state.exploreMine=false;state.exploreArea='';state.exploreKind='terms';state.sort='asc';state.exploreShown=15;state.explorePage=1;render();document.querySelector('#explore-search')?.focus();}
       else if(action==='retry-discovery')await loadDashboard();
       else if (action === 'open-legal') await loadLegal(buttonEl.dataset.document);
@@ -791,7 +797,7 @@
       else if (action === 'games-back') { state.view='games'; render(); }
       else if (action === 'practice-back') { state.view=state.practiceSource?.type==='trail'?'class':state.practiceSource?.type==='collection'?'collection':'games'; render(); }
       else if (action === 'choose-game-back') { state.view='choose-game'; render(); }
-      else if (action === 'nav-games') { clearTimeout(state.memoryTimer); state.memoryLocked=false; state.view='games'; state.gameSession=null; render(); }
+      else if (action === 'nav-games') { clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.memoryPreview=false; state.memoryLocked=false; state.view='games'; state.gameSession=null; render(); }
       else if (action === 'next-question') await nextQuestion();
       else if (action === 'decipher-letter') {
         const letterIndex=Number(buttonEl.dataset.letterIndex);
@@ -894,7 +900,7 @@
   }
 
   async function memoryCard(cardId) {
-    if (!state.gameSession || state.memoryLocked || state.memoryMatched.has(cardId) || state.memorySelected.includes(cardId)) return;
+    if (!state.gameSession || state.memoryPreview || state.memoryLocked || state.memoryMatched.has(cardId) || state.memorySelected.includes(cardId)) return;
     state.memoryMismatch=false;state.memorySelected.push(cardId); render();
     if (state.memorySelected.length < 2) return;
     state.memoryLocked=true;
@@ -915,7 +921,7 @@
         state.memoryTimer=setTimeout(()=>{
           if (state.gameSession?.session_id!==sessionId || state.gameIndex!==questionIndex) return;
           state.memorySelected=[]; state.memoryLocked=false; render();
-        },700);
+        },480);
       }
     } catch (error) {
       if (state.gameSession?.session_id===sessionId && state.gameIndex===questionIndex) {

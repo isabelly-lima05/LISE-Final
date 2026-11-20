@@ -12,6 +12,11 @@ for(const count of [4,6,10,12]){
  assert.equal((html.match(/data-action="memory-card"/g)||[]).length,count,'Nenhuma carta pode desaparecer do tabuleiro');
  assert.match(html,new RegExp('--mem-rows-small:'+Math.ceil(count/3)));
  assert.equal((html.match(/data-action="memory-read"/g)||[]).length,0,'Leitura não revela cartas fechadas');
+ s.memoryPreview=true;
+ const preview=t.renderGameQuestion();
+ assert.match(preview,/memory-session memory-preview/,'A partida deve identificar a prévia de memorização');
+ assert.equal((preview.match(/class="memory-card[^>]+disabled/g)||[]).length,count,'A onda inicial não pode aceitar palpites antes de fechar');
+ s.memoryPreview=false;
  s.memorySelected=['c0'];
  assert.equal((t.renderGameQuestion().match(/data-action="memory-read"/g)||[]).length,2,'Carta virada pode ser lida pelo corpo ou pelo ícone');
  s.memorySelected=[];

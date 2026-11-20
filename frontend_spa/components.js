@@ -40,12 +40,13 @@
 
   function termCard(term, {study=false, revealed=false, extra='', numbered=false, status=''}={}) {
     const isHidden = study && !revealed;
+    const speech=!isHidden?(window.LiseSpeech?.button(term.name)||''):'';
     return `<article class="specimen-card ${numbered?'path-card':''} ${study?'study-card':''} ${study&&revealed?'study-revealed':''}" data-term="${esc(term.id)}"><div class="specimen-meta"><span>${esc(term.area || 'Biologia')}</span></div>
-      <div class="specimen-title"><h3 class="${isHidden?'':'sr-only'}">${esc(term.name)}</h3>${isHidden?'':anatomy(term,{meanings:false})}</div>
+      <div class="specimen-title-row"><div class="specimen-title"><h3 class="${isHidden?'':'sr-only'}">${esc(term.name)}</h3>${isHidden?'':anatomy(term,{meanings:false})}</div>${speech}</div>
       ${isHidden?'<p class="study-prompt">O que esta palavra conta sobre a Biologia?</p>':`<p class="specimen-definition">${esc(term.definition)}</p>`}
       ${status?`<p class="practice-mark">${icon(status==='Praticado'?'circle-check':'circle')}${esc(status)}</p>`:''}
       <div class="card-actions">${isHidden?button('Revelar significado','reveal-study','btn-primary btn-small',`data-id="${term.id}"`):button('Investigar palavra '+icon('arrow-right'),'open-term','btn-text btn-small',`data-id="${term.id}"`)}
-      ${!isHidden?(window.LiseSpeech?.button(term.name)||''):''}${button(icon('heart'),'toggle-favorite',`icon-button favorite-toggle${term.favorite?' is-favorite':''}`,`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
+      ${button(icon('heart'),'toggle-favorite',`icon-button favorite-toggle${term.favorite?' is-favorite':''}`,`data-type="term" data-id="${term.id}" data-favorite="${!!term.favorite}" aria-label="${term.favorite?'Remover dos favoritos':'Favoritar'} ${esc(term.name)}" aria-pressed="${!!term.favorite}"`)}${extra}</div>
       ${term.created_by_me?'<span class="ownership-note">Criado por você</span>':''}</article>`;
   }
 

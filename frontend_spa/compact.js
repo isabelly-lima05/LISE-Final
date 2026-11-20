@@ -49,7 +49,8 @@
     groups=[['Resumo',[main.querySelector('.teacher-metrics'),main.querySelector('.workspace-shortcuts')]],['Turmas',[panels[0]]],['Trilhas',[panels[1]]],['Planejamento',[main.querySelector('.planning-panel')]]];
     anchor=main.querySelector('.teacher-welcome');
    }else{const columns=main.querySelector('.home-columns'),panels=columns?elements(columns):[];
-    groups=[['Descoberta',[main.querySelector('.discovery-sheet'),main.querySelector('.growth-strip')]],['Turmas',[panels[0]]],['Coleções',[panels[1]]]];anchor=main.querySelector('.section-heading');
+    const classes=Array.isArray(s.dashboard?.classes)?s.dashboard.classes.length:0,collections=Array.isArray(s.dashboard?.collections)?s.dashboard.collections.length:Array.isArray(s.collections)?s.collections.length:0;
+    groups=[['Descoberta',[main.querySelector('.discovery-sheet'),main.querySelector('.growth-strip')]],['Turmas '+classes,[panels[0]]],['Coleções '+collections,[panels[1]]]];anchor=main.querySelector('.section-heading');
    }
   }else if(s.view==='account'&&s.accountTab==='privacidade'){
    host=main.querySelector('#account-tabpanel');if(!host)return;

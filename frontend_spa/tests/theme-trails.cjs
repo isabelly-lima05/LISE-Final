@@ -13,6 +13,11 @@ const themeCtx={window:{matchMedia:()=>media,addEventListener:(name,fn)=>storage
 vm.runInNewContext(fs.readFileSync(path.join(root,'theme.js'),'utf8'),themeCtx);
 assert.equal(html.dataset.theme,'dark');assert.equal(attrs['aria-checked'],'true');clickTheme({target:toggle});assert.equal(html.dataset.theme,'light');assert.equal(saved,'light');systemChange();assert.equal(html.dataset.theme,'light','Explicit choice survives OS changes');clickTheme({target:toggle});assert.equal(html.dataset.theme,'dark');assert.equal(saved,'dark');assert.equal(attrs['aria-checked'],'true');storageChange({key:'lise_theme',newValue:null});media.matches=false;systemChange();assert.equal(html.dataset.theme,'light');
 assert.match(themeCtx.window.LiseTheme.control(),/role="switch"/);assert.ok(!themeCtx.window.LiseTheme.control().includes('<select'));
+// Em um botão real, o controle se move primeiro e a paleta só troca ao fim da animação.
+let animationEnd;const delayedHtml={dataset:{},style:{}},delayedAttrs={};
+const movingToggle={setAttribute:(k,v)=>delayedAttrs[k]=v,closest:s=>s==='[data-theme-toggle]'?movingToggle:null,classList:{add(){},remove(){}},addEventListener:(name,fn)=>{if(name==='animationend')animationEnd=fn;}};
+const delayedCtx={window:{matchMedia:()=>({matches:false,addEventListener(){}}),addEventListener(){}},document:{documentElement:delayedHtml,querySelector:()=>null,querySelectorAll:()=>[movingToggle],addEventListener:(name,fn)=>delayedCtx.click=fn},localStorage:{getItem:()=>null,setItem(){}},setTimeout:()=>1,clearTimeout(){}};
+vm.runInNewContext(fs.readFileSync(path.join(root,'theme.js'),'utf8'),delayedCtx);delayedCtx.click({target:movingToggle});assert.equal(delayedHtml.dataset.theme,'light');assert.equal(delayedAttrs['aria-checked'],'true');animationEnd({target:{classList:{contains:name=>name==='appearance-thumb'}}});assert.equal(delayedHtml.dataset.theme,'dark');
 // Storage denial must not block login or toggling.
 const blocked={...themeCtx,localStorage:{getItem(){throw Error()},setItem(){throw Error()}}};vm.runInNewContext(fs.readFileSync(path.join(root,'theme.js'),'utf8'),blocked);clickTheme({target:toggle});assert.equal(html.dataset.theme,'dark');
 function luminance(hex){const c=hex.match(/\w\w/g).map(v=>parseInt(v,16)/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;}
