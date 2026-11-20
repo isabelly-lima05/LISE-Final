@@ -407,3 +407,12 @@ dialog.app-dialog :is(h1,h2,h3,label,strong,p,small){color:inherit}dialog.app-di
 ::view-transition-new(term-detail){animation:term-shared-in 220ms cubic-bezier(.23,1,.32,1) both}
 @keyframes term-shared-out{to{opacity:.25}}@keyframes term-shared-in{from{opacity:.2}}
 @media(prefers-reduced-motion:reduce){.filter-pill:active>span{transform:none}.appearance-switch .appearance-sun,.appearance-switch .appearance-moon{transition:none}::view-transition-group(term-detail),::view-transition-old(term-detail),::view-transition-new(term-detail){animation:none!important}}
+
+/* A barra de utilidades não reserva uma linha vazia: ela compartilha o cabeçalho. */
+.app-layout .main-column{position:relative}
+.app-layout .workspace-topbar{position:absolute;z-index:20;top:24px;left:50%;width:100%;max-width:2100px;min-height:0;padding:0 clamp(18px,2.5vw,40px);transform:translateX(-50%);pointer-events:none}
+.app-layout .workspace-topbar .appearance-switch{pointer-events:auto}
+.app-layout .content,.app-layout .app-footer{width:100%;max-width:2100px;padding-inline:clamp(18px,2.5vw,40px)}
+.app-layout .content{padding-top:18px}
+.app-layout .content>.section-heading,.app-layout .content>.teacher-welcome .section-heading{padding-right:84px}
+@media(max-width:600px){.app-layout .workspace-topbar{position:relative;top:auto;left:auto;max-width:none;min-height:48px;padding:8px 18px 0;transform:none}.app-layout .content{padding-top:12px}.app-layout .content>.section-heading,.app-layout .content>.teacher-welcome .section-heading{padding-right:0}}

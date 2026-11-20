@@ -187,6 +187,23 @@ def main():
             teacher.on("pageerror", lambda error: errors.append(str(error)))
             login(teacher, "professor@lise.demo")
             create = teacher.get_by_role("button", name="Criar turma", exact=True).first
+            welcome_box = teacher.locator(".teacher-welcome").bounding_box()
+            toggle_box = teacher.locator("[data-theme-toggle]").bounding_box()
+            create_box = create.bounding_box()
+            overlaps = not (
+                toggle_box["x"] + toggle_box["width"] <= create_box["x"]
+                or create_box["x"] + create_box["width"] <= toggle_box["x"]
+                or toggle_box["y"] + toggle_box["height"] <= create_box["y"]
+                or create_box["y"] + create_box["height"] <= toggle_box["y"]
+            )
+            check(
+                "Conteúdo aproveita o topo sem colidir com o tema",
+                welcome_box["y"] < 40 and not overlaps,
+            )
+            check(
+                "Cabeçalho usa a largura disponível",
+                welcome_box["width"] >= 0.88 * (1366 - 72),
+            )
             idle_light = create.evaluate("el=>getComputedStyle(el).backgroundColor")
             surface_light = teacher.locator(".teacher-welcome").evaluate(
                 "el=>getComputedStyle(el).backgroundColor"

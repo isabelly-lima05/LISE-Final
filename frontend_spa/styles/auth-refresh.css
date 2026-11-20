@@ -1,0 +1,212 @@
+/* Login e cadastro: contraste, assinatura morfológica e feedback de formulário. */
+.access-stage{
+  --access-motion-fast:150ms;
+  --access-motion-base:200ms;
+  --access-motion-slow:300ms;
+  --access-ease-out:cubic-bezier(.23,1,.32,1);
+  --access-ease-move:cubic-bezier(.77,0,.175,1);
+}
+@media(min-width:761px){
+  .access-panel{height:min(920px,calc(100svh - 40px))}
+  .access-form-side{overflow-y:auto;scrollbar-gutter:stable}
+}
+
+/* O painel deixa de parecer esbranquiçado: verde profundo + vidro verde. */
+.access-story{
+  --glow-x:50%;
+  --glow-y:35%;
+  background:
+    radial-gradient(circle at 14% 10%,#7fa17445 0 12%,transparent 32%),
+    radial-gradient(circle at 88% 86%,#061d175e 0 8%,transparent 35%),
+    linear-gradient(145deg,#285c45 0%,#184635 52%,#0f3429 100%)!important;
+  color:#f8faed;
+}
+.access-story::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  width:auto;
+  height:auto;
+  right:0;
+  bottom:0;
+  border:0;
+  border-radius:inherit;
+  transform:none;
+  box-shadow:none;
+  pointer-events:none;
+  opacity:.24;
+  background-image:
+    radial-gradient(circle at 20% 30%,#fff 0 .55px,transparent .7px),
+    radial-gradient(circle at 70% 60%,#fff 0 .45px,transparent .6px);
+  background-size:5px 5px,7px 7px;
+  mix-blend-mode:soft-light;
+  z-index:0;
+}
+.access-story-glow{
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  opacity:.72;
+  background:radial-gradient(circle 220px at var(--glow-x) var(--glow-y),#dff5c638,transparent 72%);
+}
+.access-story::before{z-index:1;border-color:#eaf3d82e}
+.access-story-top,.access-story-art,.access-story-copy,.access-story-bottom{z-index:2}
+.access-story .access-index{color:#f0f5dc;background:#0e3226a8;border-color:#dce9c43d;text-shadow:none}
+.access-story .access-story-mark svg{color:#eef4dc}
+.access-story .access-story-copy{
+  padding:20px 22px;
+  border:1px solid #dfeac43b;
+  border-radius:18px;
+  background:linear-gradient(135deg,#103a2dce,#1a4937b5);
+  box-shadow:0 18px 45px #071d1740,inset 0 1px #ffffff17;
+  backdrop-filter:blur(6px);
+}
+.access-story .access-story-copy p{color:#fffef4;text-shadow:0 2px 18px #071d1775}
+.access-story .access-story-copy p em{color:#dcebbf}
+.access-story .access-story-copy>span:last-child{color:#f0f5e7;font-weight:550;text-shadow:0 1px 12px #071d17}
+.access-story .access-story-line{background:#d9e8ba}
+.access-story .access-story-bottom{color:#e6efda;border-color:#dbe8c33d}
+
+/* Ilustração botânica em traço fino nos cantos. */
+.access-botanical{position:absolute;z-index:1;color:#e7f1d629;pointer-events:none}
+.access-botanical svg{width:150px;height:150px;stroke-width:.55}
+.access-botanical-one{left:-32px;bottom:60px;transform:rotate(18deg)}
+.access-botanical-two{right:-20px;top:70px;transform:rotate(-35deg)}
+.access-botanical-two svg{width:118px;height:118px}
+
+/* A anatomia das palavras vira a assinatura central do painel. */
+.access-story-art{transform:translate3d(0,0,0);will-change:transform}
+.access-story-art.is-settling{transition:transform var(--access-motion-slow) var(--access-ease-out)}
+.access-morpheme-word{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:5px;filter:drop-shadow(0 13px 22px #061a143f)}
+.access-morpheme-word span{display:inline-flex;align-items:center;min-height:46px;padding:10px 13px;border:1px solid #ffffff57;border-radius:12px;font:600 clamp(17px,2vw,23px)/1 "IBM Plex Mono",monospace;letter-spacing:-.035em}
+.access-morpheme-word b{color:#dbe7cc;font:400 18px/1 "Instrument Sans",sans-serif}
+.access-morpheme-prefix{background:#e9a750;color:#422600}
+.access-morpheme-root{background:#91b887;color:#173520}
+.access-morpheme-suffix{background:#b99bc1;color:#38243d;margin-left:-5px;border-radius:4px 12px 12px 4px!important}
+.access-morpheme-word.is-remixing span{animation:access-morpheme-remix 280ms var(--access-ease-out) both}
+.access-morpheme-word.is-remixing span:nth-of-type(2){animation-delay:35ms}
+.access-morpheme-word.is-remixing span:nth-of-type(3){animation-delay:70ms}
+@keyframes access-morpheme-remix{from{opacity:.25;clip-path:inset(0 100% 0 0);transform:translateY(3px)}to{opacity:1;clip-path:inset(0 0 0 0);transform:translateY(0)}}
+.access-art-label{z-index:3;bottom:2px;color:#f1f6e8;background:#10392dcc;border-color:#d9e7c34d;font-size:11px}
+.access-orbit{border-color:#d9e8bd51!important;animation:access-orbit-one 12s linear infinite;will-change:transform}
+.access-orbit::after{display:none}
+.access-orbit i{position:absolute;display:block;width:9px;height:9px;left:50%;top:-5px;border:2px solid #e8efd6;border-radius:50%;background:#e5a354;box-shadow:0 0 0 4px #e5a35424}
+.access-orbit-two{animation-name:access-orbit-two;animation-duration:16s}
+.access-orbit-two i{width:7px;height:7px;top:calc(100% - 3px);background:#b999c0;border-color:#f2e8f3;box-shadow:0 0 0 4px #b999c026}
+@keyframes access-orbit-one{from{transform:rotate(-25deg)}to{transform:rotate(335deg)}}
+@keyframes access-orbit-two{from{transform:rotate(-38deg)}to{transform:rotate(-398deg)}}
+
+/* Campos: autofill neutro, senha mais legível e validação no próprio contexto. */
+.access-field input:-webkit-autofill,
+.access-field input:-webkit-autofill:hover,
+.access-field input:-webkit-autofill:focus,
+.access-field input:-webkit-autofill:active{
+  -webkit-text-fill-color:var(--access-text)!important;
+  caret-color:var(--access-text);
+  -webkit-box-shadow:0 0 0 1000px var(--access-field) inset!important;
+  box-shadow:0 0 0 1000px var(--access-field) inset!important;
+  border-color:var(--access-border)!important;
+}
+.access-field input[type=password]{font-size:17px!important;letter-spacing:.14em}
+.access-field input[type=password]::placeholder{font-size:13px;letter-spacing:0}
+.access-valid-mark{position:absolute;right:14px;top:50%;display:grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--access-brand);color:var(--access-button-text);opacity:0;transform:translateY(-50%) scale(.65);filter:blur(3px);transition:opacity 180ms var(--access-ease-out),transform 180ms var(--access-ease-out),filter 180ms var(--access-ease-out);pointer-events:none}
+.access-valid-mark svg{width:13px;height:13px;stroke-width:2.6}
+.access-field[data-field=email].is-valid .access-valid-mark{opacity:1;transform:translateY(-50%) scale(1);filter:blur(0)}
+.access-field[data-field=email].is-valid input{padding-right:48px!important;border-color:var(--access-brand)}
+.access-field.is-invalid input{border-color:#a2493f!important;box-shadow:0 0 0 3px #a2493f15!important}
+.access-field-feedback{display:none;margin:0;color:#8d3f38;font-size:11px;line-height:1.45}
+.access-field.is-invalid .access-field-feedback{display:block}
+.access-password-strength{display:grid;gap:7px;margin-top:1px}
+.access-strength-track{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.access-strength-track i{height:4px;border-radius:6px;background:var(--access-border);transition:background-color var(--access-motion-base) var(--access-ease-out)}
+.access-password-strength[data-strength="1"] .access-strength-track i:nth-child(-n+1){background:#b85b4f}
+.access-password-strength[data-strength="2"] .access-strength-track i:nth-child(-n+2){background:#c48336}
+.access-password-strength[data-strength="3"] .access-strength-track i:nth-child(-n+3){background:#7b995a}
+.access-password-strength[data-strength="4"] .access-strength-track i{background:var(--access-brand)}
+.access-strength-copy{display:flex;justify-content:space-between;gap:10px;color:var(--access-subtle);font-size:10px;line-height:1.4}
+.access-strength-copy strong{color:var(--access-text);font-weight:600}
+
+/* A escolha de perfil é um cartão explicativo, não apenas um rádio discreto. */
+.access-register .access-form{gap:17px}
+.access-register .access-roles{gap:12px;margin-top:2px}
+.access-roles legend{font-size:13px;margin-bottom:11px}
+.access-roles label>span{position:relative;align-items:flex-start;justify-content:flex-start;gap:10px;min-height:96px;padding:14px 13px;border-radius:12px;transition:background-color var(--access-motion-base) var(--access-ease-out),border-color var(--access-motion-base) var(--access-ease-out),transform var(--access-motion-fast) var(--access-ease-out),box-shadow var(--access-motion-base) var(--access-ease-out)}
+.access-roles label:active>span{transform:scale(.97)}
+.access-role-icon{display:grid;place-items:center;flex:none;width:31px;height:31px;border:1px solid var(--access-border);border-radius:9px;background:var(--access-paper);color:var(--access-subtle)}
+.access-role-icon svg{width:17px;height:17px}
+.access-role-copy{display:grid;gap:5px;min-width:0;padding-right:9px}
+.access-role-copy strong{font-size:13px;color:var(--access-text)}
+.access-role-copy small{font-size:10px;line-height:1.4;color:var(--access-subtle)}
+.access-role-check{position:absolute;right:9px;top:9px;display:grid;place-items:center;width:18px;height:18px;border-radius:50%;background:var(--access-brand);color:var(--access-button-text);opacity:0;transform:scale(.65);filter:blur(3px);transition:opacity 180ms var(--access-ease-out),transform 180ms var(--access-ease-out),filter 180ms var(--access-ease-out)}
+.access-role-check svg{width:11px;height:11px;stroke-width:2.8}
+.access-roles label:has(:checked)>span{border-color:var(--access-brand);box-shadow:0 0 0 2px color-mix(in srgb,var(--access-brand) 13%,transparent)}
+.access-roles label:has(:checked) .access-role-icon{background:var(--access-brand);border-color:var(--access-brand);color:var(--access-button-text)}
+.access-roles label:has(:checked) .access-role-icon svg{fill:currentColor;fill-opacity:.2;stroke-width:2}
+.access-roles label:has(:checked) .access-role-check{opacity:1;transform:scale(1);filter:blur(0)}
+.access-register .access-consent{margin-top:5px;padding-top:16px;border-top:1px solid var(--access-border)}
+.access-consent.is-invalid{color:#8d3f38}
+.access-consent-feedback{margin:-8px 0 0 25px;color:#8d3f38;font-size:11px}
+
+/* Rodapé mais legível; o link institucional ganha sua própria linha de ação. */
+.access-footer{gap:17px;padding-top:25px;font-size:12px}
+.access-landing-link{min-height:36px;padding:7px 11px;border:1px solid var(--access-border);border-radius:999px;background:var(--access-soft);color:var(--access-text)!important;font-size:13px!important;font-weight:650!important;transition:background-color var(--access-motion-base) var(--access-ease-out),border-color var(--access-motion-base) var(--access-ease-out),transform var(--access-motion-fast) var(--access-ease-out)}
+.access-landing-link:hover{border-color:var(--access-brand);background:color-mix(in srgb,var(--access-soft) 75%,var(--access-brand) 25%)}
+.access-landing-link:active{transform:scale(.97)}
+.access-footer .legal-links{gap:22px!important;font-size:12px!important;color:var(--access-subtle)!important}
+.access-footer .legal-links a{text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color var(--access-motion-fast),text-decoration-color var(--access-motion-fast)}
+.access-footer .legal-links a:hover{color:var(--access-text);text-decoration-color:currentColor}
+
+/* Loading do produto: os três morfemas se encaixam. */
+.access-submit:active:not(:disabled){transform:scale(.97)}
+.access-submit[aria-busy=true]{justify-content:center;cursor:wait}
+.access-chip-loader{display:flex;align-items:center;justify-content:center;gap:5px;min-height:19px}
+.access-chip-loader i{display:inline-flex;align-items:center;height:21px;padding:0 7px;border-radius:6px;font:600 10px/1 "IBM Plex Mono",monospace;font-style:normal;color:#173520;animation:access-chip-fit 300ms var(--access-ease-move) infinite alternate}
+.access-chip-loader i:nth-child(1){background:#e9a750;transform:translateX(-7px)}
+.access-chip-loader i:nth-child(2){background:#91b887;animation-delay:80ms}
+.access-chip-loader i:nth-child(3){background:#b99bc1;transform:translateX(7px);animation-delay:160ms}
+@keyframes access-chip-fit{to{transform:translateX(0)}}
+
+/* No mobile, a identidade permanece como uma faixa curta no topo. */
+@media(max-width:760px){
+  html:has(.access-stage),body:has(.access-stage),body:has(.access-stage)>#app{height:auto;min-height:100%;overflow:auto}
+  .access-stage{height:auto;min-height:100svh;padding:10px}
+  .access-panel{display:flex;flex-direction:column;height:auto;min-height:calc(100svh - 20px);overflow:hidden}
+  .access-story,.access-register .access-story{order:0;display:flex;flex:none;min-height:178px;margin:0;padding:20px 22px;border-radius:0;gap:8px}
+  .access-form-side,.access-register .access-form-side{order:1;overflow:visible;padding:22px 24px 26px}
+  .access-story::before{inset:10px}
+  .access-story-top{align-items:flex-start}
+  .access-story-mark{display:none}
+  .access-story-art{min-height:92px;max-height:92px;margin:0;transform:none!important}
+  .access-orbit-one{width:132px;height:82px}
+  .access-orbit-two{width:158px;height:68px}
+  .access-morpheme-word span{min-height:34px;padding:7px 9px;border-radius:9px;font-size:13px}
+  .access-morpheme-word b{font-size:13px}
+  .access-art-label{bottom:-1px;padding:5px 9px;font-size:8px}
+  .access-story-copy,.access-story-bottom,.access-botanical-two{display:none}
+  .access-botanical-one{left:-50px;bottom:-60px}
+  .access-header{margin-bottom:14px}
+  .access-content{padding-block:8px}
+  .access-footer{padding-top:24px}
+  .access-register .access-form{gap:15px}
+}
+@media(max-width:430px){
+  .access-roles{grid-template-columns:1fr}
+  .access-roles label>span{min-height:76px}
+  .access-content h1{font-size:clamp(35px,11vw,44px)}
+  .access-register .access-content h1{font-size:clamp(30px,9vw,36px)}
+}
+@media(max-height:650px) and (min-width:761px){
+  .access-story-art{display:grid}
+  .access-footer{display:flex}
+  .access-story-copy{padding:14px 16px}
+  .access-story-copy>span:last-child{display:none}
+  .access-register .access-form{gap:9px}
+  .access-register .access-roles label>span{min-height:72px;padding:10px}
+  .access-role-copy small{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){
+  .access-orbit,.access-chip-loader i{animation:none!important}
+  .access-story-art{transform:none!important;transition:none!important}
+  .access-valid-mark,.access-role-check{filter:none;transition:none}
+}
