@@ -98,7 +98,8 @@
     if (options.body !== undefined) headers['Content-Type'] = 'application/json';
     if(options.idempotencyKey)headers['Idempotency-Key']=options.idempotencyKey;
     if (state.token) headers.Authorization = `Bearer ${state.token}`;
-    const closePending=(options.method||'GET')!=='GET'?window.LiseInteractions?.notify('Processando sua ação…','info',{duration:60000}):null;
+    let closePending=null;
+    const pendingTimer=(options.method||'GET')!=='GET'?setTimeout(()=>{closePending=window.LiseInteractions?.notify('Estamos concluindo sua solicitação.','info',{duration:60000,title:'Processando'});},500):null;
     try {
     let response;
     try {
@@ -118,9 +119,9 @@
       if (data.code === 'terms_required' && state.user) await loadAccount('privacidade');
       const error=new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.'); error.status=response.status; error.code=data.code; throw error;
     }
-    if((options.method||'GET')!=='GET'&&data.message)window.LiseInteractions?.notify(data.message,'success');
+    if((options.method||'GET')!=='GET'&&data.message&&!options.silentNotice)window.LiseInteractions?.notify(data.message,'success');
     return data;
-    } finally {if(typeof closePending==='function')closePending();}
+    } finally {if(pendingTimer)clearTimeout(pendingTimer);if(typeof closePending==='function')closePending();}
   }
 
   const celebrated = new Set();

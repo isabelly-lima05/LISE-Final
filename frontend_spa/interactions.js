@@ -15,7 +15,13 @@
   root.className='toast-stack';root.removeAttribute('role');root.removeAttribute('aria-live');
   const card=document.createElement('div');card.className='notice';card.dataset.tone=tone;
   card.setAttribute('role',tone==='error'?'alert':'status');
-  const text=document.createElement('span');text.textContent=message;card.append(text);
+  const labels={success:'Tudo certo',error:'Não foi possível concluir',warning:'Atenção',info:'Em andamento'};
+  const marks={success:'circle-check',error:'circle-x',warning:'triangle-alert',info:'info'};
+  const mark=document.createElement('span');mark.className='notice-mark';mark.innerHTML=icon(marks[tone]||marks.info);card.append(mark);
+  const copy=document.createElement('span');copy.className='notice-copy';
+  const title=document.createElement('strong');title.className='notice-title';title.textContent=options.title||labels[tone]||labels.info;
+  const text=document.createElement('span');text.className='notice-message';text.textContent=message;
+  copy.append(title,text);card.append(copy);
   let timer,closing=false;const close=()=>{clearTimeout(timer);if(closing||!card.isConnected)return;closing=true;if(reduced()){card.remove();return;}const exit=motion(card,[{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(6px)'}],{duration:160,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});Promise.resolve(exit?.finished).catch(()=>{}).then(()=>card.remove());};
   if(options.action){const action=document.createElement('button');action.type='button';action.className='btn btn-text';action.textContent=options.label||'Desfazer';action.onclick=()=>{options.action();close();};card.append(action);}
   const dismiss=document.createElement('button');dismiss.type='button';dismiss.className='icon-button';dismiss.setAttribute('aria-label','Dispensar aviso');dismiss.innerHTML=icon('x');dismiss.onclick=close;card.append(dismiss);
@@ -88,7 +94,15 @@
   });
  }
  function tabs(root) {
-  root.querySelectorAll('[role=tablist]').forEach(list=>{const active=list.querySelector('[aria-selected=true]');if(!active)return;const key=list.getAttribute('aria-label');const indicator=document.createElement('span');indicator.className='tab-indicator';indicator.setAttribute('aria-hidden','true');list.append(indicator);const update=()=>{indicator.style.width=active.offsetWidth+'px';indicator.style.transform=`translateX(${active.offsetLeft}px)`;};update();const before=previousTabs.get(key);if(before&&!reduced())indicator.animate([{transform:`translateX(${before.left}px) scaleX(${before.width/(active.offsetWidth||1)})`},{transform:indicator.style.transform+' scaleX(1)'}],{duration:200,easing:'cubic-bezier(.77,0,.175,1)'});previousTabs.set(key,{left:active.offsetLeft,width:active.offsetWidth});});
+  root.querySelectorAll('[role=tablist]').forEach(list=>{
+   const active=list.querySelector('[aria-selected=true]');if(!active)return;
+   list.querySelector(':scope > .tab-indicator')?.remove();
+   const key=list.getAttribute('aria-label')||list.id||'tabs',indicator=document.createElement('span');
+   indicator.className='tab-indicator';indicator.setAttribute('aria-hidden','true');list.append(indicator);
+   const geometry=()=>{const listBox=list.getBoundingClientRect(),activeBox=active.getBoundingClientRect();return {left:activeBox.left-listBox.left+list.scrollLeft,width:activeBox.width};};
+   const place=animate=>{if(!list.isConnected)return;const current=geometry(),before=previousTabs.get(key);indicator.style.width=current.width+'px';indicator.style.transform=`translate3d(${current.left}px,0,0)`;if(animate&&before&&!reduced())indicator.animate([{transform:`translate3d(${before.left}px,0,0) scaleX(${before.width/(current.width||1)})`},{transform:`translate3d(${current.left}px,0,0) scaleX(1)`}],{duration:280,easing:'cubic-bezier(.65,0,.35,1)'});previousTabs.set(key,current);};
+   place(true);requestAnimationFrame(()=>place(false));document.fonts?.ready.then(()=>place(false));
+  });
  }
  const popoverPanel=details=>details.querySelector(':scope>.collection-menu-content,:scope>.management-options,:scope>div');
  function closePopover(details,restoreFocus=false){

@@ -169,10 +169,17 @@ def test_teacher_account_deletion_preserves_other_students_grades(app):
     assert c.get('/api/v1/classes/1',headers=student).status_code==200
 
 
-def test_missing_auth_admin_configuration_prevents_partial_deletion(app):
-    c=app.test_client();h=login(c);app.config.update(DEMO_MODE=False,SUPABASE_SECRET_KEY=None)
-    assert change(c,h,'/account',delete_body(),'DELETE').status_code==503
-    with Session(app.extensions['engine']) as db:assert db.get(Usuario,ALUNO_ID)
+def test_missing_auth_admin_configuration_removes_app_access_and_queues_provider(app):
+    c=app.test_client();h=login(c)
+    app.config.update(DEMO_MODE=False,SUPABASE_SECRET_KEY=None,
+                      AUTH_FACTORY=lambda:SimpleNamespace(auth=SimpleNamespace(
+                          sign_in_with_password=lambda _:SimpleNamespace(user=SimpleNamespace(id=ALUNO_ID)))))
+    result=change(c,h,'/account',delete_body(),'DELETE')
+    assert result.status_code==202 and result.json['auth_pending'] is True
+    assert c.get('/api/v1/auth/me',headers=h).status_code==401
+    with Session(app.extensions['engine']) as db:
+        assert db.get(Usuario,ALUNO_ID) is None
+        assert db.get(ExclusaoAuthPendente,ALUNO_ID)
 
 
 def test_provider_outbox_retries_without_restoring_access(app):

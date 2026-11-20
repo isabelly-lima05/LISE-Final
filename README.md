@@ -146,7 +146,7 @@ Em desenvolvimento, as variáveis são lidas de `backend_service/.env`. Na hospe
 | `DATABASE_URL` | Sempre | Conexão PostgreSQL; a demonstração configura SQLite automaticamente. |
 | `SUPABASE_URL` | Fora da demonstração | URL do projeto Supabase. |
 | `SUPABASE_PUBLISHABLE_KEY` | Fora da demonstração | Chave publicável usada pelo backend na autenticação. |
-| `SUPABASE_SECRET_KEY` | Exclusão de conta | Chave administrativa exclusiva do servidor. |
+| `SUPABASE_SECRET_KEY` | Recomendada para exclusão | Chave administrativa exclusiva do servidor, usada para remover imediatamente a identidade do Supabase Auth. |
 | `FRONTEND_URL` | Recomendado | Origem principal do frontend e destino dos redirecionamentos. |
 | `FRONTEND_ORIGINS` | Recomendado | Origens liberadas pelo CORS, separadas por vírgula. |
 | `DEMO_MODE` | Não | Use `true` somente na demonstração local. |
@@ -233,6 +233,6 @@ Ao preparar um release, atualize esses pontos no mesmo commit. A versão dos doc
 - **O frontend não alcança a API:** confira `API_BASE_URL`, `FRONTEND_ORIGINS`, a porta e a disponibilidade do backend.
 - **A API recusa a origem:** adicione a origem exata do frontend a `FRONTEND_ORIGINS`, sem caminhos.
 - **O banco falha:** valide conexão, credenciais, SSL e migrações.
-- **A exclusão de conta está indisponível:** configure `SUPABASE_SECRET_KEY` somente no backend e verifique a rotina de reprocessamento.
+- **A identidade continua pendente após excluir a conta:** configure `SUPABASE_SECRET_KEY` somente no backend e execute a rotina de reprocessamento. Os dados e acessos da LISE já permanecem removidos.
 
 Mais detalhes específicos estão em [`backend_service/README.md`](./backend_service/README.md) e [`frontend_spa/README.md`](./frontend_spa/README.md).
