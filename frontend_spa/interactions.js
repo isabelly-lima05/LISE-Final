@@ -52,7 +52,8 @@
  function busy(button,label='Salvando…') {
   if(!button)return()=>{};
   const html=button.innerHTML,disabled=button.disabled,width=button.getBoundingClientRect().width;
-  button.style.minWidth=width+'px';button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML=`<span class="spinner" aria-hidden="true"></span><span>${esc(label)}</span>`;
+  const authButton=button.classList.contains('access-submit');
+  button.style.minWidth=width+'px';button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML=authButton?`<span class="access-chip-loader" aria-hidden="true"><i>Pato</i><i>gên</i><i>ese</i></span><span class="sr-only">${esc(label)}</span>`:`<span class="spinner" aria-hidden="true"></span><span>${esc(label)}</span>`;
   return success=>{button.disabled=disabled;button.removeAttribute('aria-busy');if(success&&button.isConnected){button.innerHTML=icon('check')+' Salvo';icons();pulse(button);setTimeout(()=>{button.innerHTML=html;button.style.minWidth='';},1200);}else{button.innerHTML=html;button.style.minWidth='';}};
  }
  async function delayedRemoval(key,node,commit) {
@@ -92,6 +93,44 @@
     input.addEventListener('input',update);root.querySelector('#confirm-password')?.addEventListener('input',update);
    }
   });
+ }
+ function enhanceAuth(root){
+  const form=root.querySelector('.access-form');if(!form||form.dataset.validationReady)return;
+  form.dataset.validationReady='true';form.noValidate=true;
+  const register=form.dataset.form==='register',email=form.querySelector('input[type=email]'),password=form.querySelector('#auth-password');
+  const message=(input,text='')=>{const field=input?.closest('.access-field');if(!field)return;field.classList.toggle('is-invalid',!!text);field.querySelector('.access-field-feedback').textContent=text;input.setAttribute('aria-invalid',String(!!text));};
+  const validate=input=>{
+   if(!input)return true;
+   const value=input.value.trim();let error='';
+   if(!value)error=input.type==='email'?'Digite seu e-mail para continuar.':input.type==='password'?'Digite sua senha para continuar.':'Conte seu nome para a gente começar.';
+   else if(input.type==='email'&&!input.validity.valid)error='Confira o e-mail — ele deve seguir o formato nome@exemplo.com.';
+   else if(input.type==='password'&&input.value.length<8)error='Use pelo menos 8 caracteres — uma frase curta funciona bem.';
+   else if(input.name==='name'&&value.length<2)error='Seu nome precisa ter pelo menos 2 caracteres.';
+   message(input,error);return !error;
+  };
+  if(email){
+   const updateEmail=showError=>{const ready=!!email.value&&email.validity.valid;email.closest('.access-field').classList.toggle('is-valid',ready);if(showError||ready)validate(email);};
+   email.addEventListener('input',()=>updateEmail(false));email.addEventListener('blur',()=>updateEmail(true));
+  }
+  if(register&&password){
+   const strength=document.createElement('div');strength.className='access-password-strength';strength.dataset.strength='0';strength.setAttribute('aria-live','polite');strength.innerHTML='<span class="access-strength-track" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span class="access-strength-copy"><span>Força da senha</span><strong>Comece a digitar</strong></span>';
+   password.closest('.access-field').append(strength);
+   const updateStrength=()=>{const value=password.value;const score=Math.min(4,(value.length>=8?1:0)+(value.length>=12?1:0)+(/[a-z]/.test(value)&&/[A-Z]/.test(value)?1:0)+(/[0-9]/.test(value)&&/[^a-zA-Z0-9]/.test(value)?1:0));const labels=['Comece a digitar','Ainda curta','Pode ficar melhor','Boa','Forte'];strength.dataset.strength=String(score);strength.querySelector('strong').textContent=labels[score];if(password.closest('.access-field').classList.contains('is-invalid'))validate(password);};
+   password.addEventListener('input',updateStrength);password.addEventListener('blur',()=>validate(password));
+  }
+  form.querySelectorAll('.access-field input').forEach(input=>input.addEventListener('blur',()=>validate(input)));
+  form.addEventListener('submit',event=>{
+   let valid=true;form.querySelectorAll('.access-field input[required]').forEach(input=>{if(!validate(input))valid=false;});
+   const consent=form.querySelector('.access-consent input[required]');if(consent){const label=consent.closest('.access-consent');let feedback=form.querySelector('.access-consent-feedback');label.classList.toggle('is-invalid',!consent.checked);consent.setAttribute('aria-invalid',String(!consent.checked));if(!consent.checked){valid=false;if(!feedback){feedback=document.createElement('p');feedback.className='access-consent-feedback';label.after(feedback);}feedback.textContent='Para criar sua conta, confirme que leu e aceita os documentos da LISE.';}else feedback?.remove();}
+   if(!valid){event.preventDefault();event.stopPropagation();const first=form.querySelector('.is-invalid input');first?.focus({preventScroll:true});first?.closest('.access-field,.access-consent')?.scrollIntoView({block:'center',behavior:reduced()?'auto':'smooth'});}
+  });
+  const story=root.querySelector('.access-story'),art=story?.querySelector('.access-story-art');if(!story||!art||reduced())return;
+  const morphemes=story.querySelector('.access-morpheme-word'),wordParts=morphemes?.querySelectorAll('span');
+  if(wordParts?.length===3){const words=[['Pato','gên','ese'],['Hemo','glob','ina'],['Cito','plasm','a']];let wordIndex=0;const timer=setInterval(()=>{if(!story.isConnected){clearInterval(timer);return;}wordIndex=(wordIndex+1)%words.length;wordParts.forEach((part,index)=>part.textContent=words[wordIndex][index]);morphemes.classList.remove('is-remixing');void morphemes.offsetWidth;morphemes.classList.add('is-remixing');setTimeout(()=>morphemes?.classList.remove('is-remixing'),420);},4200);}
+  let frame=0,lastEvent;
+  const renderPointer=()=>{frame=0;if(!lastEvent||!story.isConnected)return;const box=story.getBoundingClientRect(),x=Math.max(0,Math.min(box.width,lastEvent.clientX-box.left)),y=Math.max(0,Math.min(box.height,lastEvent.clientY-box.top)),nx=x/box.width-.5,ny=y/box.height-.5;story.style.setProperty('--glow-x',`${x}px`);story.style.setProperty('--glow-y',`${y}px`);art.classList.remove('is-settling');art.style.transform=`translate3d(${nx*12}px,${ny*9}px,0)`;};
+  story.addEventListener('pointermove',event=>{if(event.pointerType==='touch')return;lastEvent=event;if(!frame)frame=requestAnimationFrame(renderPointer);},{passive:true});
+  story.addEventListener('pointerleave',()=>{if(frame)cancelAnimationFrame(frame);frame=0;lastEvent=null;art.classList.add('is-settling');art.style.transform='translate3d(0,0,0)';story.style.setProperty('--glow-x','50%');story.style.setProperty('--glow-y','35%');});
  }
  function tabs(root) {
   root.querySelectorAll('[role=tablist]').forEach(list=>{
@@ -154,7 +193,7 @@
   if(!root)return;observer?.disconnect();
   const memorySession=hooks.state?.().gameSession?.session_id||'';if(memorySession!==lastMemorySession){memoryFaces.clear();lastMemorySession=memorySession;}
   root.querySelectorAll('.memory-card').forEach(card=>{const face=card.classList.contains('selected')||card.classList.contains('matched'),old=memoryFaces.get(card.dataset.card)||false;memoryFaces.set(card.dataset.card,face);if(face!==old)motion(card.querySelector('.memory-card-inner'),[{transform:old?'rotateY(180deg)':'rotateY(0)'},{transform:face?'rotateY(180deg)':'rotateY(0)'}],{duration:300});});
-  tabs(root);popovers(root);enhancePasswords(root);enhanceDates(root);assessment(root);stepper(root);scrollspy(root);
+  tabs(root);popovers(root);enhancePasswords(root);enhanceAuth(root);enhanceDates(root);assessment(root);stepper(root);scrollspy(root);
   for(const button of root.querySelectorAll('button.btn-small,.icon-button,.nav-button'))button.style.minHeight='44px';
   if(key&&key!==lastEntrance&&!key.startsWith('game')){
    root.querySelectorAll('main>.section-heading,main>.stat-strip,main>.teacher-columns,main>.home-columns').forEach((el,i)=>{if(i<6)motion(el,[{opacity:0,transform:'translateY(8px)'},{opacity:1,transform:'none'}],{duration:220,delay:i*30,easing:'cubic-bezier(.23,1,.32,1)'});});
