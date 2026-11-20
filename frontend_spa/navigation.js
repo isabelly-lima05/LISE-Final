@@ -6,7 +6,7 @@
       ? [['dashboard','house','Início'],['explore','compass','Explorar'],['games','puzzle','Praticar'],['collections','library','Coleções'],['classes','users','Turmas']]
       : [['dashboard','layout-dashboard','Painel'],['classes','users','Turmas'],['trails','route','Trilhas'],['explore','compass','Explorar']];
     function active(view) {
-      return view===state.view || view==='classes'&&['class','student-detail','assessment-config','assessment','assessment-result'].includes(state.view)
+      return view===state.view || view==='classes'&&['class','student-detail','assessment-config','assessment-report','assessment','assessment-result'].includes(state.view)
         || view==='explore'&&state.view==='detail' || view==='collections'&&state.view.startsWith('collection')
         || view==='games'&&['sources','choose-game','game-config','game','result'].includes(state.view)
         || view==='trails'&&state.user.role==='Professor'&&['trail','trail-create','trail-add-terms'].includes(state.view);

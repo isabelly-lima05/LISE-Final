@@ -16,7 +16,7 @@ const fixtures={
  '/trails/4?assignment_id=5':{trail:{id:4,assignment_id:5,class_id:2,name:'Trilha teste',term_items:[]}},
  '/classes/2':{id:2,name:'Turma teste',role:'Aluno',trails:[],students:[],ranking:[]}
 };
-const ctx={console,URL,URLSearchParams,structuredClone,clearTimeout,setTimeout:()=>0,Date,Set,Map,location,history,localStorage:{getItem:k=>k==='lise_access_token'?'test-token':null,removeItem(){},setItem(){}},document:{getElementById:()=>node,activeElement:null,documentElement:{classList:{remove(){},add(){}}}},MutationObserver:class{observe(){}},fetch:async url=>{const key=url.split('/api/v1')[1];requests.push(key);assert.ok(key in fixtures,`API inesperada: ${key}`);return {ok:true,json:async()=>structuredClone(fixtures[key])}}};
+const ctx={console,URL,URLSearchParams,structuredClone,clearTimeout,setTimeout:()=>0,Date,Set,Map,location,history,localStorage:{getItem:k=>k==='lise_access_token'?'test-token':null,removeItem(){},setItem(){}},document:{getElementById:()=>node,querySelector:()=>null,querySelectorAll:()=>[],activeElement:null,documentElement:{classList:{remove(){},add(){}}}},MutationObserver:class{observe(){}},fetch:async url=>{const key=url.split('/api/v1')[1];requests.push(key);assert.ok(key in fixtures,`API inesperada: ${key}`);return {ok:true,json:async()=>structuredClone(fixtures[key])}}};
 ctx.window={matchMedia:()=>({matches:false,addEventListener(){}}),scrollTo(){},LISE_CONFIG:{API_BASE_URL:'https://example.test'},addEventListener:(name,cb)=>listeners[name]=cb};
 vm.createContext(ctx);vm.runInContext(fs.readFileSync(path.join(root,'avatars.js'),'utf8'),ctx);
 for(const file of ['components.js','navigation.js','activities.js','screens.js'])vm.runInContext(fs.readFileSync(path.join(root,file),'utf8'),ctx);
@@ -53,7 +53,7 @@ vm.runInContext(source,ctx);
  assert.match(assessmentConfig,/data-action="back-to-class"/,'Voltar deve levar a turma da avaliacao');
  for(const [route,expected] of [['detail/term/7','detail'],['collection/3','collection'],['trail/4/5','trail'],['class/2','class']]) {
    const beforeDashboard=requests.filter(p=>p==='/dashboard').length;
-   location.hash='#'+route;await t.init();assert.equal(requests.filter(p=>p==='/dashboard').length,beforeDashboard,'Link direto não deve carregar o painel');assert.equal(t.state.view,expected,route);assert.ok(location.hash.startsWith('#'+route));
+   location.hash='#'+route;await t.init();assert.equal(requests.filter(p=>p==='/dashboard').length,beforeDashboard,`Link direto ${route} não deve carregar o painel`);assert.equal(t.state.view,expected,route);assert.ok(location.hash.startsWith('#'+route));
  }
  t.state.view='dashboard';t.state.dashboard=dashboard;t.state.loading=false;t.rememberRoute();const count=history.pushes;
  t.state.detail={term:{id:99}};t.rememberRoute();assert.equal(history.pushes,count,'Estado de outra tela não deve criar histórico');
