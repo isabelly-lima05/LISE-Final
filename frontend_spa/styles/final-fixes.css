@@ -329,3 +329,48 @@ dialog.app-dialog :is(h1,h2,h3,label,strong,p,small){color:inherit}dialog.app-di
 
 @media(max-width:760px){.connection-map{grid-template-columns:1fr;gap:22px}.connection-origin{min-height:0;border-radius:16px}.connection-origin::after{left:50%;top:100%;width:1px;height:23px}.connection-node::before{display:none}.connection-node:hover{transform:none}}
 @media(prefers-reduced-motion:reduce){.connection-node{transition:none}.connection-node:hover{transform:none}}
+
+/* Navegação por contexto: indicador ligado à aba e superfícies contínuas nos dois temas. */
+.app-layout .tabs[role=tablist]{position:relative;background:transparent}
+.app-layout .account-tabs{background:transparent!important;overflow-x:auto;overflow-y:hidden}
+.app-layout .account-tabs .tab{position:relative;background:transparent!important;color:var(--muted)}
+.app-layout .account-tabs .tab.active{background:transparent!important;color:var(--green-dark)}
+.app-layout .tab-indicator{bottom:-1px;height:3px;border-radius:999px;background:var(--green);box-shadow:0 0 0 1px color-mix(in srgb,var(--green) 12%,transparent);transform-origin:left center;will-change:transform}
+[data-theme=dark] .app-layout .account-tabs,[data-theme=dark] .app-layout .tabs[role=tablist]{background:transparent!important;border-color:var(--line)}
+[data-theme=dark] .app-layout .account-tabs .tab{color:var(--muted)}
+[data-theme=dark] .app-layout .account-tabs .tab.active{color:var(--green-dark)}
+
+/* Controle segmentado: a seleção é uma única camada que desliza entre as áreas. */
+.app-layout .segmented{overflow:hidden}
+.app-layout .segmented::before{transition:transform 280ms cubic-bezier(.65,0,.35,1)}
+.app-layout .segmented .btn{transition:color 200ms cubic-bezier(.65,0,.35,1),transform 150ms cubic-bezier(.23,1,.32,1)}
+
+/* Toasts legíveis, informativos e integrados ao tema. */
+#toast.toast-stack{background:transparent!important;color:var(--ink);border:0;box-shadow:none}
+#toast.toast-stack .notice{--notice-accent:var(--green);display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:start;column-gap:12px;min-width:min(380px,calc(100vw - 40px));padding:14px 14px 14px 12px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-left:4px solid var(--notice-accent);box-shadow:0 16px 42px #17281e24}
+#toast.toast-stack .notice[data-tone=error]{--notice-accent:var(--red)}
+#toast.toast-stack .notice[data-tone=warning]{--notice-accent:var(--gold)}
+#toast.toast-stack .notice[data-tone=info]{--notice-accent:var(--green)}
+#toast.toast-stack .notice>.notice-mark{display:grid;place-items:center;flex:none;width:34px;height:34px;border-radius:10px;background:color-mix(in srgb,var(--notice-accent) 14%,transparent);color:var(--notice-accent)}
+#toast.toast-stack .notice-mark svg{width:18px;height:18px}
+#toast.toast-stack .notice>.notice-copy{display:grid;gap:3px;min-width:0;flex:none;padding-top:1px}
+#toast.toast-stack .notice-title{color:var(--ink);font-size:13px;line-height:1.35}
+#toast.toast-stack .notice-message{color:var(--muted);font-size:13px;line-height:1.5;overflow-wrap:anywhere}
+#toast.toast-stack .notice>.icon-button{width:34px;min-height:34px;padding:7px;color:var(--muted);border-color:transparent}
+#toast.toast-stack .notice>.btn{grid-column:2;justify-self:start;min-height:34px;margin-top:5px;padding:5px 10px}
+
+/* Exclusão de conta: contraste explícito para uma ação irreversível. */
+.app-layout .account-danger{border:2px solid var(--red)!important;background:color-mix(in srgb,var(--red-wash) 55%,var(--paper))!important;box-shadow:0 12px 34px color-mix(in srgb,var(--red) 8%,transparent)}
+.account-danger .danger-heading{display:flex;align-items:center;gap:13px;margin-bottom:12px}
+.account-danger .danger-heading h2{margin:2px 0 0;color:var(--red)}
+.account-danger .danger-heading .eyebrow{color:var(--red)!important}
+.account-danger .danger-mark{display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:12px;background:var(--red-wash);color:var(--red)}
+.account-danger .account-danger-detail{padding:13px 15px;border:1px solid color-mix(in srgb,var(--red) 28%,var(--line));border-radius:10px;background:var(--paper);color:var(--muted)}
+.account-danger .btn-danger:hover:not(:disabled){background:var(--red);color:var(--on-accent)!important}
+
+:root[data-theme=dark]{color-scheme:dark}
+[data-theme=dark] .app-layout .account-danger{background:color-mix(in srgb,var(--red-wash) 46%,var(--paper))!important;border-color:var(--red)!important}
+[data-theme=dark] .account-danger .account-danger-detail{background:var(--paper);color:var(--muted)}
+[data-theme=dark] :is(.legal-note,.notice){color:var(--ink)}
+
+@media(max-width:600px){#toast.toast-stack .notice{min-width:0;width:100%}.account-danger .danger-heading{align-items:flex-start}}

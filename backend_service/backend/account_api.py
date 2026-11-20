@@ -14,10 +14,6 @@ accounts=Blueprint('lise_accounts',__name__,url_prefix='/api/v1')
 SYSTEM_ID='00000000-0000-4000-8000-000000000001'
 
 
-def deletion_available():
-    return bool(current_app.config['DEMO_MODE'] or current_app.config.get('AUTH_ADMIN_FACTORY') or current_app.config.get('SUPABASE_SECRET_KEY'))
-
-
 def process_auth_deletions(app,limit=3):
     """Automatic retries. A pending provider operation never restores app access."""
     if app.config['DEMO_MODE']:return 0
@@ -77,7 +73,6 @@ def delete_account():
         abort(400,description='Confirme EXCLUIR e a preservação do histórico compartilhado.')
     password=data.get('password')
     if not isinstance(password,str) or not 1<=len(password)<=128:abort(400,description='Informe sua senha atual.')
-    if not deletion_available():abort(503,description='A exclusão direta aguarda a configuração do serviço de autenticação. Nenhum dado foi removido.')
     uid=g.user.id_usuario
     if current_app.config['DEMO_MODE']:
         valid=check_password_hash(g.user.demo_password_hash,password) if g.user.demo_password_hash else password=='LiseDemo123!'

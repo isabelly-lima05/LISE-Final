@@ -85,7 +85,8 @@ def account():
     return jsonify(legal_version=LEGAL_VERSION, legal_ready=legal_ready(),
                    accepted=bool(accepted), accepted_at=accepted.aceito_em.isoformat() if accepted else None,
                    requests=[request_json(item) for item in requests], request_types=REQUEST_TYPES,
-                   direct_deletion_available=bool(current_app.config['DEMO_MODE'] or current_app.config.get('AUTH_ADMIN_FACTORY') or current_app.config.get('SUPABASE_SECRET_KEY')))
+                   direct_deletion_available=True,
+                   auth_deletion_immediate=bool(current_app.config['DEMO_MODE'] or current_app.config.get('AUTH_ADMIN_FACTORY') or current_app.config.get('SUPABASE_SECRET_KEY')))
 
 
 @privacy_api.post('/account/terms')

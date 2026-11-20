@@ -23,6 +23,6 @@ Em outro terminal, dentro de `frontend_spa/`, rode `python -m http.server 5500` 
 
 ## CRUD e exclusão de conta
 
-Aplique as migrações de `supabase/migrations/` antes de publicar. `SUPABASE_SECRET_KEY` configura somente o cliente administrativo usado na exclusão da conta. Sem ela, a API recusa a exclusão antes de remover dados. Agende o comando `flask --app app:create_app process-account-deletions` para repetir falhas do Auth.
+Aplique as migrações de `supabase/migrations/` antes de publicar. `SUPABASE_SECRET_KEY` configura somente o cliente administrativo usado na exclusão da identidade do Supabase Auth. Mesmo sem ela, a API remove os dados e acessos da LISE e registra a identidade externa em uma fila; configure a chave e agende `flask --app app:create_app process-account-deletions` para concluir e repetir operações pendentes no provedor.
 
 Os testes de desenvolvimento também podem ser executados pelo pytest na raiz do workspace. Eles usam banco e provedores isolados, sem autenticação real no Supabase.
