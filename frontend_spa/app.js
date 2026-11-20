@@ -12,7 +12,7 @@
     sources: null, practiceSource: null, practiceGame: '', trailCatalog: null, trailAreas: [],
     gameSession: null, gameFeedback: null, gameIndex: 0, decipherSlots: [], decipherSelectedLetter: null, memorySelected: [], memoryPairs: [],
     memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, result: null, busy: false,
-    studentDetail: null, assessmentTarget: null, assessmentReturnTab: 'trails', assessmentSession: null, assessmentIndex: 0,
+    studentDetail: null, assessmentTarget: null, assessmentDetailId: null, assessmentReturnTab: 'trails', assessmentSession: null, assessmentIndex: 0,
     assessmentAnswer: null, assessmentResult: null,
     profilePasswordEdit: false, selectedTermIds: new Set(), selectedTermInfo: new Map(), catalogTerms: [], catalogSearchTimer: null,
     catalogSearchSequence: 0, termSelectionTarget: null, existingTermIds: new Set(),
@@ -246,6 +246,8 @@
 
   function renderAssessmentConfig() { return activities.renderAssessmentConfig(); }
 
+  function renderAssessmentReport() { return window.LiseAssessmentUI?.teacherDetail(state.classDetail,state.assessmentDetailId)||loadingCard(); }
+
   function renderAssessment() { return activities.renderAssessment(); }
 
   function renderAssessmentResult() { return activities.renderAssessmentResult(); }
@@ -285,6 +287,7 @@
     if (state.view === 'trail' && state.collection?.assignment_id) parts.push(state.collection.assignment_id);
     if (state.view === 'detail') parts.push(state.detailType, state.detail?.[state.detailType]?.id || '');
     if (state.view === 'game') parts.push(state.gameSession?.session_id || '');
+    if (state.view === 'assessment-report') parts.push(state.classId || '',state.assessmentDetailId || '');
     let key=parts.join('/');
     if(state.view==='explore'){
       const params=new URLSearchParams();
@@ -317,7 +320,7 @@
     for(const key of ['dashboard','classDetail','studentDetail','collection','detail','account','explore','discovery','gameSession','gameFeedback','assessmentSession','assessmentResult','sources','practiceSource','result'])state[key]=null;
     state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();state.selectedTermIds.clear();state.selectedTermInfo.clear();
     state.catalogTerms=[];state.exploreSearch='';state.exploreArea='';state.exploreMine=false;state.explorePage=1;state.explorePageSize=15;
-    state.studentGreeting=null;state.studentProgressBaseline=null;
+    state.studentGreeting=null;state.studentProgressBaseline=null;state.assessmentDetailId=null;
     state.loading=false;state.loadError='';routeSnapshots.clear();pendingReads.clear();celebrated.clear();
   }
   window.addEventListener('storage', event=>{if(event.key==='lise_access_token' && !event.newValue){forgetSession();renderAuth();}});
@@ -368,6 +371,7 @@
       case 'student-detail': content = renderStudentDetail(); break;
       case 'trail': content = renderTrail(); break;
       case 'assessment-config': content = renderAssessmentConfig(); break;
+      case 'assessment-report': content = renderAssessmentReport(); break;
       case 'assessment': content = renderAssessment(); break;
       case 'assessment-result': content = renderAssessmentResult(); break;
       case 'profile': state.view='account';state.accountTab='perfil';content=renderAccount();break;
@@ -445,9 +449,10 @@
   }
   function configureAssessment(buttonEl) {
     const trail=(state.classDetail?.trails || []).find(item=>Number(item.assignment_id)===Number(buttonEl.dataset.assignment));
+    const report=(state.classDetail?.assessments || []).find(item=>Number(item.id)===Number(buttonEl.dataset.assessment));
     state.assessmentReturnTab=state.classTab||'trails';
     state.assessmentTarget={class_id:Number(buttonEl.dataset.class), assignment_id:Number(buttonEl.dataset.assignment),
-      trail_name:buttonEl.dataset.name || trail?.name || 'Trilha', assessment:trail?.assessment || null};
+      trail_name:buttonEl.dataset.name || trail?.name || report?.trail || 'Trilha', assessment:trail?.assessment || report || null};
     state.view='assessment-config'; render();
   }
   async function startAssessment(classId, assignmentId) {
@@ -759,6 +764,8 @@
         state.practiceSource={type:'favorites',name:'Seus favoritos'}; state.practiceGame=''; state.view='choose-game'; render();
       }
       else if (action === 'class-tab') { state.classTab=buttonEl.dataset.tab; renderOverlapping(); }
+      else if(action==='open-assessment-report'){state.classId=Number(buttonEl.dataset.class||state.classId);state.assessmentDetailId=Number(buttonEl.dataset.id);state.view='assessment-report';render();}
+      else if(action==='assessment-report-back'){state.view='class';state.classTab='results';render();}
       else if(action==='review-assessment'){state.assessmentResult=await api(`/assessment/sessions/${buttonEl.dataset.id}`);state.view='assessment-result';render();}
       else if (action === 'configure-assessment') configureAssessment(buttonEl);
       else if (action === 'start-assessment') await startAssessment(buttonEl.dataset.class,buttonEl.dataset.assignment);
@@ -1184,6 +1191,7 @@
     }
     if(['classes','collections','games','trails'].includes(route))return navigate(route);
     if(route==='class'&&/^\d+$/.test(id)){await loadClass(id);const available=state.user.role==='Professor'?['overview','students','trails','results']:['trails','assessments','rank'];if(available.includes(params.get('tab'))){state.classTab=params.get('tab');render();}return;}
+    if(route==='assessment-report'&&/^\d+$/.test(id)&&/^\d+$/.test(extra)){await loadClass(id);state.classTab='results';state.assessmentDetailId=Number(extra);state.view='assessment-report';render();return;}
     if(route==='collection'&&/^\d+$/.test(id))return loadCollection(id);
     if(route==='trail'&&/^\d+$/.test(id))return loadTrail(id,/^\d+$/.test(extra)?extra:undefined);
     if(route==='detail'&&/^\d+$/.test(extra)){if(id==='term')return openTerm(extra,'explore');if(id==='radical')return openRadical(extra,'explore');}

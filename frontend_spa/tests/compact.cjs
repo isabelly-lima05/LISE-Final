@@ -21,5 +21,9 @@ window.LiseCompact.mount(root,{view:'dashboard',user:state.user});const nav=root
 nav.children[1].click();assert.ok(root.querySelector('.discovery-sheet').hidden);assert.equal(root.querySelectorAll('.dashboard-section')[0].hidden,false);assert.equal(root.querySelectorAll('.dashboard-section')[1].hidden,true);
 assert.equal(nav.children[1].getAttribute('aria-pressed'),'true');
 root.innerHTML='<main class="content"><div class="specimen-grid">'+cards(35)+'</div><div class="games-grid">'+cards(8)+'</div></main>';window.LiseCompact.mount(root,{view:'explore',user:state.user});assert.equal(root.querySelectorAll('[hidden]').length,0);assert.equal(root.querySelector('.compact-pagination'),null,'Explorador and games are not paginated');
+root.innerHTML='<main class="content"><div class="table-wrap"><table class="student-table"><tbody>'+Array.from({length:18},(_,i)=>`<tr data-student-row="${i+1}"><td>Aluno ${i+1}</td></tr>`).join('')+'</tbody></table></div></main>';
+window.LiseCompact.mount(root,{view:'class',classTab:'students',classId:1,user:state.user});
+assert.equal(root.querySelectorAll('.student-table tbody tr[hidden]').length,0,'A turma mostra todos os alunos na mesma página');
+assert.equal(root.querySelector('.compact-pagination'),null,'A tabela de alunos não recebe paginação compacta');
 const p=window.LiseCompact.plan(30,200,300,250,1);assert.equal(p.size,1);assert.equal(p.pages,30,'Small screens keep every record accessible');
 console.log('PASS: pagination, all records reachable, state restoration, filters, dashboard sections and tiny-screen fallback.');

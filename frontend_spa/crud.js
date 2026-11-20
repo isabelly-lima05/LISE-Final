@@ -44,9 +44,9 @@
   }
   if(s.view==='class'&&s.classDetail){const d=s.classDetail;
    if(teacher){add(heading,`<details class="management-menu"><summary>Gerenciar turma <i data-lucide="chevron-down" aria-hidden="true"></i></summary><div class="management-options">${classControls(d)}<div class="card-actions crud-actions">${control('Gerar novo código','class-code',`data-id="${d.id}"`)}${control(d.enrollment_open?'Fechar matrículas':'Abrir matrículas','class-enrollment',`data-id="${d.id}"`)}</div></div></details>`);
-    root.querySelectorAll('[data-student-row]').forEach(row=>add(row.querySelector('td:last-child'),control('Remover da turma','student-remove',`data-class="${d.id}" data-user="${row.dataset.studentRow}"`,'btn-text danger-text')));
+    root.querySelectorAll('[data-student-row]').forEach(row=>add(row.querySelector('.student-row-actions')||row.querySelector('td:last-child'),control('Remover da turma','student-remove',`data-class="${d.id}" data-user="${row.dataset.studentRow}"`,'btn-text danger-text')));
     if(s.classTab==='trails'){
-     add(root.querySelector('#class-tabpanel'),control('Atribuições arquivadas','assignments-archived',`data-class="${d.id}"`));
+     add(root.querySelector('#class-tabpanel'),control('Atribuições arquivadas','assignments-archived',`data-class="${d.id}"`,'btn-outline class-archived-assignments'));
      for(const t of d.trails){const remove=root.querySelector(`[data-action=unassign-trail][data-id="${t.id}"]`);if(remove){remove.removeAttribute('data-action');remove.dataset.crud='assignment-archive';remove.dataset.assignment=t.assignment_id;remove.dataset.class=d.id;remove.dataset.revision=t.assignment_revision;remove.textContent='Arquivar atribuição';const actions=remove.closest('article').querySelector('.card-actions');add(actions,control('Editar prazo','assignment-date',`data-assignment="${t.assignment_id}"`));
        const a=t.assessment;if(a?.opens_at&&a.closes_at){const now=Date.now(),action=new Date(a.opens_at)>now?'cancel':new Date(a.closes_at)>now?'close':'reopen';add(actions,control(({cancel:'Cancelar agendamento',close:'Encerrar avaliação agora',reopen:'Reabrir janela'})[action],'assessment-life',`data-assignment="${t.assignment_id}" data-kind="${action}"`));}
       }

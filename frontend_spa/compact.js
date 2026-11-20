@@ -36,7 +36,9 @@
   anchor.after(nav);el._lisePager=nav;show();
  }
  function lists(root,s){
-  const selected='.class-grid,.trail-list,.collection-grid,.word-path,.student-table tbody,.collection-notes,.planning-panel ul,.crud-sessions,.request-history';
+  // Student rosters stay complete on one page; their table already has its own
+  // responsive layout and should not inherit the viewport-based list pager.
+  const selected='.class-grid,.trail-list,.collection-grid,.word-path,.collection-notes,.planning-panel ul,.crud-sessions,.request-history';
   root.querySelectorAll(selected).forEach((el,i)=>paginate(el,keyFor(s)+':list:'+i));
  }
  function deck(main,s){

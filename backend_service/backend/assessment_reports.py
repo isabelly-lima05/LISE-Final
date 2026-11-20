@@ -43,6 +43,15 @@ def distribution(scores):
                 minimum=min(scores),maximum=max(scores),histogram=[dict(label=f'{lo}-{hi}',count=sum(lo<=x<=hi for x in scores)) for lo,hi in [(0,19),(20,39),(40,59),(60,79),(80,100)]])
 
 
+def duration_summary(seconds):
+    if not seconds:
+        return dict(count=0, mean_seconds=None, median_seconds=None,
+                    minimum_seconds=None, maximum_seconds=None)
+    return dict(count=len(seconds), mean_seconds=round(statistics.mean(seconds)),
+                median_seconds=round(statistics.median(seconds)),
+                minimum_seconds=min(seconds), maximum_seconds=max(seconds))
+
+
 def class_assessments(class_row,user):
     teacher=class_row.fk_professor==user.id_usuario
     pairs=g.db.execute(select(Avaliacao,TurmaTrilha,Trilha).join(TurmaTrilha,TurmaTrilha.id==Avaliacao.fk_turma_trilha).join(Trilha,Trilha.id_trilha==TurmaTrilha.fk_trilha).where(TurmaTrilha.fk_turma==class_row.id_turma).order_by(Avaliacao.criada_em.desc())).all()
@@ -70,9 +79,10 @@ def class_assessments(class_row,user):
         window='nao_agendado' if not assessment.abre_em or not assessment.encerra_em else 'agendado' if now<aware(assessment.abre_em) else 'encerrado' if now>=aware(assessment.encerra_em) else 'aberto'
         closed=bool(latest and latest.finalizada_em)
         status='concluida' if closed else 'em_andamento' if latest else 'atrasada' if window=='encerrado' else 'agendada' if window=='agendado' else 'pendente'
-        item=dict(id=assessment.id,assignment_id=link.id,title=assessment.titulo,trail=trail.nome,trail_deleted=bool(trail.excluida_em),archived=bool(link.desvinculada_em or trail.arquivada_em),
+        item=dict(id=assessment.id,assignment_id=link.id,revision=assessment.revisao,title=assessment.titulo,trail=trail.nome,trail_deleted=bool(trail.excluida_em),archived=bool(link.desvinculada_em or trail.arquivada_em),
                   opens_at=aware(assessment.abre_em).isoformat() if assessment.abre_em else None,closes_at=aware(assessment.encerra_em).isoformat() if assessment.encerra_em else None,
                   window_state=window,status=status,question_count=assessment.quantidade,pass_score=assessment.nota_minima,
+                  content=assessment.conteudo,mode=assessment.formato,
                   can_start=window=='aberto' and not trail.arquivada_em and not link.desvinculada_em and not any(s.janela_versao==assessment.janela_versao for s in own),
                   session_id=latest.id if latest else None,score=latest.pontuacao if closed else None,
                   reason=latest.encerramento_motivo if closed else None)
@@ -85,6 +95,8 @@ def class_assessments(class_row,user):
                     prev=latest_by_user.get(s.fk_usuario)
                     if not prev or aware(s.finalizada_em)>aware(prev.finalizada_em):latest_by_user[s.fk_usuario]=s
             scores=[s.pontuacao for s in latest_by_user.values()]
+            durations=[max(0,round((aware(s.finalizada_em)-aware(s.criada_em)).total_seconds()))
+                       for s in latest_by_user.values()]
             rows=[]
             relevant_ids={s.fk_usuario for s in relevant}
             for pupil in [*roster,*[p for p in historical if p.id_usuario in relevant_ids]]:
@@ -107,8 +119,12 @@ def class_assessments(class_row,user):
                     else:bucket['unanswered']+=1
             question_charts=[{**bucket,'options':list(bucket['options'].values())} for bucket in grouped.values()]
             responded={s.fk_usuario for s in relevant if any(q.respondida for q in by_session.get(s.id,[]))}
-            item.update(students=rows,enrolled=len(roster),responded=len(responded),completed=len(latest_by_user),statistics=distribution(scores),questions=question_charts,
-                        attempts=[dict(session_id=s.id,user_id=str(s.fk_usuario),score=s.pontuacao if s.finalizada_em else None,finished_at=aware(s.finalizada_em).isoformat() if s.finalizada_em else None) for s in relevant])
+            item.update(students=rows,enrolled=len(roster),responded=len(responded),completed=len(latest_by_user),statistics=distribution(scores),timing=duration_summary(durations),questions=question_charts,
+                        attempts=[dict(session_id=s.id,user_id=str(s.fk_usuario),score=s.pontuacao if s.finalizada_em else None,
+                                       started_at=aware(s.criada_em).isoformat(),
+                                       finished_at=aware(s.finalizada_em).isoformat() if s.finalizada_em else None,
+                                       duration_seconds=max(0,round((aware(s.finalizada_em)-aware(s.criada_em)).total_seconds())) if s.finalizada_em else None)
+                                  for s in relevant])
         output.append(item)
     if changed:g.db.commit()
     return output

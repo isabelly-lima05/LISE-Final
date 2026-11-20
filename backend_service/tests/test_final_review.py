@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from test_api import app, login
 from backend.demo import ALUNO_ID
 from backend.models import Usuario,Matricula,Partida,TrilhaTermo,Progresso,Avaliacao,AvaliacaoQuestao,utcnow
-from backend.assessment_reports import distribution
+from backend.assessment_reports import distribution,duration_summary
 
 
 def prepare_exam(app):
@@ -65,6 +65,8 @@ def test_deleted_trail_disappears_but_assessments_and_question_charts_remain(app
     teacher=c.get('/api/v1/classes/1',headers=t).json['assessments'][0]
     assert teacher['responded']==1;assert teacher['completed']==1;assert teacher['students'][0]['score'] is not None
     assert teacher['statistics']['count']==1
+    assert teacher['timing']['count']==1
+    assert teacher['timing']['mean_seconds'] is not None
     assert sum(option['count'] for bucket in teacher['questions'] for option in bucket['options'])==1
     assert c.get('/api/v1/dashboard',headers=t).json['trails']==[]
     assert c.get('/api/v1/trails/1?assignment_id=1',headers=s).status_code==404
@@ -93,6 +95,7 @@ def test_exam_review_ownership_and_statistics_math(app):
     assert c.get(f'/api/v1/assessment/sessions/{sid}').status_code==401
     result=distribution([20,80,80,100]);assert result['mean']==70;assert result['median']==80;assert result['modes']==[80];assert result['minimum']==20;assert result['maximum']==100
     assert distribution([])['mean'] is None
+    timing=duration_summary([60,120,300]);assert timing['mean_seconds']==160;assert timing['median_seconds']==120;assert timing['minimum_seconds']==60;assert timing['maximum_seconds']==300
 
 
 def test_catalog_is_loaded_without_a_query_and_area_filter_is_exact(app):

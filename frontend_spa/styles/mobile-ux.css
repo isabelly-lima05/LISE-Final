@@ -1,0 +1,111 @@
+/* Ajustes de contenção e toque para telas estreitas. */
+.access-story-mobile-title{display:none}
+
+/* Ritmo da tela da turma: abas sem scrollbar vertical e blocos sem colisão. */
+.app-layout .class-section-tabs{
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:none;
+  overscroll-behavior-inline:contain;
+}
+.app-layout .class-section-tabs::-webkit-scrollbar{display:none}
+.app-layout .class-tabpanel{min-width:0}
+.app-layout .class-tabpanel-trails{
+  display:grid;
+  gap:22px;
+  align-content:start;
+  padding:2px 0 32px;
+}
+.app-layout .class-tabpanel-trails>.card-actions{margin:0}
+.app-layout .class-tabpanel-trails>:is(.empty,.grid){margin:0}
+.app-layout .class-tabpanel-trails>.class-archived-assignments{justify-self:start;margin:0}
+
+/* Ações da lista de alunos mantêm uma distância legível em todas as larguras. */
+.app-layout .student-table td[data-label="Ações"]{min-width:230px}
+.app-layout .student-row-actions{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  flex-wrap:wrap;
+  gap:8px 18px;
+  min-width:0;
+}
+.app-layout .student-row-actions>.btn{margin:0;white-space:normal;line-height:1.25}
+
+/* O deslocamento acompanha o dedo sem tween; a animação só acontece ao soltar. */
+.rubber-band-surface{transform:translate3d(0,var(--rubber-y,0),0);will-change:transform}
+.rubber-band-surface.is-rubber-banding{transition:none!important}
+.rubber-band-surface.is-rubber-settling{transition:transform 280ms cubic-bezier(.23,1,.32,1)!important}
+
+@media(max-width:760px){
+  html.rubber-band-ready,html.rubber-band-ready body{overscroll-behavior-y:none}
+
+  /* Controles que compartilham uma superfície mantêm cada rótulo na sua célula. */
+  .app-layout :is(.tabs[role=tablist],.tabs[role=group],.segmented,.trail-stepper){width:100%;max-width:100%;min-width:0}
+  .app-layout :is(.tabs[role=tablist],.tabs[role=group]){display:flex;gap:4px;overflow:visible}
+  .app-layout :is(.tabs[role=tablist],.tabs[role=group])>.tab{
+    flex:1 1 0;
+    min-width:0;
+    max-width:none;
+    justify-content:center;
+    padding:10px 6px;
+    white-space:normal;
+    overflow-wrap:anywhere;
+    word-break:normal;
+    text-align:center;
+    line-height:1.22;
+  }
+  .app-layout .teacher-layout .tabs .tab{padding:10px 6px;white-space:normal}
+  .app-layout .account-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;overflow:visible}
+  .app-layout .account-tabs>.tab{width:100%;min-width:0;justify-content:center;white-space:normal;text-align:center;line-height:1.2}
+  .app-layout .account-tabs .tab svg{flex:none}
+  .app-layout .segmented{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .app-layout .segmented .btn{min-width:0;padding-inline:8px;white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.22}
+  .app-layout [data-form=trail-create] .trail-stepper{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px}
+  .app-layout [data-form=trail-create] .trail-stepper li{min-width:0}
+  .app-layout [data-form=trail-create] .trail-stepper button{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-width:0;padding:9px 5px;white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.18}
+  .app-layout [data-form=trail-create] .trail-stepper b{flex:none;margin:0}
+
+  /* Ações lado a lado podem crescer em altura, nunca em direção ao botão vizinho. */
+  .app-layout .card-actions>.btn{min-width:0;max-width:100%;white-space:normal;overflow-wrap:anywhere;text-align:center;line-height:1.25}
+  .app-layout .card-actions:has(>.btn:nth-child(2))>.btn{flex:1 1 min(140px,100%)}
+  .app-layout .class-tabpanel-trails{gap:16px;padding-bottom:24px}
+
+  /* No acesso, o título ocupa o espaço útil da faixa verde. */
+  .access-story,.access-register .access-story{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(130px,46%);
+    grid-template-rows:auto minmax(112px,1fr);
+    column-gap:8px;
+    min-height:218px;
+    padding:20px 22px 18px;
+  }
+  .access-story-top{grid-column:1/-1;grid-row:1}
+  .access-story-mobile-title{display:block;grid-column:1;grid-row:2;align-self:center;position:relative;z-index:3;margin:0;color:#fffef4;font:500 clamp(26px,8.1vw,32px)/1.03 "Bricolage Grotesque","Arial Narrow",sans-serif;letter-spacing:-.035em;text-wrap:balance;text-shadow:0 2px 18px #071d1775}
+  .access-story-mobile-title em{color:#dcebbf;font-weight:500}
+  .access-story-art{grid-column:2;grid-row:2;align-self:center;width:100%;min-height:108px;max-height:108px;margin:0}
+  .access-story .access-orbit-one{width:120px;height:82px}
+  .access-story .access-orbit-two{width:142px;height:66px}
+  .access-story .access-morpheme-word{gap:2px;transform:scale(.82)}
+  .access-story .access-morpheme-word span{padding:7px 8px}
+  .access-story .access-art-label{display:none}
+  .access-content>h1{display:none}
+  .access-lead{margin-top:2px;margin-bottom:22px}
+}
+
+@media(max-width:600px){
+  .app-layout .student-table td[data-label="Ações"]{min-width:0}
+  .app-layout .student-row-actions{justify-content:flex-start;width:100%;gap:8px 16px}
+}
+
+@media(max-width:360px){
+  .app-layout :is(.tabs[role=tablist],.tabs[role=group])>.tab{padding-inline:4px;font-size:10px}
+  .app-layout [data-form=trail-create] .trail-stepper button{font-size:10px;padding-inline:3px}
+  .app-layout [data-form=trail-create] .trail-stepper b{width:22px;height:22px}
+  .access-story,.access-register .access-story{grid-template-columns:minmax(0,1fr) 126px;padding-inline:18px}
+  .access-story-mobile-title{font-size:26px}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .rubber-band-surface{transform:none!important;transition:none!important}
+}
