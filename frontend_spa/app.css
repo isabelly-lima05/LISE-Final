@@ -1,23 +1,10 @@
-@import url('/styles/tokens.css?v=20261117-type3');
-@import url('/styles/layout.css?v=20261114-ui12');
-@import url('/styles/components.css?v=20261114-ui12');
-@import url('/styles/screens.css?v=20261117-polish');
-@import url('/styles/activities.css?v=20261117-polish');
-@import url('/styles/interactions.css?v=20261117-polish');
-@import url('/styles/polish.css?v=20261114-ui12');
-@import url('/styles/refinements.css?v=20261114-ui12');
-@import url('/styles/elegance.css?v=20261114-ui12');
-@import url('/styles/memory-focus.css?v=20261117-polish');
-@import url('/styles/responsive.css?v=20261114-ui12');
-@import url('/styles/palette.css?v=20261114-ui12');
-@import url('/styles/themes.css?v=20261114-ui12');
-@import url('/styles/access.css?v=20261121-focus1');
-@import url('/styles/compact.css?v=20261114-ui12');
-@import url('/styles/welcome.css?v=20261114-ui12');
-@import url('/styles/final-fixes.css?v=20261121-focus1');
-@import url('/styles/auth-refresh.css?v=20261121-focus1');
-@import url('/styles/mobile-ux.css?v=20261120-students1');
-/* Ordem única: tokens, estrutura, componentes, telas e atividades. */
+@import url('/styles/bundle-foundation.css?v=20261121-review1');
+@import url('/styles/bundle-screens.css?v=20261121-review1');
+@import url('/styles/bundle-polish.css?v=20261121-review1');
+@import url('/styles/bundle-responsive.css?v=20261121-review1');
+@import url('/styles/bundle-theme.css?v=20261121-review1');
+@import url('/styles/bundle-final.css?v=20261121-review1');
+/* A ordem interna dos seis bundles replica exatamente a cascata original. */
 
 
 

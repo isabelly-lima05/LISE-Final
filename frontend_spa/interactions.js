@@ -139,8 +139,8 @@
    list.querySelector(':scope > .tab-indicator')?.remove();
    const key=list.getAttribute('aria-label')||list.id||'tabs',indicator=document.createElement('span');
    indicator.className='tab-indicator';indicator.setAttribute('aria-hidden','true');list.append(indicator);
-   const geometry=()=>{const listBox=list.getBoundingClientRect(),activeBox=active.getBoundingClientRect();return {left:activeBox.left-listBox.left+list.scrollLeft,width:activeBox.width};};
-   const place=animate=>{if(!list.isConnected)return;const current=geometry(),before=previousTabs.get(key);indicator.style.width=current.width+'px';indicator.style.transform=`translate3d(${current.left}px,0,0)`;if(animate&&before&&!reduced())indicator.animate([{transform:`translate3d(${before.left}px,0,0) scaleX(${before.width/(current.width||1)})`},{transform:`translate3d(${current.left}px,0,0) scaleX(1)`}],{duration:280,easing:'cubic-bezier(.65,0,.35,1)'});previousTabs.set(key,current);};
+   const geometry=()=>{const listBox=list.getBoundingClientRect(),activeBox=active.getBoundingClientRect(),width=Math.min(activeBox.width,list.clientWidth),left=activeBox.left-listBox.left+list.scrollLeft;return {left:Math.max(0,Math.min(left,list.clientWidth-width)),width};};
+   const place=animate=>{if(!list.isConnected)return;const current=geometry(),before=previousTabs.get(key),beforeWidth=Math.min(before?.width||0,list.clientWidth),beforeLeft=Math.max(0,Math.min(before?.left||0,list.clientWidth-beforeWidth));indicator.style.width=current.width+'px';indicator.style.transform=`translate3d(${current.left}px,0,0)`;if(animate&&before&&!reduced())indicator.animate([{transform:`translate3d(${beforeLeft}px,0,0) scaleX(${beforeWidth/(current.width||1)})`},{transform:`translate3d(${current.left}px,0,0) scaleX(1)`}],{duration:280,easing:'cubic-bezier(.65,0,.35,1)'});previousTabs.set(key,current);};
    place(true);requestAnimationFrame(()=>place(false));document.fonts?.ready.then(()=>place(false));
   });
  }
