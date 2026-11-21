@@ -184,6 +184,44 @@ def auth_login():
     return jsonify(access_token=token, token_type='Bearer', expires_at=expires.isoformat(), user=_user_json(user))
 
 
+@api.post('/auth/google')
+def auth_google():
+    """Start Google OAuth without exposing the Supabase project keys to the SPA."""
+    _auth_limit()
+    if current_app.config['DEMO_MODE']:
+        _fail(503, 'O acesso com Google fica disponÃ­vel na versÃ£o conectada ao Supabase.')
+    try:
+        response = _auth_client().auth.sign_in_with_oauth({
+            'provider': 'google',
+            'options': {'redirect_to': current_app.config['FRONTEND_URL'] + '/?auth_provider=google'},
+        })
+        url = getattr(response, 'url', None)
+    except AuthApiError:
+        url = None
+    if not url:
+        _fail(503, 'NÃ£o foi possÃ­vel iniciar o acesso com Google agora.')
+    return jsonify(url=url)
+
+
+@api.post('/auth/google/exchange')
+def auth_google_exchange():
+    """Validate the provider token and issue the normal LISE application session."""
+    _auth_limit()
+    if current_app.config['DEMO_MODE']:
+        _fail(503, 'O acesso com Google fica disponÃ­vel na versÃ£o conectada ao Supabase.')
+    provider_token = _field(_body().get('access_token', ''), 'token do Google', 4096)
+    try:
+        response = _auth_client().auth.get_user(provider_token)
+        provider_user = response.user
+    except AuthApiError:
+        provider_user = None
+    user = g.db.get(Usuario, str(provider_user.id)) if provider_user else None
+    if not user or user.perfil not in ('Professor', 'Aluno'):
+        _fail(401, 'NÃ£o foi possÃ­vel conectar esta conta Google Ã  LISE.')
+    token, expires = _token_session(user, True)
+    return jsonify(access_token=token, token_type='Bearer', expires_at=expires.isoformat(), user=_user_json(user))
+
+
 @api.post('/auth/register')
 def auth_register():
     _auth_limit()
@@ -2076,6 +2114,7 @@ def _feedback(partida, payload, correct, answer=None):
         except (TypeError, ValueError):
             selected_ids = set()
         feedback.update(
+            definition=payload.get('prompt', ''),
             correct_terms=[names[ident] for ident in sorted(expected_ids) if ident in names],
             correct_selected=[names[ident] for ident in sorted(expected_ids & selected_ids) if ident in names],
             omitted_terms=[names[ident] for ident in sorted(expected_ids - selected_ids) if ident in names],
@@ -2097,6 +2136,26 @@ def _feedback(partida, payload, correct, answer=None):
     return feedback
 
 
+def _quick_feedback(partida, payload, answer=None):
+    """Small, query-free correction payload used between questions."""
+    feedback = {}
+    if partida.jogo in ('bioquiz', 'decifrador'):
+        feedback['correct_answer'] = payload.get('_correct_answer')
+    elif partida.jogo == 'familia_palavras':
+        expected_ids = {int(value) for value in partida.resposta_esperada}
+        selected_ids = {int(value) for value in (answer or [])}
+        names = {int(option['id']): option['name'] for option in payload.get('options', [])}
+        feedback.update(
+            definition=payload.get('prompt', ''),
+            correct_terms=[names[ident] for ident in sorted(expected_ids) if ident in names],
+            correct_selected=[names[ident] for ident in sorted(expected_ids & selected_ids) if ident in names],
+            omitted_terms=[names[ident] for ident in sorted(expected_ids - selected_ids) if ident in names],
+            incorrect_terms=[names[ident] for ident in sorted(selected_ids - expected_ids) if ident in names],
+            radical=payload.get('_radical'),
+        )
+    return feedback
+
+
 @api.post('/games/sessions/<session_id>/answer')
 @_student
 def game_answer(session_id):
@@ -2111,7 +2170,8 @@ def game_answer(session_id):
     partida = g.db.scalar(select(Partida).where(Partida.id == question_id, Partida.fk_usuario == g.user.id_usuario).with_for_update())
     if not question or not partida: _fail(404, 'Questão não encontrada.')
     if partida.respondida:
-        return jsonify(correct=bool(partida.correto), xp=partida.xp, feedback=_feedback(partida, question.payload, bool(partida.correto)))
+        return jsonify(correct=bool(partida.correto), xp=partida.xp,
+                       feedback=_quick_feedback(partida, question.payload, question.payload.get('_last_answer')))
     if aware(partida.criada_em) < utcnow() - timedelta(hours=2): _fail(400, 'Esta partida expirou. Inicie outra.')
     visible_term(g.db,g.user.id_usuario,partida.fk_termo,True)
     if session_row.source_type == 'trail' and not session_row.fk_turma_trilha:
@@ -2162,7 +2222,7 @@ def game_answer(session_id):
     session_row.corretas += int(correct)
     session_row.xp += partida.xp or 0
     g.db.flush()
-    feedback = _feedback(partida, question.payload, correct, answer)
+    feedback = _quick_feedback(partida, question.payload, answer)
     g.db.commit()
     return jsonify(correct=correct, xp=partida.xp, feedback=feedback,
                    correct_count=session_row.corretas, total=session_row.total)
@@ -2241,5 +2301,19 @@ def game_finish(session_id):
         row.finalizada_em = utcnow()
         row.pontuacao = round(100 * row.corretas / row.total) if row.total else 0
         g.db.commit()
+    played = g.db.scalars(select(Partida).join(GameQuestion, GameQuestion.fk_partida == Partida.id)
+                          .where(GameQuestion.fk_sessao == session_id)
+                          .order_by(GameQuestion.posicao)).all()
+    term_ids = list(dict.fromkeys(item.fk_termo for item in played))
+    terms = g.db.scalars(visible_terms(g.user.id_usuario, True).where(Termo.id_termo.in_(term_ids))).all() if term_ids else []
+    views = {item['id']: item for item in _term_data(terms, g.user.id_usuario)}
+    review = []
+    for item in played:
+        term = views.get(item.fk_termo)
+        if term and not any(entry['id'] == term['id'] for entry in review):
+            review.append(dict(id=term['id'], name=term['name'], definition=term.get('definition', ''),
+                               radical_list=term.get('radical_list', []), favorite=term.get('favorite', False),
+                               correct=bool(item.correto)))
     return jsonify(session_id=row.id, score=row.pontuacao, correct=row.corretas,
-                   total=row.total, xp=row.xp, finished_at=aware(row.finalizada_em).isoformat())
+                   total=row.total, xp=row.xp, review=review,
+                   finished_at=aware(row.finalizada_em).isoformat())

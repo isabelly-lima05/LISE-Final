@@ -43,7 +43,7 @@ assert.equal((collection.match(/path-node practiced/g)||[]).length,1,'Percentual
 assert.match(collection,/Sem prática individual registrada/);
 viewState.dashboard={role:'Aluno',classes:[],stats:{xp:65,nivel:2,streak:3},collections:[]};viewState.discovery=bio;viewState.collections=[];viewState.studentGreeting=null;
 const dashboard=screens.dashboard();
-assert.match(dashboard,/word-map-note/,'O painel lateral deve explicar as partes da palavra');
+assert.match(dashboard,/study-cue-note/,'O painel lateral deve orientar um próximo passo sem repetir as partes da palavra');
 assert.match(dashboard,/streak-week/,'A sequência semanal deve ser visual');
 assert.doesNotMatch(dashboard.match(/<header class="section-heading student-greeting"[^]*?<\/header>/)[0],/data-view="games"/,'O atalho de prática não deve disputar o cabeçalho');
 viewState.explore={terms:[bio],areas:['Geral']};viewState.exploreSearch='bio';viewState.exploreKind='terms';viewState.exploreMine=false;viewState.exploreArea='';viewState.sort='asc';viewState.exploreMode='browse';viewState.exploreShown=15;viewState.explorePage=1;viewState.explorePageSize=15;viewState.studyRevealed=new Set();

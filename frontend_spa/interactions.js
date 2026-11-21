@@ -53,7 +53,8 @@
   if(!button)return()=>{};
   const html=button.innerHTML,disabled=button.disabled,width=button.getBoundingClientRect().width;
   const authButton=button.classList.contains('access-submit');
-  button.style.minWidth=width+'px';button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML=authButton?`<span class="access-chip-loader" aria-hidden="true"><i>Pato</i><i>gên</i><i>ese</i></span><span class="sr-only">${esc(label)}</span>`:`<span class="spinner" aria-hidden="true"></span><span>${esc(label)}</span>`;
+  const welcome=/Entrando/i.test(label)?['Bem-vindo','de volta']:['Só um','instante'];
+  button.style.minWidth=width+'px';button.disabled=true;button.setAttribute('aria-busy','true');button.innerHTML=authButton?`<span class="access-chip-loader access-welcome-loader" aria-hidden="true">${welcome.map(part=>`<i>${esc(part)}</i>`).join('')}</span><span class="sr-only">${esc(label)}</span>`:`<span class="spinner" aria-hidden="true"></span><span>${esc(label)}</span>`;
   return success=>{button.disabled=disabled;button.removeAttribute('aria-busy');if(success&&button.isConnected){button.innerHTML=icon('check')+' Salvo';icons();pulse(button);setTimeout(()=>{button.innerHTML=html;button.style.minWidth='';},1200);}else{button.innerHTML=html;button.style.minWidth='';}};
  }
  async function delayedRemoval(key,node,commit) {

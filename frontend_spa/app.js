@@ -11,7 +11,7 @@
     detail: null, detailType: '', detailBack: 'explore', collections: [], collection: null,
     sources: null, practiceSource: null, practiceGame: '', trailCatalog: null, trailAreas: [],
     gameSession: null, gameFeedback: null, gameIndex: 0, decipherSlots: [], decipherSelectedLetter: null, memorySelected: [], memoryPairs: [],
-    memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, memoryPreviewTimer: null, memoryPreview: false, gameAdvanceTimer: null, result: null, busy: false,
+    memoryMatched: new Set(), memoryAttempts: 0, memoryStartedAt: 0, memoryLocked: false, memoryTimer: null, memoryPreviewTimer: null, memoryPreview: false, gameAdvanceTimer: null, gamePending: '', result: null, busy: false,
     studentDetail: null, assessmentTarget: null, assessmentDetailId: null, assessmentReturnTab: 'trails', assessmentSession: null, assessmentIndex: 0,
     assessmentAnswer: null, assessmentResult: null,
     profilePasswordEdit: false, selectedTermIds: new Set(), selectedTermInfo: new Map(), catalogTerms: [], catalogSearchTimer: null,
@@ -100,7 +100,15 @@
     if(options.idempotencyKey)headers['Idempotency-Key']=options.idempotencyKey;
     if (state.token) headers.Authorization = `Bearer ${state.token}`;
     let closePending=null;
-    const pendingTimer=(options.method||'GET')!=='GET'?setTimeout(()=>{closePending=window.LiseInteractions?.notify('Estamos concluindo sua solicitação.','info',{duration:60000,title:'Processando'});},500):null;
+    const pendingNotices=[
+      [/\/auth\//,'Conectando com segurança','Só mais um instante para abrir seu espaço.'],
+      [/\/account\/data/,'Preparando seu arquivo','Estamos reunindo seus dados para o PDF.'],
+      [/\/collections/,'Organizando seu caderno','Estamos salvando as mudanças da coleção.'],
+      [/\/trails|\/classes/,'Atualizando seu espaço','Estamos registrando as mudanças.'],
+    ];
+    const pendingCopy=pendingNotices.find(([pattern])=>pattern.test(path))||[null,'Salvando alterações','Estamos concluindo esta ação.'];
+    const showPending=(options.method||'GET')!=='GET'&&!path.startsWith('/games/')&&!path.startsWith('/auth/')&&!options.silentPending;
+    const pendingTimer=showPending?setTimeout(()=>{closePending=window.LiseInteractions?.notify(pendingCopy[2],'info',{duration:60000,title:pendingCopy[1]});},900):null;
     try {
     let response;
     try {
@@ -120,7 +128,7 @@
       if (data.code === 'terms_required' && state.user) await loadAccount('privacidade');
       const error=new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.'); error.status=response.status; error.code=data.code; throw error;
     }
-    if((options.method||'GET')!=='GET'&&data.message&&!options.silentNotice)window.LiseInteractions?.notify(data.message,'success');
+    if((options.method||'GET')!=='GET'&&data.message&&options.noticeSuccess)window.LiseInteractions?.notify(data.message,'success');
     return data;
     } finally {if(pendingTimer)clearTimeout(pendingTimer);if(typeof closePending==='function')closePending();}
   }
@@ -136,6 +144,12 @@
   function toast(message,tone='success') {
     if(window.LiseInteractions)return window.LiseInteractions.notify(message,tone);
     toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>toastEl.classList.remove('show'),4000);
+  }
+
+  function interactionLock(message='Abrindo…') {
+    const layer=document.createElement('div');layer.className='interaction-lock';layer.setAttribute('role','status');layer.setAttribute('aria-live','polite');
+    layer.innerHTML=`<span><i class="spinner" aria-hidden="true"></i>${esc(message)}</span>`;document.body.append(layer);
+    return ()=>layer.remove();
   }
 
   function loadingCard(message = 'Carregando…') {
@@ -330,8 +344,15 @@
     if(await window.LiseInteractions.mayLeave(document.querySelector('[data-form=trail-create] input'))){window.LiseInteractions.clearDirty();return true;}
     history.replaceState(history.state,'',location.pathname+lastRouteHash);return false;
   }
+  let ignoreGameHistoryReturn=false;
   window.addEventListener('popstate', async event => {
+    if(ignoreGameHistoryReturn){ignoreGameHistoryReturn=false;return;}
     if(window.LiseExamGuard?.active()){await window.LiseExamGuard.leave();return;}
+    if(state.view==='game'&&state.gameSession){
+      const leave=await window.LiseInteractions.confirm('Abandonar partida','Seu progresso nesta partida não será concluído. Deseja mesmo sair?',null,true);
+      if(!leave){ignoreGameHistoryReturn=true;history.go(1);return;}
+      clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.gameSession=null;state.gamePending='';
+    }
     if(!await mayRestoreRoute())return;
     if(legalRoute()){await loadLegal(legalRoute(),false);lastRouteHash=location.hash;return;}
     if(!state.token||!state.user){renderAuth();return;}
@@ -466,12 +487,12 @@
   async function startPractice(game, source, config = {}) {
     clearTimeout(state.gameAdvanceTimer);clearTimeout(state.memoryPreviewTimer);
     state.decipherSlots=[]; state.decipherSelectedLetter=null; state.memoryMismatch=false; state.memoryCompleting=false; state.memoryCompletionError='';
-    state.practiceGame = game; state.practiceSource = source; state.classId = source.class_id || null; state.view = 'game'; state.gameSession = null; state.gameFeedback = null; render();
+    state.practiceGame = game; state.practiceSource = source; state.classId = source.class_id || null; state.view = 'game'; state.gameSession = null; state.gameFeedback = null; state.gamePending='Preparando seu desafio…'; render();
     const payload = {game, source_type:source.type, source_id:source.id, area:source.area, class_id:source.class_id, question_count:Number(config.question_count || 10), mode:config.mode || 'termo_definicao'};
     let d;
     try { d = await api('/games/sessions', {method:'POST', body:payload}); }
-    catch (error) { state.view='game-config'; render(); throw error; }
-    clearTimeout(state.memoryTimer); state.gameSession = d; state.gameIndex = 0; state.gameFeedback = null; state.memoryPairs = []; state.memoryMatched = new Set(); state.memorySelected = []; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null;
+    catch (error) { state.gamePending='';state.view='game-config'; render(); throw error; }
+    clearTimeout(state.memoryTimer); state.gamePending='';state.gameSession = d; state.gameIndex = 0; state.gameFeedback = null; state.memoryPairs = []; state.memoryMatched = new Set(); state.memorySelected = []; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null;
     const cards=d.game==='memoria'?(d.questions?.[0]?.cards||[]):[];
     state.memoryPreview=cards.length>0;state.memoryLocked=state.memoryPreview;render();
     if(state.memoryPreview){const sessionId=d.session_id,previewMs=1100;state.memoryPreviewTimer=setTimeout(()=>{if(state.gameSession?.session_id!==sessionId)return;state.memoryPreview=false;state.memoryLocked=false;state.memoryStartedAt=Date.now();render();},previewMs);}
@@ -575,9 +596,15 @@
     if (state.gameSession.game === 'familia_palavras') body.answer = data.getAll('answer');
     else if (state.gameSession.game === 'decifrador') body.answer = state.decipherSlots.map(index => question.letters[index]).join('');
     else body.answer = data.get('answer');
-    const answer = await api(`/games/sessions/${state.gameSession.session_id}/answer`, {method:'POST', body});
+    const sessionId=state.gameSession.session_id,questionId=question.id;
+    state.gamePending='Conferindo sua resposta…';render();
+    let answer;
+    try{answer = await api(`/games/sessions/${sessionId}/answer`, {method:'POST', body});}
+    catch(error){if(state.gameSession?.session_id===sessionId){state.gamePending='';render();}throw error;}
+    if(state.gameSession?.session_id===sessionId)state.gamePending='';
+    if(state.gameSession?.session_id!==sessionId||state.gameSession.questions[state.gameIndex]?.id!==questionId)return;
     state.gameFeedback = answer; render();
-    if(answer.correct){celebrate(`${state.gameSession.session_id}:${question.id}`);const sessionId=state.gameSession.session_id,questionId=question.id;clearTimeout(state.gameAdvanceTimer);state.gameAdvanceTimer=setTimeout(()=>{if(state.view==='game'&&state.gameSession?.session_id===sessionId&&state.gameSession.questions[state.gameIndex]?.id===questionId&&state.gameFeedback?.correct)nextQuestion().catch(error=>toast(error.message,'error'));},900);}
+    if(answer.correct){celebrate(`${sessionId}:${question.id}`);clearTimeout(state.gameAdvanceTimer);state.gameAdvanceTimer=setTimeout(()=>{if(state.view==='game'&&state.gameSession?.session_id===sessionId&&state.gameSession.questions[state.gameIndex]?.id===questionId&&state.gameFeedback?.correct)nextQuestion().catch(error=>toast(error.message,'error'));},900);}
   }
 
   async function nextQuestion() {
@@ -585,7 +612,11 @@
     if (state.gameIndex + 1 < state.gameSession.questions.length) {
       clearTimeout(state.memoryTimer); state.gameIndex++; state.gameFeedback=null; state.decipherSlots=[]; state.decipherSelectedLetter=null; state.memoryPairs=[]; state.memoryMatched=new Set(); state.memorySelected=[]; state.memoryAttempts=0; state.memoryStartedAt=Date.now();state.memoryElapsed=null; state.memoryLocked=false; render(); return;
     }
-    const result = await api(`/games/sessions/${state.gameSession.session_id}/finish`, {method:'POST', body:{}});
+    state.gamePending='Montando seu resumo…';render();
+    let result;
+    try{result = await api(`/games/sessions/${state.gameSession.session_id}/finish`, {method:'POST', body:{}});}
+    catch(error){state.gamePending='';render();throw error;}
+    state.gamePending='';
     state.result = result; state.view='result'; render();
   }
 
@@ -613,6 +644,8 @@
     if(action==='back-to-top'){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main-content')?.focus({preventScroll:true});return;}
     if(buttonEl.dataset.pending==='1' || buttonEl.disabled) return;
     buttonEl.dataset.pending='1'; buttonEl.setAttribute('aria-busy','true');
+    const lockedActions=new Set(['navigate','go-dashboard','open-account','open-profile','open-class','open-student','open-term','open-radical','open-collection','open-trail','start-assessment','review-assessment','select-game']);
+    const finishLock=lockedActions.has(action)?interactionLock('Abrindo seu espaço…'):null;
     try {
       if(action==='retry-exam-close'){await window.LiseExamGuard?.leave();return;}
       if(action==='skip-content')app.querySelector('main')?.focus();
@@ -668,6 +701,10 @@
         localStorage.removeItem('lise_access_token');forgetSession();history.replaceState({},'', '/');renderAuth();toast(result.message);
       }
       else if (action === 'auth-mode') { state.authMode=buttonEl.dataset.mode; renderAuth();document.querySelector('#auth-title')?.focus({preventScroll:true}); }
+      else if(action==='google-login'){
+        const end=window.LiseInteractions?.busy(buttonEl,'Conectando…')||(()=>{});
+        try{const d=await api('/auth/google',{method:'POST',body:{},silentPending:true});location.assign(d.url);}finally{end();}
+      }
       else if (action === 'navigate') await navigate(buttonEl.dataset.view);
       else if (action === 'go-dashboard') await loadDashboard();
       else if (action === 'retry-current') { location.reload(); }
@@ -797,7 +834,11 @@
       else if (action === 'games-back') { state.view='games'; render(); }
       else if (action === 'practice-back') { state.view=state.practiceSource?.type==='trail'?'class':state.practiceSource?.type==='collection'?'collection':'games'; render(); }
       else if (action === 'choose-game-back') { state.view='choose-game'; render(); }
-      else if (action === 'nav-games') { clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.memoryPreview=false; state.memoryLocked=false; state.view='games'; state.gameSession=null; render(); }
+      else if (action === 'abandon-game') {
+        if(!await window.LiseInteractions.confirm('Abandonar partida','Seu progresso nesta partida não será concluído. Deseja mesmo sair?',buttonEl,true))return;
+        clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.memoryPreview=false;state.memoryLocked=false;state.gamePending='';state.view='games';state.gameSession=null;render();
+      }
+      else if (action === 'nav-games') { if(state.view==='game'&&!await window.LiseInteractions.confirm('Abandonar partida','Seu progresso nesta partida não será concluído. Deseja mesmo sair?',buttonEl,true))return;clearTimeout(state.memoryTimer);clearTimeout(state.memoryPreviewTimer);clearTimeout(state.gameAdvanceTimer);state.memoryPreview=false; state.memoryLocked=false;state.gamePending=''; state.view='games'; state.gameSession=null; render(); }
       else if (action === 'next-question') await nextQuestion();
       else if (action === 'decipher-letter') {
         const letterIndex=Number(buttonEl.dataset.letterIndex);
@@ -834,7 +875,7 @@
       else if (action === 'memory-card') await memoryCard(buttonEl.dataset.card);
       else if (action === 'memory-complete') await completeMemory();
       else if (action === 'add-to-collection') { /* submitted by the form handler */ }
-    } catch (error) { if (state.loading) { state.loadError=error.message; render(); } toast(error.message,'error'); } finally { delete buttonEl.dataset.pending; buttonEl.removeAttribute('aria-busy'); }
+    } catch (error) { if (state.loading) { state.loadError=error.message; render(); } toast(error.message,'error'); } finally { finishLock?.();delete buttonEl.dataset.pending; buttonEl.removeAttribute('aria-busy'); }
   }
 
   function placeDecipherLetter(letterIndex, slotIndex) {
@@ -911,7 +952,6 @@
       if (state.gameSession?.session_id!==sessionId || state.gameIndex!==questionIndex) return;
       state.memoryAttempts=check.attempts ?? state.memoryAttempts+1;
       if (check.match) {
-        if(!check.duplicate) toast('Par encontrado.');
         state.memoryPairs.push(pair); pair.forEach(id=>state.memoryMatched.add(id)); state.memorySelected=[]; state.memoryLocked=false; render();
         if (state.memoryMatched.size === q.cards.length) {
           await completeMemory();
@@ -940,12 +980,14 @@
     form.dataset.operationKey ||= crypto.randomUUID();
     if(kind==='explore-filter'){updateExploreFromForm(form);return;}
     if(form.dataset.pending==='1') return;
-    form.dataset.pending='1';const submitButton=form.querySelector('[type=submit]');const finishBusy=window.LiseInteractions?.busy(submitButton,kind==='login'?'Entrando…':kind==='assessment-config'?'Agendando…':'Salvando…');let success=false;
+    form.dataset.pending='1';const submitButton=form.querySelector('[type=submit]');const finishBusy=window.LiseInteractions?.busy(submitButton,kind==='login'?'Entrando…':kind==='assessment-config'?'Agendando…':'Salvando…');
+    const lockedForms=new Set(['new-class','join-class','collection-create','collection-add-terms','trail-add-terms','trail-create','assign-trail','assessment-config','teacher-term','student-term']);
+    const finishLock=lockedForms.has(kind)?interactionLock(kind==='assessment-config'?'Agendando avaliação…':'Salvando alterações…'):null;let success=false;
     try {
       if (kind === 'login') {
         const d=await api('/auth/login',{method:'POST',body:{email:data.get('email'),password:data.get('password'),remember:data.has('remember')}});
         routeSnapshots.clear(); history.replaceState({},'',location.pathname);
-        state.token=d.access_token; state.user=d.user;state.explore=null;state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();localStorage.setItem('lise_access_token',state.token); if(await window.LiseExamGuard?.recover())return;await loadDashboard(); toast(`Olá, ${state.user.name.split(' ')[0]}!`);
+        state.token=d.access_token; state.user=d.user;state.explore=null;state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();localStorage.setItem('lise_access_token',state.token); if(await window.LiseExamGuard?.recover())return;await loadDashboard(); toast(`Bem-vindo de volta, ${state.user.name.split(' ')[0]}!`);
       } else if (kind === 'register') {
         const version = await ensureLegalVersion();
         const d=await api('/auth/register',{method:'POST',body:{name:data.get('name'),email:data.get('email'),password:data.get('password'),role:data.get('role'),accept_terms:data.has('accept_terms'),legal_version:version}}); toast(d.message); state.authMode='login'; renderAuth();
@@ -1009,7 +1051,7 @@
         state.assessmentAnswer=await api(`/assessment/sessions/${state.assessmentSession.session_id}/answer`,{method:'POST',body:{question_id:question.id,answer:choice}}); render(); if(state.assessmentAnswer.correct) celebrate(question.id);
       }
     success=true;
-    } catch (error) { if (state.loading) { state.loadError=error.message; render(); } toast(error.message,'error'); } finally { delete form.dataset.pending;finishBusy?.(success); }
+    } catch (error) { if (state.loading) { state.loadError=error.message; render(); } toast(error.message,'error'); } finally { finishLock?.();delete form.dataset.pending;finishBusy?.(success); }
   }
 
   function handleChange(event) {
@@ -1098,8 +1140,17 @@
   async function init() {
     if (location.pathname !== '/' && location.pathname !== '/index.html' && !legalRoute()) { renderNotFound(); return; }
     if (!API_BASE) { renderAuth(); toast('Configure o endereço da API em config.js para conectar o LISE.'); return; }
+    const initParams=new URLSearchParams(location.search),oauthHash=new URLSearchParams(location.hash.slice(1));
+    if(initParams.get('auth_provider')==='google'&&oauthHash.get('access_token')){
+      app.innerHTML=`<main class="access-stage"><section class="oauth-return" role="status" aria-live="polite"><span class="game-loader" aria-hidden="true">${iconMarkup('dna')}</span><h1>Bom ter você por aqui.</h1><p>Conectando sua conta Google à LISE…</p></section></main>`;
+      try{
+        const d=await api('/auth/google/exchange',{method:'POST',body:{access_token:oauthHash.get('access_token')},silentPending:true});
+        state.token=d.access_token;state.user=d.user;state.explore=null;state.collections=[];state.collectionsLoaded=false;state.studyRevealed.clear();
+        localStorage.setItem('lise_access_token',state.token);history.replaceState({},'',location.pathname);await loadDashboard();toast(`Bem-vindo de volta, ${state.user.name.split(' ')[0]}!`);return;
+      }catch(error){history.replaceState({},'',location.pathname);if(state.user&&error.code==='terms_required'){toast('Conclua o aceite dos documentos para começar.','info');return;}renderAuth();toast(error.message,'error');return;}
+    }
     if (legalRoute()) { await loadLegal(legalRoute(), false); return; }
-    const params=new URLSearchParams(location.search);
+    const params=initParams;
     if (params.get('confirmed')==='1') toast('E-mail confirmado. Agora você pode entrar.');
     if (params.get('mode')==='recovery') {
       const tokenHash=params.get('token_hash');
@@ -1133,6 +1184,8 @@
   function afterRender(focusBefore) {
     navigation.mount();
     window.LiseInteractions?.mount(app,state.view);window.LiseCrud?.mount(app);window.LiseCompact?.mount(app,state);
+    const memoryExit=state.view==='game'?app.querySelector('.memory-head-actions [data-action="nav-games"]'):null;
+    if(memoryExit){memoryExit.dataset.action='abandon-game';memoryExit.innerHTML=iconMarkup('log-out')+' Abandonar partida';}
     if(app.querySelector('.term-selection-form')&&!state.catalogTerms.length){const mainArea=app.querySelector('[data-form=trail-create] [name=area]'),filter=app.querySelector('[data-role="term-area"]');if(mainArea?.value&&filter)filter.value=mainArea.value;searchCatalogTerms();}
     if(state.view==='trail-create'&&state.trailDraft){const f=app.querySelector('[data-form=trail-create]');for(const [name,value] of state.trailDraft.values){const el=f?.elements.namedItem(name);if(el&&'value' in el&&el.type!=='checkbox')el.value=value;}f?.querySelector(`[data-step="${state.trailDraft.step}"]`)?.click();}
     let fieldIndex=0;
@@ -1224,6 +1277,7 @@
 
 
   app.addEventListener('error', event => { if(event.target.matches?.('.avatar-image')) event.target.remove(); }, true);
+  window.addEventListener('beforeunload',event=>{if(state.view==='game'&&state.gameSession){event.preventDefault();event.returnValue='';}});
   new MutationObserver(() => { window.lucide?.createIcons({attrs:{'stroke-width':1.7}}); }).observe(app,{childList:true});
 
   app.addEventListener('click', event=>handleClick(event));
