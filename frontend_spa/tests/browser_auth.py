@@ -33,6 +33,8 @@ with sync_playwright() as p:
             page.locator(f'[data-form={mode}]').wait_for()
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth'),(width,mode)
             assert page.locator('form').count()==1
+            assert page.locator('.access-google').count()==0
+            assert page.get_by_text('Conectar com Google',exact=True).count()==0
             page.locator('[type=submit]').scroll_into_view_if_needed()
             assert page.locator('[type=submit]').is_visible()
             if mode=='register':assert page.locator('[name=role]').count()==2

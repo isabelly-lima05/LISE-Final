@@ -89,13 +89,10 @@
 .access-morpheme-word.is-remixing span:nth-of-type(3){animation-delay:70ms}
 @keyframes access-morpheme-remix{from{opacity:.25;clip-path:inset(0 100% 0 0);transform:translateY(3px)}to{opacity:1;clip-path:inset(0 0 0 0);transform:translateY(0)}}
 .access-art-label{z-index:3;bottom:2px;color:#f1f6e8;background:#10392dcc;border-color:#d9e7c34d;font-size:11px}
-.access-orbit{border-color:#d9e8bd51!important;animation:access-orbit-one 12s linear infinite;will-change:transform}
+.access-orbit{border-color:#d9e8bd51!important;animation:none}
 .access-orbit::after{display:none}
 .access-orbit i{position:absolute;display:block;width:9px;height:9px;left:50%;top:-5px;border:2px solid #e8efd6;border-radius:50%;background:#e5a354;box-shadow:0 0 0 4px #e5a35424}
-.access-orbit-two{animation-name:access-orbit-two;animation-duration:16s}
 .access-orbit-two i{width:7px;height:7px;top:calc(100% - 3px);background:#b999c0;border-color:#f2e8f3;box-shadow:0 0 0 4px #b999c026}
-@keyframes access-orbit-one{from{transform:rotate(-25deg)}to{transform:rotate(335deg)}}
-@keyframes access-orbit-two{from{transform:rotate(-38deg)}to{transform:rotate(-398deg)}}
 
 /* Campos: autofill neutro, senha mais legível e validação no próprio contexto. */
 .access-field input:-webkit-autofill,

@@ -48,21 +48,21 @@ def main():
             assert page.get_by_role('button', name='Salvar avatar', exact=True).is_disabled()
 
             catalog = page.evaluate('window.LISE_AVATARS.map(({id,image})=>({id,image}))')
-            assert sum(item['image'].endswith('.png') for item in catalog) == 9
+            assert sum(item['image'].endswith('.webp') for item in catalog) == 9
             assert next(item for item in catalog if item['id'] == 'leaf')['image'].endswith('tardigrado.svg')
 
             page.locator('[data-choice=butterfly]').click()
             page.get_by_role('button', name='Salvar avatar', exact=True).click()
             page.locator('.interaction-dialog').wait_for(state='detached')
-            assert page.locator('.avatar-edit img').get_attribute('src').endswith('suricato.png')
+            assert page.locator('.avatar-edit img').get_attribute('src').endswith('suricato.webp')
             page.reload()
             page.locator('.avatar-edit').wait_for()
-            assert page.locator('.avatar-edit img').get_attribute('src').endswith('suricato.png')
+            assert page.locator('.avatar-edit img').get_attribute('src').endswith('suricato.webp')
             assert not errors, errors
             browser.close()
     finally:
         server.shutdown()
-    print('PASS: placeholder neutro, 9 PNGs, tardígrado preservado e suricato persistente.')
+    print('PASS: placeholder neutro, 9 WebPs, tardígrado SVG preservado e suricato persistente.')
 
 
 if __name__ == '__main__':

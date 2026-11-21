@@ -1,0 +1,10 @@
+{
+  "name": "lise-frontend",
+  "private": true,
+  "scripts": {
+    "test": "node tests/components.cjs && node tests/contrast.cjs && node tests/data-report.cjs && node tests/exam-guard.cjs && node tests/export-action.cjs && node tests/games.cjs && node tests/live-class.cjs && node tests/memory-focus.cjs && node tests/regression.cjs && node tests/speech.cjs && node tests/theme-trails.cjs && node tests/compact.cjs && node tests/final-review.cjs"
+  },
+  "devDependencies": {
+    "linkedom": "0.18.12"
+  }
+}

@@ -56,7 +56,7 @@
     line-height:1.22;
   }
   .app-layout .teacher-layout .tabs .tab{padding:10px 6px;white-space:normal}
-  .app-layout .account-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;overflow:visible}
+  .app-layout .account-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px;overflow:hidden}
   .app-layout .account-tabs>.tab{width:100%;min-width:0;justify-content:center;white-space:normal;text-align:center;line-height:1.2}
   .app-layout .account-tabs .tab svg{flex:none}
   .app-layout .segmented{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -96,11 +96,13 @@
 @media(max-width:600px){
   .app-layout .student-table td[data-label="Ações"]{min-width:0}
   .app-layout .student-row-actions{justify-content:flex-start;width:100%;gap:8px 16px}
+  .access-stage :is(.access-logo small,.access-kicker,.access-consent,.access-footer,.access-footer .legal-links){font-size:12px}
+  .access-stage :is(.access-field label,.access-options,.access-switch){font-size:13px}
 }
 
 @media(max-width:360px){
-  .app-layout :is(.tabs[role=tablist],.tabs[role=group])>.tab{padding-inline:4px;font-size:10px}
-  .app-layout [data-form=trail-create] .trail-stepper button{font-size:10px;padding-inline:3px}
+  .app-layout :is(.tabs[role=tablist],.tabs[role=group])>.tab{padding-inline:5px;font-size:12px}
+  .app-layout [data-form=trail-create] .trail-stepper button{font-size:12px;padding-inline:4px}
   .app-layout [data-form=trail-create] .trail-stepper b{width:22px;height:22px}
   .access-story,.access-register .access-story{grid-template-columns:minmax(0,1fr) 126px;padding-inline:18px}
   .access-story-mobile-title{font-size:26px}

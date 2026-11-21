@@ -94,29 +94,29 @@
 
   async function requestApi(path, options = {}) {
     if (!API_BASE) throw new Error('Configure o endereço da API em frontend_spa/config.js.');
+    const method=options.method||'GET';
     const requestToken=state.token;
     const headers = { Accept: 'application/json' };
     if (options.body !== undefined) headers['Content-Type'] = 'application/json';
     if(options.idempotencyKey)headers['Idempotency-Key']=options.idempotencyKey;
     if (state.token) headers.Authorization = `Bearer ${state.token}`;
-    let closePending=null;
-    const pendingNotices=[
-      [/\/auth\//,'Conectando com segurança','Só mais um instante para abrir seu espaço.'],
-      [/\/account\/data/,'Preparando seu arquivo','Estamos reunindo seus dados para o PDF.'],
-      [/\/collections/,'Organizando seu caderno','Estamos salvando as mudanças da coleção.'],
-      [/\/trails|\/classes/,'Atualizando seu espaço','Estamos registrando as mudanças.'],
-    ];
-    const pendingCopy=pendingNotices.find(([pattern])=>pattern.test(path))||[null,'Salvando alterações','Estamos concluindo esta ação.'];
-    const showPending=(options.method||'GET')!=='GET'&&!path.startsWith('/games/')&&!path.startsWith('/auth/')&&!options.silentPending;
-    const pendingTimer=showPending?setTimeout(()=>{closePending=window.LiseInteractions?.notify(pendingCopy[2],'info',{duration:60000,title:pendingCopy[1]});},900):null;
+    const timeoutMs=Number(options.timeout)||(/\/account\/data/.test(path)?60000:method==='GET'?12000:20000);
+    const controller=typeof AbortController==='function'?new AbortController():null;
+    const abort=()=>controller?.abort();
+    if(options.signal&&controller){
+      if(options.signal.aborted)abort();
+      else options.signal.addEventListener('abort',abort,{once:true});
+    }
+    const timeout=controller?setTimeout(abort,timeoutMs):null;
     try {
     let response;
     try {
       response = await fetch(`${API_BASE}/api/v1${path}`, {
-        method: options.method || 'GET', headers, credentials: 'omit',
+        method, headers, credentials: 'omit', signal:controller?.signal,
         body: options.body === undefined ? undefined : JSON.stringify(options.body)
       });
-    } catch (_error) {
+    } catch (error) {
+      if(error?.name==='AbortError')throw new Error(method==='GET'?'O carregamento demorou mais que o esperado. Tente novamente.':'A operação demorou mais que o esperado. Confira o resultado antes de repetir.');
       throw new Error('Não consegui acessar o backend. Confira o endereço da API e a configuração de CORS.');
     }
     const data = await response.json().catch(() => ({}));
@@ -128,9 +128,12 @@
       if (data.code === 'terms_required' && state.user) await loadAccount('privacidade');
       const error=new Error(response.status===404 && path.startsWith('/games/') ? 'A API publicada não oferece esta rota de jogo. Publique também o backend atualizado do LISE.' : data.error || 'Não foi possível concluir essa ação.'); error.status=response.status; error.code=data.code; throw error;
     }
-    if((options.method||'GET')!=='GET'&&data.message&&options.noticeSuccess)window.LiseInteractions?.notify(data.message,'success');
+    if(method!=='GET'&&data.message&&options.noticeSuccess)window.LiseInteractions?.notify(data.message,'success');
     return data;
-    } finally {if(pendingTimer)clearTimeout(pendingTimer);if(typeof closePending==='function')closePending();}
+    } finally {
+      if(timeout)clearTimeout(timeout);
+      if(options.signal&&controller)options.signal.removeEventListener('abort',abort);
+    }
   }
 
   const celebrated = new Set();
@@ -146,10 +149,11 @@
     toastEl.textContent=message;toastEl.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>toastEl.classList.remove('show'),4000);
   }
 
-  function interactionLock(message='Abrindo…') {
+  function interactionLock(message='Abrindo…',target=app) {
     const layer=document.createElement('div');layer.className='interaction-lock';layer.setAttribute('role','status');layer.setAttribute('aria-live','polite');
-    layer.innerHTML=`<span><i class="spinner" aria-hidden="true"></i>${esc(message)}</span>`;document.body.append(layer);
-    return ()=>layer.remove();
+    layer.innerHTML=`<span><i class="spinner" aria-hidden="true"></i>${esc(message)}</span>`;
+    target.classList.add('is-interaction-locked');target.setAttribute('aria-busy','true');target.append(layer);
+    return ()=>{layer.remove();if(target.isConnected){target.classList.remove('is-interaction-locked');target.removeAttribute('aria-busy');}};
   }
 
   function loadingCard(message = 'Carregando…') {
@@ -644,8 +648,9 @@
     if(action==='back-to-top'){window.scrollTo({top:0,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});document.getElementById('main-content')?.focus({preventScroll:true});return;}
     if(buttonEl.dataset.pending==='1' || buttonEl.disabled) return;
     buttonEl.dataset.pending='1'; buttonEl.setAttribute('aria-busy','true');
-    const lockedActions=new Set(['navigate','go-dashboard','open-account','open-profile','open-class','open-student','open-term','open-radical','open-collection','open-trail','start-assessment','review-assessment','select-game']);
-    const finishLock=lockedActions.has(action)?interactionLock('Abrindo seu espaço…'):null;
+    const lockedActions=new Set(['open-class','open-student','open-term','open-radical','open-collection','open-trail','start-assessment','review-assessment','select-game']);
+    const lockRegion=buttonEl.closest?.('main')||app.querySelector('main')||app;
+    const finishLock=lockedActions.has(action)?interactionLock('Abrindo seu espaço…',lockRegion):null;
     try {
       if(action==='retry-exam-close'){await window.LiseExamGuard?.leave();return;}
       if(action==='skip-content')app.querySelector('main')?.focus();
@@ -982,7 +987,7 @@
     if(form.dataset.pending==='1') return;
     form.dataset.pending='1';const submitButton=form.querySelector('[type=submit]');const finishBusy=window.LiseInteractions?.busy(submitButton,kind==='login'?'Entrando…':kind==='assessment-config'?'Agendando…':'Salvando…');
     const lockedForms=new Set(['new-class','join-class','collection-create','collection-add-terms','trail-add-terms','trail-create','assign-trail','assessment-config','teacher-term','student-term']);
-    const finishLock=lockedForms.has(kind)?interactionLock(kind==='assessment-config'?'Agendando avaliação…':'Salvando alterações…'):null;let success=false;
+    const finishLock=lockedForms.has(kind)?interactionLock(kind==='assessment-config'?'Agendando avaliação…':'Salvando alterações…',form):null;let success=false;
     try {
       if (kind === 'login') {
         const d=await api('/auth/login',{method:'POST',body:{email:data.get('email'),password:data.get('password'),remember:data.has('remember')}});
@@ -1155,7 +1160,7 @@
     if (params.get('mode')==='recovery') {
       const tokenHash=params.get('token_hash');
       if (tokenHash) {
-        app.innerHTML=`<div class="auth-page"><section class="auth-aside"><div class="brand"><span class="brand-mark">L</span> LISE</div><div><h1 class="auth-title">Crie uma nova senha.</h1><p class="auth-copy">Escolha uma senha segura para voltar aos seus estudos.</p></div></section><section class="auth-main"><form class="auth-card card" data-form="password-reset"><h2>Nova senha</h2><div class="field"><label>Nova senha</label><input name="password" type="password" minlength="8" required></div><div class="field"><label>Repita a nova senha</label><input name="confirm" type="password" minlength="8" required></div><button class="btn btn-primary btn-block">Atualizar senha</button></form></section></div>`;
+        app.innerHTML=`<div class="auth-page"><section class="auth-aside"><div class="brand"><span class="brand-mark">L</span> LISE</div><div><h1 class="auth-title">Crie uma nova senha.</h1><p class="auth-copy">Escolha uma senha segura para voltar aos seus estudos.</p></div></section><section class="auth-main"><form class="auth-card card" data-form="password-reset"><h2>Nova senha</h2><div class="field"><label for="reset-password">Nova senha</label><input id="reset-password" name="password" type="password" minlength="8" required></div><div class="field"><label for="reset-confirm">Repita a nova senha</label><input id="reset-confirm" name="confirm" type="password" minlength="8" required></div><button class="btn btn-primary btn-block">Atualizar senha</button></form></section></div>`;
         state.recovery={tokenHash};
         history.replaceState({},'',`${location.pathname}?mode=recovery`);
         return;

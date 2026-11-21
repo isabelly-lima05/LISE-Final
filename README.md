@@ -136,6 +136,8 @@ Acesse `http://127.0.0.1:5500`. A URL da API deve conter apenas a origem, sem `/
 
 Para uma demonstração simples, prefira `run_demo.py`: ele gera a configuração local sem exigir alterações permanentes em `config.js`.
 
+O acesso Google está desativado por padrão com `GOOGLE_AUTH_ENABLED=false`. O botão permanece oculto até uma revisão futura da integração.
+
 ## Configuração do backend
 
 Em desenvolvimento, as variáveis são lidas de `backend_service/.env`. Na hospedagem, cadastre-as no provedor.
@@ -181,7 +183,7 @@ Depois de instalar `requirements-dev.txt`, execute na raiz:
 
 Os testes do backend usam dados e provedores isolados e não precisam de credenciais reais do Supabase.
 
-`frontend_spa/tests/` também contém testes Node (`*.cjs`) e testes de navegador (`browser_*.py`). Eles são ferramentas de desenvolvimento e podem exigir Node.js, `linkedom`, Playwright e navegadores instalados. O frontend estático ainda não mantém um manifesto `package.json`; portanto, essas dependências precisam ser preparadas separadamente antes da execução.
+`frontend_spa/tests/` também contém testes Node (`*.cjs`) e testes de navegador (`browser_*.py`). Eles são ferramentas de desenvolvimento e podem exigir Node.js, `linkedom`, Playwright e navegadores instalados. Os bundles de CSS e os avatares WebP podem ser recriados com `tools/build_css.py` e `tools/optimize_avatars.py`.
 
 ## Publicação
 

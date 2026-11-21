@@ -3,7 +3,7 @@ const root=path.resolve(__dirname,'..');
 // CSS imports must precede every style rule; otherwise browsers ignore themes.
 const stylesheet=fs.readFileSync(path.join(root,'app.css'),'utf8').replace(/\/\*[\s\S]*?\*\//g,'');
 const importBlock=stylesheet.match(/^(?:\s*@import[^;]+;)+/)[0];
-assert.ok(importBlock.includes('/styles/themes.css'));assert.ok(importBlock.includes('/styles/access.css'));assert.ok(importBlock.includes('/styles/palette.css'));
+assert.ok(importBlock.includes('/styles/bundle-theme.css'));assert.ok(importBlock.includes('/styles/bundle-responsive.css'));assert.equal((importBlock.match(/@import/g)||[]).length,6);
 assert.ok(!stylesheet.slice(importBlock.length).includes('@import'));
 for(const reference of importBlock.matchAll(/url\('([^'?]+)(?:\?[^']*)?'\)/g))assert.ok(fs.existsSync(path.join(root,reference[1])),reference[1]);
 let clickTheme,systemChange,storageChange,saved=null;const html={dataset:{},style:{}};
