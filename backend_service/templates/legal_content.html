@@ -11,7 +11,7 @@
     <h2>4. Quem pode acessar</h2>
     <p>O professor da turma pode consultar nome, e-mail, progresso, atividade e resultados de avaliações dos alunos matriculados. Colegas de turma podem visualizar o nome cadastrado e a pontuação nos rankings geral, diário e semanal da turma. Compartilhe o código de ingresso apenas com as pessoas que devem participar.</p>
     <p>A LISE utiliza Supabase para autenticação e banco de dados e infraestrutura de hospedagem para entregar o site. O local de processamento e eventuais transferências internacionais devem ser informados conforme os contratos e as regiões escolhidos pelo responsável pelo serviço.</p>
-    <p>O acesso por Google não está disponível nesta interface. Não são carregadas ferramentas de autenticação desse provedor.</p>
+    <p>Quando você escolhe conectar com Google, o provedor autentica a conta e compartilha com o serviço de autenticação os dados básicos necessários, como identificador, nome e e-mail. A LISE não recebe sua senha do Google. O uso desse acesso é opcional; o login por e-mail e senha continua disponível.</p>
     <h2>5. Por quanto tempo</h2>
     <p>As sessões de acesso expiram em até 12 horas, ou até 30 dias quando você escolhe lembrar o acesso. Os dados pessoais de aprendizagem permanecem associados à conta enquanto ela existir. A área Minha conta permite excluir diretamente a conta, com confirmação da senha e da palavra EXCLUIR.</p>
     <p>A exclusão pode exigir a preservação de informações por obrigação legal ou para exercício de direitos. A equipe deve explicar o que foi removido, anonimizado ou mantido e por qual motivo. A política de retenção de cópias de segurança e registros da infraestrutura está em revisão.</p>
@@ -52,5 +52,5 @@
       <tr><th scope="row">Histórico de navegação</th><td>Cópias temporárias das telas em memória da página, sem gravar os dados das telas no armazenamento permanente do navegador.</td><td>Até recarregar, sair ou trocar de conta; limitado a 20 telas.</td></tr>
     </tbody></table></div>
     <h2>Como controlar</h2><p>Você pode sair da conta ou encerrar todas as sessões em <a href="/#conta">Minha conta</a>. É possível remover o armazenamento pelos controles do navegador. Bloquear o armazenamento necessário pode impedir que o acesso seja mantido. Esta interface não usa cookie de sessão para autenticar na API.</p>
-    <h2>Novas tecnologias</h2><p>Se forem adicionados recursos opcionais que dependam de consentimento, a escolha será apresentada antes da ativação, com opção de recusa e alteração posterior. Não há integração de acesso por Google nesta interface.</p>
+    <h2>Novas tecnologias</h2><p>Se forem adicionados recursos opcionais que dependam de consentimento, a escolha será apresentada antes da ativação, com opção de recusa e alteração posterior. O acesso opcional por Google usa o provedor apenas para autenticação; a LISE cria e mantém sua própria sessão de aplicação.</p>
   {% endif %}

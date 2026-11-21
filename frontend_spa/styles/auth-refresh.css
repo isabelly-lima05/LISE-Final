@@ -157,7 +157,7 @@
 .access-footer .legal-links a{text-decoration:underline;text-decoration-color:transparent;text-underline-offset:4px;transition:color var(--access-motion-fast),text-decoration-color var(--access-motion-fast)}
 .access-footer .legal-links a:hover{color:var(--access-text);text-decoration-color:currentColor}
 
-/* Loading do produto: os três morfemas se encaixam. */
+/* Loading do produto: uma saudação curta se encontra no centro. */
 .access-submit:active:not(:disabled){transform:scale(.97)}
 .access-submit[aria-busy=true]{justify-content:center;cursor:wait}
 .access-chip-loader{display:flex;align-items:center;justify-content:center;gap:5px;min-height:19px}
@@ -165,6 +165,7 @@
 .access-chip-loader i:nth-child(1){background:#e9a750;transform:translateX(-7px)}
 .access-chip-loader i:nth-child(2){background:#91b887;animation-delay:80ms}
 .access-chip-loader i:nth-child(3){background:#b99bc1;transform:translateX(7px);animation-delay:160ms}
+.access-welcome-loader i:nth-child(2){transform:translateX(7px)}
 @keyframes access-chip-fit{to{transform:translateX(0)}}
 
 /* No mobile, a identidade permanece como uma faixa curta no topo. */

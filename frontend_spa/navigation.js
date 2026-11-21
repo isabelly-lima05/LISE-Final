@@ -19,7 +19,7 @@
     }
     function shell(content) {
       if (!state.user) return content;
-      return `<div class="app-layout ${state.sidebarCollapsed?'sidebar-collapsed':''} ${state.view==='game'&&state.gameSession?.game==='memoria'&&!state.gameFeedback?'memory-focus':''}"><a class="skip-link" href="#main-content" data-action="skip-content">Pular para o conteúdo</a>
+      return `<div class="app-layout ${state.sidebarCollapsed?'sidebar-collapsed':''} ${state.view==='game'?'game-focus':''} ${state.view==='game'&&state.gameSession?.game==='memoria'&&!state.gameFeedback?'memory-focus':''}"><a class="skip-link" href="#main-content" data-action="skip-content">Pular para o conteúdo</a>
         <aside class="sidebar" aria-label="Menu lateral"><div class="sidebar-brand-row"><button class="brand brand-toggle" type="button" data-action="toggle-sidebar" aria-label="LISE — ${state.sidebarCollapsed?'Expandir':'Recolher'} menu lateral" title="${state.sidebarCollapsed?'Expandir':'Recolher'} menu" aria-expanded="${!state.sidebarCollapsed}">${icon('dna')}<span class="brand-word">LISE</span><span class="brand-chevron" aria-hidden="true">${icon('chevron-left')}</span></button></div>${links()}${account()}</aside>
         <button type="button" class="sidebar-launcher" data-action="open-menu" aria-label="Abrir menu lateral" aria-haspopup="dialog">${icon('dna')}</button>
         <dialog class="side-drawer" id="mobile-navigation" aria-labelledby="mobile-menu-title"><div class="drawer-heading"><span class="brand" id="mobile-menu-title">${icon('dna')} LISE</span><button type="button" class="icon-button" data-action="close-menu" aria-label="Fechar menu lateral">${icon('x')}</button></div>${links()}${account()}</dialog>
